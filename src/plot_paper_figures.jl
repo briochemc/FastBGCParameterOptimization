@@ -1,7 +1,7 @@
 # Main script to plot paper figures
 
 # 1. Always load the packages
-using OCIMtools
+using TransportMatrixtools
 using SparseArrays, SuiteSparse, LinearAlgebra, Printf, DualNumbers
 using JLD2, Parameters, Optim
 using Flatten

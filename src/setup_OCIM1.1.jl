@@ -1,6 +1,6 @@
 
 # TRANSPORT
-# TODO: Replace with dataDeps.jl
+# TODO: Replace with dataDeps.jl!!
 @load (homedir() * "/.julia/v0.6/OCIMtools/data/OCIM1.1_CTL.jld2") wet3d grd T
 
 # For standard use with OCIM
@@ -20,7 +20,7 @@ const z = grd["ZT3d"][iwet]
 const ztop = grd["ZW3d"][iwet]
 const spd = 24 * 60 * 60.0 # Think about using Unitful.jl
 
-# load observations
+# load observations - Recode the fetching and regridding in Julia!
 @load (homedir() * "/.julia/v0.6/OCIMtools/data/OCIM1.1_SiObs.jld2") xobs
 const DSiobs = xobs
 const DSimean = vmean(DSiobs)

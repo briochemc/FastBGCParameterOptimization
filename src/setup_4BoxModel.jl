@@ -1,7 +1,7 @@
 
 include("build_4BoxModel_circulation.jl")
 
-# For standard use with OCIM
+# For standard use to match with OCIM
 const iwet = (LinearIndices(wet3d))[findall(!iszero, wet3d)] # replaces find(wet3d) :(
 const nwet = length(iwet)
 const DIV = buildDIV(wet3d, iwet, grd)

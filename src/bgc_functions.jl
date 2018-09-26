@@ -35,7 +35,7 @@ Para(v::Vector) = Para(v...)
 Base.:+(p₁::Para, p₂::Para) = Para(vec(p₁) .+ vec(p₂))
 Base.:-(p₁::Para, p₂::Para) = Para(vec(p₁) .- vec(p₂))
 Base.:*(s::Number, p::Para) = Para(s .* vec(p))
-# Convert p to λ and vice versa, needed by OCIMtools!
+# Convert p to λ and vice versa, needed by TransportMatrixtools!
 optvec(p::Para) = flatten(Vector, p)
 p2λ(p::Para) = log.(optvec(p) ./ optvec(pobs))
 Dp2λ(p::Para) = optvec(p).^(-1)

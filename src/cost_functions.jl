@@ -1,5 +1,5 @@
 # Cost functions
-import OCIMtools.q!, OCIMtools.Dq!, OCIMtools.D2q!
+import TransportMatrixtools.q!, TransportMatrixtools.Dq!, TransportMatrixtools.D2q!
 
 function nrm(x)
     DSi, PSi = unpackx(x)
