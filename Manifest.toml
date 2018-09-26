@@ -1,0 +1,6 @@
+[[TransportMatrixTools]]
+git-tree-sha1 = "093746822eae2607420f94ed809ad24d5bf62fec"
+repo-rev = "master"
+repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
+uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
+version = "0.1.0"
