@@ -1,5 +1,5 @@
 # Cost functions
-import TransportMatrixtools.q!, TransportMatrixtools.Dq!, TransportMatrixtools.D2q!
+import TransportMatrixTools.q!, TransportMatrixTools.Dq!, TransportMatrixTools.D2q!
 
 function nrm(x)
     DSi, PSi = unpackx(x)

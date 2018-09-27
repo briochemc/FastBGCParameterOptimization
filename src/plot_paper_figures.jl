@@ -1,7 +1,9 @@
 # Main script to plot paper figures
 
 # 1. Always load the packages
-using TransportMatrixtools
+using Pkg
+Pkg.activate(".")
+using TransportMatrixTools
 using SparseArrays, SuiteSparse, LinearAlgebra, Printf, DualNumbers
 using JLD2, Parameters, Optim
 using Flatten
