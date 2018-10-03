@@ -29,8 +29,8 @@ end
 
 function q!(c, p::Para, SaJ, f, fJac, nrm, τstop, verbose::Bool)
     if verbose
-        paraprint(p, "  ")
-        return q!(c, p, SaJ, f, fJac, nrm, τstop, "  ")
+        show(IOContext(stdout, :compact => true), p)
+        return q!(c, p, SaJ, f, fJac, nrm, τstop, "    ")
     else
         return q!(c, p, SaJ, f, fJac, nrm, τstop, "")
     end
@@ -45,7 +45,7 @@ q!(p::Para) = q!(c, p, SaJ, f, fJac, nrm, τstop, false)
 # Need to define the function with a storage argument first
 function q!(c, λ::Vector, SaJ, f, fJac, nrm, τstop, λ2p, verbose::Bool)
     if verbose
-        paraprint(λ2p(λ), "    ")
+        show(IOContext(stdout, :compact => true), λ2p(λ))
         qval = q!(c, λ, SaJ, f, fJac, nrm, τstop, λ2p, "    ")
         print_cost(qval, "    ")
         return qval

@@ -6,7 +6,10 @@ Pkg.activate(".")
 using TransportMatrixTools
 using SparseArrays, SuiteSparse, LinearAlgebra, Printf, DualNumbers
 using JLD2, Parameters, Optim
-using Flatten
+# Packages for unitful parameters :)
+using Defaults, Flatten, FieldMetadata, Unitful
+import Defaults: get_default
+import FieldMetadata: @units, units # use the metadata of units already in it
 import Flatten: flattenable
 
 
@@ -32,7 +35,7 @@ include("cost_functions.jl")
 function print_results(results)
     λopt = results.minimizer
     popt = λ2p(λopt)
-    paraprint(popt)
+    show(popt)
     qopt = q!(popt)
     print_cost(qopt)
     printstyled("  gives cost q = $(@sprintf("%.2g",qopt))\n", color=:red)

@@ -1,22 +1,33 @@
 # Biogeochemistry functions
 
 # BGC parameters
+# Define some metadata
+@metadata printunits nothing
+@metadata describe ""
+# Define the year unit (not in Unitful)
+@unit(yr, "yr", Year, 365.0u"d", true)
+Unitful.register(@__MODULE__)
 """
     Para
 
-BGC parameters type.
-Create parameters p by using the constructor
-`p = Para()` for default values
-or `p = Para(p₁, p₂, ...)` for non-default values
+Biogeochemical parameters (type).
+You can create parameters `p` by using the default constructor `p = Para()`, which will have the default values.
+Or you can specify some of the parameter values via `p = Para(p₁ = <value1>, p₂ = <value2>, ...)`.
 Make sure you know what the parameters are!
-And tell it here which ones will be optimized with the boolean
+Each parameter in `p` comes with a bunch of metadata for each field `f`:
+- `flattenable(p, f)` — is p.f optimizable? (boolean)
+- `describe(p, f)` describes the parameter (string)
+- `printunits(p, f)` gives the unit used for `show(p)`
+- `units(p, f)` gives the unit used in the model (SI)
+- `default(p, f)` gives the default value
+Modify this part of the code if you need new/different parameters!
 """
-@flattenable @with_kw struct Para{U}
-    τu::U = 50.0 * spd  | true # specific uptake rate timescale, default = 30 d
-    w₀::U = 1 / spd     | true # terminal sinking velocity at surface, default = 1 m/d
-    w′::U = 1 / spd     | false # dw/dz, default = 1 (m/d)/m
-    κ::U = 0.25 / spd   | false
-    τg::U = 365e6 * spd | false
+@describe @flattenable @printunits @units @default_kw struct Para{U}
+    τu::U |  50.0 * spd | u"s"   | u"d"   | true  | "Specific uptake rate timescale"
+    w₀::U |     1 / spd | u"m/s" | u"m/d" | true  | "Sinking velocity at surface"
+    w′::U |     1 / spd | u"1/s" | u"1/d" | false | "Vertical gradient of sinking velocity"
+    κ::U  |  0.25 / spd | u"1/s" | u"d"   | false | "Remineralization rate"
+    τg::U | 365e6 * spd | u"s"   | u"yr"  | false | "Geological Restoring"
 end
 const p₀ = Para() # p₀ will hold the default values of non-optimized parameters
 const pobs = Para(τu = 50.0 * spd, w₀ = 100 / spd)
@@ -46,23 +57,25 @@ optPara(v::Vector) = Flatten.reconstruct(p₀, v)
 Dλ2p(λ) = exp.(λ) .* optvec(pobs)
 D2λ2p(λ) = exp.(λ) .* optvec(pobs)
 
+"""
+    show(io::IO, p::Para)
 
-using Unitful
-function paraprint(p::Para, preprint="")
-    if preprint == ""
-        return nothing
-    else
-        @unpack τu, w₀, w′ = p
-        println(preprint * "Parameter values:")
-        print(preprint * "  ")
-        @printf("τu = %.2g \n", τu / spd)
-        print(preprint * "  ")
-        @printf("w₀ = %.2g \n", w₀ * spd)
-        print(preprint * "  ")
-        @printf("w′ = %.2g m d⁻¹ / m\n", w′ * spd)
-        return nothing
+shows the parameters after applying the base unit and converting to printing unit.
+
+`show(p)` will show all the parameters.
+
+`show(IOContext(stdout, :compact => true), p)` will only show the optimizable parameters.
+"""
+function Base.show(io::IO, p::Para)
+    println("Parameter values:")
+    compact = get(io, :compact, false)
+    for f in fieldnames(typeof(p))
+        val = uconvert(printunits(p, f), getfield(p, f) * units(p, f))
+        (~compact || flattenable(p, f)) && println("| $f = $val")
     end
 end
+
+
 # # macro for printing p::Para?
 # function printPara(p::Para)
 #     for param in p
@@ -73,11 +86,11 @@ end
 
 # Geological restoring
 function geores(DSi, p::Para)
-    @unpack τg = p
+    τg = p.τg
     return (DSimean .- DSi) ./ τg
 end
 function georesJac(DSi, p::Para)
-    @unpack τg = p
+    τg = p.τg
     return -I / τg
 end
 
@@ -85,33 +98,33 @@ end
 relu(x) = (x .≥ 0) .* x
 Drelu(x) = (x .≥ 0) .* 1.0
 function uptake(DSi, p::Para)
-    @unpack τu = p
+    τu = p.τu
     return maskEup .* relu(DSi - DSiobs) ./ τu
 end
 # overload for numJac
 function uptake(DSi::Array{<:Number,2}, p::Para)
-    @unpack τu = p
+    τu = p.τu
     DSiobs2 = repeat(DSiobs, 1, size(DSi, 2))
     return d₀(maskEup) * relu(DSi - DSiobs2) ./ τu
 end
 # Uptake derivatives
 function uptakeJac(DSi, p::Para)
-    @unpack τu = p
+    τu = p.τu
     return d₀(maskEup .* Drelu(DSi - DSiobs) ./ τu)
 end
 function Duptake_Dτu(DSi, p::Para)
-    @unpack τu = p
+    τu = p.τu
     return -uptake(DSi, p) ./ τu
 end
 
 # Remineralization
 function remineralization(PSi, p::Para)
-    @unpack κ = p
+    κ = p.κ
     return κ * PSi
 end
 # Remineralization derivative
 function remineralizationJac(PSi, p::Para)
-    @unpack κ = p
+    κ = p.κ
     return κ * I
 end
 
@@ -134,7 +147,7 @@ end
 const S1 = buildPFD(ones(nwet), DIV, Iabove)
 const Sz = buildPFD(ztop, DIV, Iabove)
 function S(p::Para)
-    @unpack w₀, w′ = p
+    w₀, w′ = p.w₀, p.w′
     return w₀ * S1 + w′ * Sz
 end
 
