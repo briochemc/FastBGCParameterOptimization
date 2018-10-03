@@ -39,7 +39,7 @@ end
 # Preallocate State and Jacobian, and τstop for wrapping qprint
 const λ₀ = p2λ(p₀)
 SaJ = StateAndJacobian(x₀, factorize(fJac(x₀, p₀)), p₀) # the Jacobian factors
-const τstop = τg * 1e6
+const τstop = 1e6 * 365e6 * spd
 q!(p::Para) = q!(c, p, SaJ, f, fJac, nrm, τstop, false)
 
 # Need to define the function with a storage argument first

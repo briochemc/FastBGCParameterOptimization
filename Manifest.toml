@@ -169,9 +169,9 @@ version = "0.16.0"
 
 [[OrderedCollections]]
 deps = ["Pkg", "Random", "Serialization", "Test"]
-git-tree-sha1 = "41da1edba028376b58520ca01d9a41e29f855d55"
+git-tree-sha1 = "85619a3f3e17bb4761fe1b1fd47f0e979f964d5b"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.0.1"
+version = "1.0.2"
 
 [[Parameters]]
 deps = ["Markdown", "OrderedCollections", "Pkg", "REPL", "Test"]
@@ -270,7 +270,7 @@ version = "0.8.1"
 
 [[TransportMatrixTools]]
 deps = ["DualNumbers", "FieldMetadata", "Flatten", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "194c815596b3486da6804627ad5d261262ad8e6d"
+git-tree-sha1 = "53f1c4ff1356366623a6b901bb7c69ed198b27fe"
 repo-rev = "master"
 repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"

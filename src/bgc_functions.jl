@@ -12,12 +12,14 @@ Make sure you know what the parameters are!
 And tell it here which ones will be optimized with the boolean
 """
 @flattenable @with_kw struct Para{U}
-    τu::U = 50.0 * spd | true # specific uptake rate timescale, default = 30 d
-    w₀::U = 1 / spd   | true # terminal sinking velocity at surface, default = 1 m/d
-    Dzw::U = 1 / spd   | false # dw/dz, default = 1 (m/d)/m
+    τu::U = 50.0 * spd  | true # specific uptake rate timescale, default = 30 d
+    w₀::U = 1 / spd     | true # terminal sinking velocity at surface, default = 1 m/d
+    w′::U = 1 / spd     | false # dw/dz, default = 1 (m/d)/m
+    κ::U = 0.25 / spd   | false
+    τg::U = 365e6 * spd | false
 end
 const p₀ = Para() # p₀ will hold the default values of non-optimized parameters
-const pobs = Para(50.0 * spd, 100 / spd , 1 / spd)
+const pobs = Para(τu = 50.0 * spd, w₀ = 100 / spd)
 const optimizable_parameters = fieldnameflatten(p₀)
 const npopt = length(optimizable_parameters)
 const all_parameters = fieldnames(typeof(p₀))
@@ -50,14 +52,14 @@ function paraprint(p::Para, preprint="")
     if preprint == ""
         return nothing
     else
-        @unpack τu, w₀, Dzw = p
+        @unpack τu, w₀, w′ = p
         println(preprint * "Parameter values:")
         print(preprint * "  ")
         @printf("τu = %.2g \n", τu / spd)
         print(preprint * "  ")
         @printf("w₀ = %.2g \n", w₀ * spd)
         print(preprint * "  ")
-        @printf("∂w/∂z = %.2g m d⁻¹ / m\n", Dzw * spd)
+        @printf("w′ = %.2g m d⁻¹ / m\n", w′ * spd)
         return nothing
     end
 end
@@ -70,9 +72,14 @@ end
 
 
 # Geological restoring
-const τg = 365 * spd
-geores(DSi) = (DSimean .- DSi) ./ τg
-georesJac(DSi) = -I / τg
+function geores(DSi, p::Para)
+    @unpack τg = p
+    return (DSimean .- DSi) ./ τg
+end
+function georesJac(DSi, p::Para)
+    @unpack τg = p
+    return -I / τg
+end
 
 # Uptake
 relu(x) = (x .≥ 0) .* x
@@ -98,10 +105,15 @@ function Duptake_Dτu(DSi, p::Para)
 end
 
 # Remineralization
-const κ = 0.25 / spd
-remineralization(PSi) = κ * PSi
+function remineralization(PSi, p::Para)
+    @unpack κ = p
+    return κ * PSi
+end
 # Remineralization derivative
-remineralizationJac(PSi) = κ * I
+function remineralizationJac(PSi, p::Para)
+    @unpack κ = p
+    return κ * I
+end
 
 # Indices for DSi and PSi (needed for Rate of change f(x,p))
 const iDSi = 1:nwet
@@ -122,17 +134,17 @@ end
 const S1 = buildPFD(ones(nwet), DIV, Iabove)
 const Sz = buildPFD(ztop, DIV, Iabove)
 function S(p::Para)
-    @unpack w₀, Dzw = p
-    return w₀ * S1 + Dzw * Sz
+    @unpack w₀, w′ = p
+    return w₀ * S1 + w′ * Sz
 end
 
 # Rate of change f(x,p)
 function f(x, p::Para)
     DSi, PSi = unpackx(x)
     u = uptake(DSi, p)
-    r = remineralization(PSi)
+    r = remineralization(PSi, p)
     foo = zeros(eltype(x), size(x))
-    foo[iDSi] .= -T * DSi - u + r + geores(DSi)
+    foo[iDSi] .=  -T   * DSi - u + r + geores(DSi, p)
     foo[iPSi] .= -S(p) * PSi + u - r
     return foo
 end
@@ -151,9 +163,9 @@ end
 function fJac(x, p::Para)
     DSi, PSi = unpackx(x)
     uJac = uptakeJac(DSi, p)
-    rJac = remineralizationJac(PSi)
-    foo = [-T - uJac + georesJac(DSi)        rJac;
-                uJac                 -S(p) - rJac]
+    rJac = remineralizationJac(PSi, p)
+    foo = [ -T   - uJac + georesJac(DSi, p)    rJac       ;
+                  +uJac                       -rJac - S(p)]
     dropzeros!(foo)
     return foo
 end
@@ -190,7 +202,9 @@ function Dpf(x, p::Para, s::Symbol)
         foo[iDSi] .= -foo[iPSi]
     elseif s == :w₀
         foo[iPSi] .= -S1 * PSi
-    elseif s == :Dzw
+    elseif s == :w′
+        foo[iPSi] .= -Sz * PSi
+    elseif s == :κ
         foo[iPSi] .= -Sz * PSi
     else
         error("There is no $s parameter")

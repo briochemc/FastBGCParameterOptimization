@@ -42,6 +42,11 @@ function print_results(results)
   #println(results)
 end
 
+# Test that the solver works
+p = 1.1p₀
+x = solvef0NewtonChordShamanskii!(x -> f(x, p), x -> fJac(x, p), x₀, nrm, τstop, "    ")
+# TODO: add test for derivatives
+
 # Do those once for the benchmark
 using BenchmarkTools
 q!(λ₀)
