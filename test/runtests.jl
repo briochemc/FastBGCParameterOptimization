@@ -15,4 +15,4 @@ include("../src/bgc_functions.jl")
 include("../src/cost_functions.jl")
 
 # run tests
-include("test_Derivatives")
+include("test_Derivatives.jl")
