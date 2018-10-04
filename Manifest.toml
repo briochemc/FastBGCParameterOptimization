@@ -279,9 +279,7 @@ uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.8.1"
 
 [[TransportMatrixTools]]
-git-tree-sha1 = "31c0820dcd36dbbd81599bce1f6de11f498c7b0e"
-repo-rev = "master"
-repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
+path = "/Users/benoitpasquier/Projects/TransportMatrixTools"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
 version = "0.1.0"
 
