@@ -23,11 +23,11 @@ Each parameter in `p` comes with a bunch of metadata for each field `f`:
 Modify this part of the code if you need new/different parameters!
 """
 @describe @flattenable @printunits @units @default_kw struct Para{U}
-    τu::U |  50.0 * spd | u"s"   | u"d"   | true  | "Specific uptake rate timescale"
-    w₀::U |     1 / spd | u"m/s" | u"m/d" | true  | "Sinking velocity at surface"
-    w′::U |     1 / spd | u"1/s" | u"1/d" | false | "Vertical gradient of sinking velocity"
-    κ::U  |  0.25 / spd | u"1/s" | u"d"   | false | "Remineralization rate"
-    τg::U | 365e6 * spd | u"s"   | u"yr"  | false | "Geological Restoring"
+    τu::U |  50.0 * spd | u"s"    | u"d"   | true  | "Specific uptake rate timescale"
+    w₀::U |     1 / spd | u"m/s"  | u"m/d" | true  | "Sinking velocity at surface"
+    w′::U |     1 / spd | u"s^-1" | u"d^-1" | false | "Vertical gradient of sinking velocity"
+    κ::U  |  0.25 / spd | u"s^-1" | u"d^-1" | false | "Remineralization rate"
+    τg::U | 365e6 * spd | u"s"    | u"yr"  | false | "Geological Restoring"
 end
 const p₀ = Para() # p₀ will hold the default values of non-optimized parameters
 const pobs = Para(τu = 50.0 * spd, w₀ = 100 / spd)
@@ -47,6 +47,7 @@ Para(v::Vector) = Para(v...)
 # Overload +, -, and * for parameters
 Base.:+(p₁::Para, p₂::Para) = Para(vec(p₁) .+ vec(p₂))
 Base.:-(p₁::Para, p₂::Para) = Para(vec(p₁) .- vec(p₂))
+Base.:*(p₁::Para, p₂::Para) = Para(vec(p₁) .* vec(p₂))
 Base.:*(s::Number, p::Para) = Para(s .* vec(p))
 # Convert p to λ and vice versa, needed by TransportMatrixTools!
 optvec(p::Para) = flatten(Vector, p)
@@ -89,7 +90,7 @@ function geores(DSi, p::Para)
     τg = p.τg
     return (DSimean .- DSi) ./ τg
 end
-function georesJac(DSi, p::Para)
+function georesJac(p::Para)
     τg = p.τg
     return -I / τg
 end
@@ -162,12 +163,12 @@ function f(x, p::Para)
     return foo
 end
 # For numJac
-function f(x::Array{<:Number,2}, p)
+function f(x::Array{<:Number,2}, p::Para)
     DSi, PSi = unpackx(x)
     u = uptake(DSi, p)
-    r = remineralization(PSi)
+    r = remineralization(PSi, p)
     foo = zeros(eltype(x), size(x))
-    foo[iDSi, :] .=  -T   * DSi - u + r + geores(DSi)
+    foo[iDSi, :] .=  -T   * DSi - u + r + geores(DSi, p)
     foo[iPSi, :] .= -S(p) * PSi + u - r
     return foo
 end
@@ -177,8 +178,8 @@ function fJac(x, p::Para)
     DSi, PSi = unpackx(x)
     uJac = uptakeJac(DSi, p)
     rJac = remineralizationJac(PSi, p)
-    foo = [ -T   - uJac + georesJac(DSi, p)    rJac       ;
-                  +uJac                       -rJac - S(p)]
+    foo = [ -T   - uJac + georesJac(p)    rJac       ;
+                  +uJac                  -rJac - S(p)]
     dropzeros!(foo)
     return foo
 end

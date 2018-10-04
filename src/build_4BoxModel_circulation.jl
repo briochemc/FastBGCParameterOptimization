@@ -33,9 +33,9 @@ function build_grd()
     area_ocean = 349e12 # m²
     depth_low = 100.0  # m
     depth_high = 250.0 # m
-    fraction_area_high = 0.15 # 
+    fraction_area_high = 0.15 #
     # Infer other values
-    depth_ocean = vtot / area_ocean 
+    depth_ocean = vtot / area_ocean
 
     # Build DY3d
     earth_perimeter = 40e6 # 40'000 km
@@ -44,16 +44,16 @@ function build_grd()
     DYlow = (1 - fraction_area_high) * DYocean
     DYT3d = zeros(size(wet3d))
     DYT3d[1, 1, :] .= DYhigh
-    DYT3d[1, 2, :] .= DYlow
+    DYT3d[2, 1, :] .= DYlow
     # Build DZ3d
     DZT3d = zeros(size(wet3d))
     DZT3d[1, 1, 1] = depth_high
-    DZT3d[1, 2, 1] = depth_low
+    DZT3d[2, 1, 1] = depth_low
     DZT3d[1, 1, 2] = depth_ocean - depth_high
-    DZT3d[1, 2, 2] = depth_ocean - depth_low
+    DZT3d[2, 1, 2] = depth_ocean - depth_low
     # Build DX3d
     DXT3d = vtot / (depth_ocean * DYocean) * ones(size(wet3d))
-    # ZT3d 
+    # ZT3d
     ZT3d = cumsum(DZT3d, dims=3) - DZT3d / 2
     # ZW3d (depth at top of box)
     ZW3d = cumsum(DZT3d, dims=3) - DZT3d
@@ -72,17 +72,17 @@ function build_T(grd)
     overturning = 19e6
     Overturning = falses(4,4)
     Overturning[1, 3] = Overturning[3, 4] = Overturning[4, 2] = Overturning[2, 1] = true # Overturning circulation
-    # Build T, as a divergence operator, i.e., 
+    # Build T, as a divergence operator, i.e.,
     # T is positive where tracers are removed.
     T = spzeros(4,4)
     for orig in 1:4, dest in 1:4
         # Overturning part
-        if Overturning[orig, dest] 
+        if Overturning[orig, dest]
             T[orig, orig] += overturning # add at origin
             T[dest, orig] -= overturning # remove at destination
         end
 
-        if !iszero(Mixing[orig, dest]) 
+        if !iszero(Mixing[orig, dest])
             T[orig, orig] += Mixing[orig, dest] # add at origin
             T[dest, orig] -= Mixing[orig, dest] # remove at destination
         end
