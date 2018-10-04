@@ -48,15 +48,12 @@ deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
 [[Defaults]]
+deps = ["FieldMetadata", "Test"]
 git-tree-sha1 = "0922a001a7610719d86302bc9a3b3a26acbbab2e"
 repo-rev = "master"
 repo-url = "https://github.com/rafaqz/Defaults.jl.git"
 uuid = "47c4a13d-4e7f-5b95-980b-15b3b9bc83bc"
 version = "0.0.0"
-
-    [Defaults.deps]
-    FieldMetadata = "bf96fef3-21d2-5d20-8afa-0e7d4c32a885"
-    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[DelimitedFiles]]
 deps = ["Mmap"]
@@ -91,13 +88,6 @@ uuid = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
 version = "0.5.0"
 
 [[FieldMetadata]]
-deps = ["Markdown", "REPL", "Test"]
-git-tree-sha1 = "367d77381908451a77266d6eafb36fb378b9febc"
-repo-rev = "master"
-repo-url = "https://github.com/rafaqz/FieldMetadata.jl.git"
-uuid = "5a9f0ffb-bd87-5683-90a1-db430f12bee5"
-version = "0.0.0"
-[[FieldMetadata]]
 deps = ["REPL"]
 git-tree-sha1 = "367d77381908451a77266d6eafb36fb378b9febc"
 uuid = "bf96fef3-21d2-5d20-8afa-0e7d4c32a885"
@@ -110,14 +100,10 @@ uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 version = "1.0.2"
 
 [[Flatten]]
+deps = ["FieldMetadata", "Pkg", "Test"]
 git-tree-sha1 = "e297304e07be73e386772e35b4356620ff53bf09"
 uuid = "4c728ea3-d9ee-5c9a-9642-b6f7d7dc04fa"
 version = "0.0.1"
-
-    [Flatten.deps]
-    FieldMetadata = "bf96fef3-21d2-5d20-8afa-0e7d4c32a885"
-    Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "InteractiveUtils", "LinearAlgebra", "NaNMath", "Pkg", "Random", "SparseArrays", "SpecialFunctions", "StaticArrays", "Test"]
@@ -279,23 +265,12 @@ uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.8.1"
 
 [[TransportMatrixTools]]
-git-tree-sha1 = "0942dfaf98c46eafeca4bc4a2b2bb80994ae732e"
+deps = ["Defaults", "DualNumbers", "FieldMetadata", "Flatten", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
+git-tree-sha1 = "ccdfad57e0b84d532872e7ccb592a04c3b7b504a"
 repo-rev = "master"
 repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
 version = "0.1.0"
-
-    [TransportMatrixTools.deps]
-    Defaults = "47c4a13d-4e7f-5b95-980b-15b3b9bc83bc"
-    DualNumbers = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
-    FieldMetadata = "5a9f0ffb-bd87-5683-90a1-db430f12bee5"
-    Flatten = "4c728ea3-d9ee-5c9a-9642-b6f7d7dc04fa"
-    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-    Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
-    SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-    SuiteSparse = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
-    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [[URIParser]]
 deps = ["Test", "Unicode"]
