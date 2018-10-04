@@ -1,18 +1,7 @@
 # Main script to plot paper figures
 
 # 1. Always load the packages
-using Pkg
-Pkg.activate(".")
-using TransportMatrixTools
-using SparseArrays, SuiteSparse, LinearAlgebra, Printf, DualNumbers
-using JLD2, Parameters, Optim
-# Packages for unitful parameters :)
-using Defaults, Flatten, FieldMetadata, Unitful
-import Defaults: get_default
-import FieldMetadata: @units, units # use the metadata of units already in it
-import Flatten: flattenable
-
-
+include("load_packages.jl")
 
 # Setup OCIM1.1 or toy model (comment/uncomment to use the one you need for now)
 # include("setup_OCIM1.1.jl")
@@ -25,6 +14,8 @@ include("bgc_functions.jl")
 # load cost functions
 include("cost_functions.jl")
 
+# load test functions
+include("test_functions.jl")
 
 # # print("\nOptimizing (Q Newton)...")
 # # @benchmark print_results(optimize(Qwrap, λ₀, Newton()))

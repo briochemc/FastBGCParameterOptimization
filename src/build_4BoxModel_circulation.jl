@@ -18,7 +18,7 @@ These are the indices of the 4-box model:
 └───────┴────────────────────────┘
 =#
 
-const wet3d = trues(1, 2, 2)
+const wet3d = trues(2, 1, 2)
 
 # Macro to create grd in a simple `@Dict` call
 # Thanks to Lyndon White (on slack)
