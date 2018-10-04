@@ -16,6 +16,4 @@ These tests should be run everytime to make sure the tests are passed on the fun
         @test fJac(x, p) ≈ numJac(x -> f(x, p), x, C)
     end
 end
-@test numjac(x, p) = fJac(x, p)
-foo = fJac(x₀, p₀)
 
