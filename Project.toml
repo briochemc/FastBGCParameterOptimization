@@ -1,3 +1,8 @@
+name = "FastBGCParameterOptimization"
+uuid = "38c7da39-0e08-46c5-84e3-2c60409dd58a"
+authors = ["Benoit Pasquier <pasquieb@uci.edu>"]
+version = "0.1.0"
+
 [deps]
 Defaults = "47c4a13d-4e7f-5b95-980b-15b3b9bc83bc"
 DualNumbers = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
