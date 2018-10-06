@@ -5,7 +5,7 @@ using Pkg
 Pkg.activate(".")
 using TransportMatrixTools
 using SparseArrays, SuiteSparse, LinearAlgebra, Printf, DualNumbers
-using JLD2, Parameters, Optim
+using JLD2, Calculus, Optim
 # Packages for unitful parameters :)
 using Defaults, Flatten, FieldMetadata, Unitful
 import Defaults: get_default

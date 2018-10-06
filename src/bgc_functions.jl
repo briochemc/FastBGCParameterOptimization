@@ -23,11 +23,11 @@ Each parameter in `p` comes with a bunch of metadata for each field `f`:
 Modify this part of the code if you need new/different parameters!
 """
 @describe @flattenable @printunits @units @default_kw struct Para{U}
-    τu::U |  50.0 * spd | u"s"    | u"d"   | true  | "Specific uptake rate timescale"
-    w₀::U |     1 / spd | u"m/s"  | u"m/d" | true  | "Sinking velocity at surface"
+    τu::U |  50.0 * spd | u"s"    | u"d"    | true  | "Specific uptake rate timescale"
+    w₀::U |     1 / spd | u"m/s"  | u"m/d"  | true  | "Sinking velocity at surface"
     w′::U |     1 / spd | u"s^-1" | u"d^-1" | false | "Vertical gradient of sinking velocity"
     κ::U  |  0.25 / spd | u"s^-1" | u"d^-1" | false | "Remineralization rate"
-    τg::U | 365e6 * spd | u"s"    | u"yr"  | false | "Geological Restoring"
+    τg::U | 365e6 * spd | u"s"    | u"yr"   | false | "Geological Restoring"
 end
 const p₀ = Para() # p₀ will hold the default values of non-optimized parameters
 const pobs = Para(τu = 50.0 * spd, w₀ = 100 / spd)
@@ -53,7 +53,14 @@ Base.:*(s::Number, p::Para) = Para(s .* vec(p))
 optvec(p::Para) = flatten(Vector, p)
 p2λ(p::Para) = log.(optvec(p) ./ optvec(pobs))
 Dp2λ(p::Para) = optvec(p).^(-1)
-optPara(v::Vector) = Flatten.reconstruct(p₀, v)
+function optPara(v::Vector{U}) where U
+    if U == eltype(p₀)
+        return Flatten.reconstruct(p₀, v)
+    else
+        p = Para(convert(Vector{U}, vec(p₀)))
+        return Flatten.reconstruct(p, v)
+    end
+end
 λ2p(λ) = optPara(exp.(λ) .* optvec(pobs))
 Dλ2p(λ) = exp.(λ) .* optvec(pobs)
 D2λ2p(λ) = exp.(λ) .* optvec(pobs)
@@ -153,11 +160,11 @@ function S(p::Para)
 end
 
 # Rate of change f(x,p)
-function f(x, p::Para)
+function f(x::Vector{Tx}, p::Para{Tp}) where {Tx, Tp}
     DSi, PSi = unpackx(x)
     u = uptake(DSi, p)
     r = remineralization(PSi, p)
-    foo = zeros(eltype(x), size(x))
+    foo = zeros(promote_type(Tx, Tp), size(x))
     foo[iDSi] .=  -T   * DSi - u + r + geores(DSi, p)
     foo[iPSi] .= -S(p) * PSi + u - r
     return foo
