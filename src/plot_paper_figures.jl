@@ -8,6 +8,9 @@ include("load_packages.jl")
 include("setup_4BoxModel.jl")
 # The above must define everything needed by the functions
 
+# load biogeochmistry parameters
+include("bgc_parameters.jl")
+
 # load biogeochmistry functions
 include("bgc_functions.jl")
 
@@ -41,4 +44,7 @@ else
     @load "fig/4BoxModel_results.jld2" results
 end
 
-include("plot_figure_2.jl")
+# include("plot_figure_1.jl")
+# include("plot_figure_2.jl")
+# include("plot_figure_3.jl")
+include("plot_functions.jl")
