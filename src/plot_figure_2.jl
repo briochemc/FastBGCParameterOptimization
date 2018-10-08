@@ -34,7 +34,7 @@ function plot_figure_2(results, q!)
 
     display(plt)
 
-    savefig("Fig2.pdf")
+    savefig("fig/Fig2.pdf")
 
 end
 

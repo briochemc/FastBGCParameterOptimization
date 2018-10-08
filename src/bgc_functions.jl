@@ -4,6 +4,7 @@
 # Define some metadata
 @metadata printunits nothing
 @metadata describe ""
+@metadata latexSymbol ""
 # Define the year unit (not in Unitful)
 @unit(yr, "yr", Year, 365.0u"d", true)
 Unitful.register(@__MODULE__)
@@ -22,12 +23,12 @@ Each parameter in `p` comes with a bunch of metadata for each field `f`:
 - `default(p, f)` gives the default value
 Modify this part of the code if you need new/different parameters!
 """
-@describe @flattenable @printunits @units @default_kw struct Para{U}
-    τu::U |  50.0 * spd | u"s"    | u"d"    | true  | "Specific uptake rate timescale"
-    w₀::U |     1 / spd | u"m/s"  | u"m/d"  | true  | "Sinking velocity at surface"
-    w′::U |     1 / spd | u"s^-1" | u"d^-1" | false | "Vertical gradient of sinking velocity"
-    κ::U  |  0.25 / spd | u"s^-1" | u"d^-1" | false | "Remineralization rate"
-    τg::U | 365e6 * spd | u"s"    | u"yr"   | false | "Geological Restoring"
+@latexSymbol @describe @flattenable @printunits @units @default_kw struct Para{U}
+    τu::U |  50.0 * spd | u"s"    | u"d"    | true  | "Specific uptake rate timescale"        | "\\tau_\\mathbf{u}"
+    w₀::U |     1 / spd | u"m/s"  | u"m/d"  | true  | "Sinking velocity at surface"           | "w_0"
+    w′::U |     1 / spd | u"s^-1" | u"d^-1" | false | "Vertical gradient of sinking velocity" | "w'"
+    κ::U  |  0.25 / spd | u"s^-1" | u"d^-1" | false | "Remineralization rate"                 | "\\kappa"
+    τg::U | 365e6 * spd | u"s"    | u"yr"   | false | "Geological Restoring"                  | "\\tau_\\mathrm{geo}"
 end
 const p₀ = Para() # p₀ will hold the default values of non-optimized parameters
 const pobs = Para(τu = 50.0 * spd, w₀ = 100 / spd)
@@ -82,6 +83,52 @@ function Base.show(io::IO, p::Para)
         (~compact || flattenable(p, f)) && println("| $f = $val")
     end
 end
+
+"""
+    print_LaTeX_table(p::Para)
+
+prints a LaTeX table of the parameters applying the printing unit.
+"""
+function print_LaTeX_table(p::Para)
+    println("Latex table for the parameters:")
+    println("\\begin{table*}[t]")
+    println("    \\centering")
+    println("    \\begin{tabular}{lllll}")
+    println("        Parameter & Description & Value & Unit & Optimized? \\\\ \\hline")
+    for f in fieldnames(typeof(p))
+        LaTeX_line = "        " # Indent
+        LaTeX_line = LaTeX_line * "\$" * latexSymbol(p, f) * "\$" # Parameter Symbol
+        LaTeX_line = LaTeX_line * " & " * describe(p, f) # Parameter Description
+        val = uconvert(printunits(p, f), getfield(p, f) * units(p, f)) # Value in print units
+        LaTeX_line = LaTeX_line * " & \$" * latexify(ustrip(val)) * "\$"
+        LaTeX_line = LaTeX_line * " & " * latexify(printunits(p, f)) # print units
+        LaTeX_line = LaTeX_line * " & " * latexify(flattenable(p, f)) * "\\\\"
+        println(LaTeX_line)
+    end
+    println("        \\label{T:Parameters}")
+    println("    \\end{tabular}")
+    println("    \\caption{")
+    println("    }")
+    println("\\end{table*}")
+end
+
+function latexify(U::Unitful.Units)
+    str = string(U)
+    str = replace(str, r"\^-(?<exp>\d+)" => s"$^{-\g<exp>}$") # add brackets around exponents
+    str = replace(str, r"dy" => s"d") # Replace "dy" with "d" for days
+    str = replace(str, r"\s" => s"\\,") # replace spaces with small spaces
+    return str
+end
+
+latexify(optimized::Bool) = optimized ? "yes" : "no"
+
+function latexify(val::R) where R<:Real
+    str = @sprintf("%.2g", val)
+    str = replace(str, r"e\+0+(?<exp>\d+)" => s" \\times 10^{\g<exp>}")
+    str = replace(str, r"e\-0+(?<exp>\d+)" => s" \\times 10^{-\g<exp>}")
+    return str
+end
+
 
 
 # # macro for printing p::Para?
