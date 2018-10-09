@@ -5,6 +5,10 @@ function nrm(x)
     DSi, PSi = unpackx(x)
     return sqrt(vnorm²(DSi) + vnorm²(PSi))
 end# This could change if I want with some other norm
+function nrm(x::Vector{Dual{U}}) where U
+    DSi, PSi = unpackx(x)
+    return sqrt(vnorm²(realpart.(DSi)) + vnorm²(realpart.(PSi)))
+end# This could change if I want with some other norm
 
 # cost function
 function c(x) # with respect to x
@@ -38,7 +42,7 @@ end
 
 # Preallocate State and Jacobian, and τstop for wrapping qprint
 const λ₀ = p2λ(p₀)
-SaJ = StateAndJacobian(x₀, factorize(fJac(x₀, p₀)), p₀) # the Jacobian factors
+SaJ = StateAndJacobian(x₀, factorize(fJac(x₀, p₀)), fJac(x₀, p₀), p₀) # the Jacobian factors
 const τstop = 1e6 * 365e6 * spd
 q!(p::Para) = q!(c, p, SaJ, f, fJac, nrm, τstop, false)
 
@@ -62,8 +66,15 @@ function print_cost(cval, preprint = "")
     end
     return nothing
 end
+function print_cost(cval::Dual{Float64}, preprint = "")
+    if preprint ≠ ""
+        print(preprint)
+        @printf("RMS = %.2f%% (+ ε part:%.2g)\n", 100 * sqrt(realpart(cval) / c(0*x₀)), dualpart(cval))
+    end
+    return nothing
+end
 
-q!(λ::Vector) = q!(c, λ, SaJ, f, fJac, nrm, τstop, λ2p, false)
+q!(λ::Vector) = q!(c, λ, SaJ, f, fJac, nrm, τstop, λ2p, true)
 # Qwrap(λ) = Q!(c, λ, SaJ, f, Dxf, vnorm, τstop)
 # slowQwrap(λ) = slowQ(c, λ, nwet, f, fJac, nrm, τstop)
 # vnorm(f(ones(length(x₀)),p₀))

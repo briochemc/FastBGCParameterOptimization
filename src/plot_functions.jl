@@ -16,7 +16,7 @@ function convergence_plot(results, q!)
         λs = Optim.x_trace(results[k])
         y = [q!(λ) for λ in λs]
         ny = length(y)
-        x = collect(1:ny) + counter_line / n_lines
+        x = collect(1:ny) .+ counter_line / n_lines
         col = mycolor(k)
         #out[k] = semilogy(qvals, color = col, markevery=n_trace, marker="o", markersize=5, label=k)
         out[k] = step(x, y, color = col, markevery=[ny-1], marker="o", markersize=5, label=k, where="post")

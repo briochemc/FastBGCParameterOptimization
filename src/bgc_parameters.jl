@@ -80,7 +80,7 @@ function Base.show(io::IO, p::Para)
     compact = get(io, :compact, false)
     for f in fieldnames(typeof(p))
         val = uconvert(printunits(p, f), getfield(p, f) * units(p, f))
-        (~compact || flattenable(p, f)) && println("| $f = $val")
+        (~compact || flattenable(p, f)) && println("│ $f = $val")
     end
 end
 

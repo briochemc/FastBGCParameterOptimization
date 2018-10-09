@@ -243,9 +243,9 @@ version = "0.3.2"
 
 [[Optim]]
 deps = ["Calculus", "Compat", "DiffEqDiffTools", "ForwardDiff", "LineSearches", "LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "Pkg", "PositiveFactorizations", "Printf", "Random", "SparseArrays", "StatsBase", "Test"]
-git-tree-sha1 = "0ed8809e72d3b595930c8ade539838a99f94dc8b"
+git-tree-sha1 = "ba60a8f4adceb8a881c683e59a799cb4d11e9e69"
 uuid = "429524aa-4258-5aef-a3af-852621145aeb"
-version = "0.16.0"
+version = "0.17.1"
 
 [[OrderedCollections]]
 deps = ["Pkg", "Random", "Serialization", "Test"]
@@ -378,9 +378,7 @@ version = "0.8.1"
 
 [[TransportMatrixTools]]
 deps = ["Defaults", "DualNumbers", "FieldMetadata", "Flatten", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-git-tree-sha1 = "ad708eecd52c4fe39ad1f77ce47435efe8e6a78c"
-repo-rev = "master"
-repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
+path = "/Users/benoitpasquier/.julia/dev/TransportMatrixTools"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
 version = "0.1.0"
 

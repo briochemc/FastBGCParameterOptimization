@@ -10,7 +10,7 @@ opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = tru
 results = Dict()
 # Hessian Required
   # 1) Newton
-  λshift = 0.02 * ones(npopt)
+  λshift = 0 # 0.02 * ones(npopt) # shift or not
   λ₀ = λ₀ + λshift
 @btime results["Newton"] = optimize(q!, Dq!, D2q!, λ₀, Newton(), opt)
 # print_results(results["Newton"])
