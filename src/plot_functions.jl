@@ -4,38 +4,58 @@
 using PyPlot, PyCall
 
 function convergence_plot(results, q!)
-    clf()
-    out = nothing
-    for k in keys(results)
+    fig = figure(figsize=(8,6))
+    ax = PyPlot.axes(yscale="log")
+    out = Dict()
+    
+    # Determine number of plots to shift them
+    n_lines = sum([haskey((results[k].trace[1]).metadata, "x") for k in keys(results)])
+    counter_line = 0
+    for k in mysort(keys(results))
         !haskey((results[k].trace[1]).metadata, "x") && continue
-        x_trace = Optim.x_trace(results[k])
-        qvals = [q!(λ) for λ in x_trace]
+        λs = Optim.x_trace(results[k])
+        y = [q!(λ) for λ in λs]
+        ny = length(y)
+        x = collect(1:ny) + counter_line / n_lines
         col = mycolor(k)
-        out = semilogy(qvals, color = col)
-        semilogy(length(qvals), qvals[end], color = col, marker="o", markersize=5)
+        #out[k] = semilogy(qvals, color = col, markevery=n_trace, marker="o", markersize=5, label=k)
+        out[k] = step(x, y, color = col, markevery=[ny-1], marker="o", markersize=5, label=k, where="post")
+        counter_line += 1
     end
-    legend(keys(results))
-    xlim((1, 10))
+    legend()
+    #yaxis("log")
+    xlim((1, 30))
     display(out)
-    savefig(out, "fig/convergence_plot_4box_model.pdf")
+    #savefig(out, "fig/convergence_plot_4box_model.pdf")
     return out
 end
 
 using Match
 function mycolor(key)
     cmap = ColorMap("tab20c")
-    @match key begin
-        "Newton"              => cmap(0)
-        "InteriorPointNewton" => cmap(1)
-        "NewtonTrustRegion"   => cmap(2)
-        "ConjugateGradient"   => cmap(4)
-        "GradientDescent"     => cmap(5)
-        "LBFGS"               => cmap(6)
-        "SimulatedAnnealing"  => cmap(8)
-        "NelderMead"          => cmap(9)
-        "ParticleSwarm"       => cmap(10)
-        _                     => cmap(19)
-    end
+    println(key)
+    println(cmapindex(key))
+    println(cmap(cmapindex(key)))
+    return cmap(cmapindex(key))
+end
+
+cmapindex(k) = @match k begin
+    "Newton"              => 0
+    "InteriorPointNewton" => 1
+    "NewtonTrustRegion"   => 2
+    "ConjugateGradient"   => 4
+    "GradientDescent"     => 5
+    "LBFGS"               => 6
+    "SimulatedAnnealing"  => 8
+    "NelderMead"          => 9
+    "ParticleSwarm"       => 10
+    _                     => 19
+end
+
+function mysort(keys)
+    k_colors = [cmapindex(key) for key in keys]
+    println(k_colors)
+    return collect(keys)[sortperm(k_colors)]
 end
 
 convergence_plot(results, q!)
