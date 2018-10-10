@@ -45,6 +45,8 @@ Base.iterate(p::Para, i=1) = i > np ? nothing : (getfield(p, i), i + 1)
 # Convert p to a vector and vice versa
 Base.vec(p::Para) = collect((p...,))
 Para(v::Vector) = Para(v...)
+# read non-real part (for update of xinit)
+realpart(p::Para) = Para(realpart.(vec(p)))
 # Overload +, -, and * for parameters
 Base.:+(p₁::Para, p₂::Para) = Para(vec(p₁) .+ vec(p₂))
 Base.:-(p₁::Para, p₂::Para) = Para(vec(p₁) .- vec(p₂))
