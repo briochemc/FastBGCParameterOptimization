@@ -5,14 +5,22 @@ using BenchmarkTools
 q!(λ₀)
 Dq!(λ₀)
 D2q!(λ₀)
+slowDq!(λ₀)
+slowD2q!(λ₀)
+
+λshift = 0λ₀ # 0.02 * ones(npopt) # shift or not
+
+mySetup = begin
+    init.x, init.p = x₀, p₀
+    MyJ.fac, MyJ.p = factorize(fJac(x₀, p₀)), p₀
+end
 
 opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = true, x_tol = 1e-3)
 results = Dict()
 # Hessian Required
   # 1) Newton
-  λshift = 0 # 0.02 * ones(npopt) # shift or not
-  λ₀ = λ₀ + λshift
-@btime results["Newton"] = optimize(q!, Dq!, D2q!, λ₀, Newton(), opt)
+@btime results["Newton"] = optimize(q!, Dq!, D2q!, λ₀, Newton(), opt) setup = mySetup
+@btime results["slowNewton"] = optimize(q!, slowDq!, slowD2q!, λ₀, Newton(), opt) setup = ((init, MyJ, εp₀, εx₀, εsol, MyεJ) = mySetup)
 # print_results(results["Newton"])
   # 2) Interior Point Newton
   λ₀ = λ₀ + λshift

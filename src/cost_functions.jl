@@ -101,7 +101,7 @@ function print_cost(cval::Dual{Float64}, preprint = "")
     return nothing
 end
 
-q!(λ::Vector{Float64}) = q!(init, λ, c, f, fJac, nrm, τstop, λ2p, true)
+q!(λ::Vector{Float64}) = q!(init, λ, c, f, fJac, nrm, τstop, λ2p, false)
 q!(ελ::Vector{Dual{Float64}}) = q!(εsol, init, ελ, c, f, fJac, nrm, τstop, λ2p, true)
 # Qwrap(λ) = Q!(c, λ, SaJ, f, Dxf, vnorm, τstop)
 # slowQwrap(λ) = slowQ(c, λ, nwet, f, fJac, nrm, τstop)
@@ -112,6 +112,9 @@ Dq!(ελ::Vector{Dual{Float64}}) = Dq!(MyεJ, εsol, init, ελ, Dc, f, fJac, Dp
 # slowDQwrap(λ) = slowDQ(Dc, λ, nwet, f, fJac, Dpf, nrm, τstop)
 D2q!(λ::Vector{Float64}) = D2q!(MyJ, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, D2λ2p, "")
 
+slowDq!(λ::Vector{Float64}) = Calculus.gradient(q!, λ)'
+slowD2q!(λ::Vector{Float64}) = Calculus.hessian(q!, λ)
+
 
 function Dq!(storage, λ)
     storage[1:npopt] .= vec(Dq!(λ))
@@ -120,4 +123,9 @@ function D2q!(storage, λ)
     storage[1:npopt, 1:npopt] .= D2q!(λ)
 end
 
-
+function slowDq!(storage, λ)
+    storage[1:npopt] .= vec(slowDq!(λ))
+end
+function slowD2q!(storage, λ)
+    storage[1:npopt, 1:npopt] .= slowD2q!(λ)
+end
