@@ -23,7 +23,7 @@ Each parameter in `p` comes with a bunch of metadata for each field `f`:
 - `default(p, f)` gives the default value
 Modify this part of the code if you need new/different parameters!
 """
-@latexSymbol @describe @flattenable @printunits @units @default_kw struct Para{U}
+@latexSymbol @describe @flattenable @printunits @units @default_kw struct Para{U} <: AbstractPara{U}
     τu::U | 500.0 * spd | u"s"    | u"d"    | true  | "Specific uptake rate timescale"        | "\\tau_\\mathbf{u}"
     w₀::U |     1 / spd | u"m/s"  | u"m/d"  | true  | "Sinking velocity at surface"           | "w_0"
     w′::U |     1 / spd | u"s^-1" | u"d^-1" | false | "Vertical gradient of sinking velocity" | "w'"
@@ -46,7 +46,7 @@ Base.iterate(p::Para, i=1) = i > np ? nothing : (getfield(p, i), i + 1)
 Base.vec(p::Para) = collect((p...,))
 Para(v::Vector) = Para(v...)
 # read non-real part (for update of xinit)
-realpart(p::Para) = Para(realpart.(vec(p)))
+DualNumbers.realpart(p::Para{Dual{Float64}}) = Para(realpart.(vec(p)))
 # Overload +, -, and * for parameters
 Base.:+(p₁::Para, p₂::Para) = Para(vec(p₁) .+ vec(p₂))
 Base.:-(p₁::Para, p₂::Para) = Para(vec(p₁) .- vec(p₂))

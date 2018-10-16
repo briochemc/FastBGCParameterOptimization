@@ -31,30 +31,57 @@ function c(x, p::Para) # with respect to both x and p
     return c(x) + c(p)
 end
 
-function q!(c, p::Para, SaJ, f, fJac, nrm, τstop, verbose::Bool)
+function q!(init::RealSolution, p::Para{Float64}, c, f, fJac, nrm, τstop, verbose::Bool)
     if verbose
         show(IOContext(stdout, :compact => true), p)
-        return q!(c, p, SaJ, f, fJac, nrm, τstop, "    ")
+        return q!(init, p, c, f, nrm, τstop, "    ")
     else
-        return q!(c, p, SaJ, f, fJac, nrm, τstop, "")
+        return q!(init, p, c, f, nrm, τstop, "")
+    end
+end
+function q!(εsol::DualSolution, init::RealSolution, εp::Para{Dual{Float64}}, c, f, fJac, nrm, τstop, verbose::Bool)
+    if verbose
+        show(IOContext(stdout, :compact => true), εp)
+        return q!(εsol, init, εp, c, f, nrm, τstop, "    ")
+    else
+        return q!(εsol, init, εp, c, f, nrm, τstop, "")
     end
 end
 
-# Preallocate State and Jacobian, and τstop for wrapping qprint
+# Preallocate initial state and Jacobian, and τstop for wrapping qprint
 const λ₀ = p2λ(p₀)
-SaJ = StateAndJacobian(x₀, factorize(fJac(x₀, p₀)), fJac(x₀, p₀), p₀) # the Jacobian factors
+# SaJ = StateAndJacobian(x₀, factorize(fJac(x₀, p₀)), fJac(x₀, p₀), p₀) # the Jacobian factors
+init = RealSolution(x₀, p₀)
+MyJ = MyRealJacobianFactors(factorize(fJac(x₀, p₀)), p₀)
+# Also preallocate the Dual containers
+εp₀ = Para(convert(Vector{Dual{Float64}}, vec(p₀)))
+εx₀ = convert(Vector{Dual{Float64}}, x₀)
+εsol = DualSolution(εx₀, εp₀)
+MyεJ = MyDualJacobianFactors(factorize(fJac(εx₀, εp₀)), εp₀)
 const τstop = 1e6 * 365e6 * spd
-q!(p::Para) = q!(c, p, SaJ, f, fJac, nrm, τstop, false)
+q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop, false)
+q!(p::Para{Dual{Float64}}) = q!(εsol, init, p, c, f, fJac, nrm, τstop, false)
 
 # Need to define the function with a storage argument first
-function q!(c, λ::Vector, SaJ, f, fJac, nrm, τstop, λ2p, verbose::Bool)
+function q!(init::RealSolution, λ::Vector{Float64}, c, f, fJac, nrm, τstop, λ2p, verbose::Bool)
     if verbose
         show(IOContext(stdout, :compact => true), λ2p(λ))
-        qval = q!(c, λ, SaJ, f, fJac, nrm, τstop, λ2p, "    ")
+        qval = q!(init, λ, c, f, fJac, nrm, τstop, λ2p, "    ")
         print_cost(qval, "    ")
         return qval
     else
-        qval = q!(c, λ, SaJ, f, fJac, nrm, τstop, λ2p, "")
+        qval = q!(init, λ, c, f, fJac, nrm, τstop, λ2p, "")
+        return qval
+    end
+end
+function q!(εsol::DualSolution, init::RealSolution, ελ::Vector{Dual{Float64}}, c, f, fJac, nrm, τstop, λ2p, verbose::Bool)
+    if verbose
+        show(IOContext(stdout, :compact => true), λ2p(ελ))
+        qval = q!(εsol, init, ελ, c, f, fJac, nrm, τstop, λ2p, "    ")
+        print_cost(qval, "    ")
+        return qval
+    else
+        qval = q!(εsol, init, ελ, c, f, fJac, nrm, τstop, λ2p, "")
         return qval
     end
 end
@@ -74,14 +101,16 @@ function print_cost(cval::Dual{Float64}, preprint = "")
     return nothing
 end
 
-q!(λ::Vector) = q!(c, λ, SaJ, f, fJac, nrm, τstop, λ2p, true)
+q!(λ::Vector{Float64}) = q!(init, λ, c, f, fJac, nrm, τstop, λ2p, true)
+q!(ελ::Vector{Dual{Float64}}) = q!(εsol, init, ελ, c, f, fJac, nrm, τstop, λ2p, true)
 # Qwrap(λ) = Q!(c, λ, SaJ, f, Dxf, vnorm, τstop)
 # slowQwrap(λ) = slowQ(c, λ, nwet, f, fJac, nrm, τstop)
 # vnorm(f(ones(length(x₀)),p₀))
 # Q₀ = Qwrap(λ₀)
-Dq!(λ) = Dq!(Dc, λ, SaJ, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "")
+Dq!(λ::Vector{Float64}) = Dq!(MyJ, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "")
+Dq!(ελ::Vector{Dual{Float64}}) = Dq!(MyεJ, εsol, init, ελ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "")
 # slowDQwrap(λ) = slowDQ(Dc, λ, nwet, f, fJac, Dpf, nrm, τstop)
-D2q!(λ) = D2q!(Dc, λ, SaJ, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, D2λ2p, "")
+D2q!(λ::Vector{Float64}) = D2q!(MyJ, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, D2λ2p, "")
 
 
 function Dq!(storage, λ)
