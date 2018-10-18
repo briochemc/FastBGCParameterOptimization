@@ -9,6 +9,10 @@ function nrm(x::Vector{Dual{U}}) where U
     DSi, PSi = unpackx(x)
     return sqrt(vnorm²(realpart.(DSi)) + vnorm²(realpart.(PSi)))
 end# This could change if I want with some other norm
+function nrm(x::Vector{Complex{U}}) where U
+    DSi, PSi = unpackx(x)
+    return sqrt(vnorm²(real.(DSi)) + vnorm²(real.(PSi)))
+end# This
 
 # cost function
 function c(x) # with respect to x
@@ -62,17 +66,17 @@ end
 const λ₀ = p2λ(p₀)
 # SaJ = StateAndJacobian(x₀, factorize(fJac(x₀, p₀)), fJac(x₀, p₀), p₀) # the Jacobian factors
 init = RealSolution(x₀, p₀)
-MyJ = MyRealJacobianFactors(factorize(fJac(x₀, p₀)), p₀)
+J = RealJacobianFactors(factorize(fJac(x₀, p₀)), p₀)
 # Also preallocate the Dual containers
 εp₀ = Para(convert(Vector{Dual{Float64}}, vec(p₀)))
 εx₀ = convert(Vector{Dual{Float64}}, x₀)
 εsol = DualSolution(εx₀, εp₀)
-MyεJ = MyDualJacobianFactors(factorize(fJac(εx₀, εp₀)), εp₀)
+εJ = DualJacobianFactors(factorize(fJac(εx₀, εp₀)), εp₀)
 # Also preallocate the Complex containers
 imp₀ = Para(convert(Vector{Complex{Float64}}, vec(p₀)))
 imx₀ = convert(Vector{Complex{Float64}}, x₀)
 imsol = ComplexSolution(imx₀, imp₀)
-MyimJ = MyComplexJacobianFactors(factorize(fJac(imx₀, imp₀)), imp₀)
+imJ = ComplexJacobianFactors(factorize(fJac(imx₀, imp₀)), imp₀)
 const τstop = 1e6 * 365e6 * spd
 q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop, false)
 q!(p::Para{Dual{Float64}}) = q!(εsol, init, p, c, f, fJac, nrm, τstop, false)
@@ -123,7 +127,14 @@ end
 function print_cost(cval::Dual{Float64}, preprint = "")
     if preprint ≠ ""
         print(preprint)
-        @printf("RMS = %.2f%% (+ ε part:%.2g)\n", 100 * sqrt(realpart(cval) / c(0*x₀)), dualpart(cval))
+        @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(realpart(cval) / c(0*x₀)), dualpart(cval))
+    end
+    return nothing
+end
+function print_cost(cval::Complex{Float64}, preprint = "")
+    if preprint ≠ ""
+        print(preprint)
+        @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(real(cval) / c(0*x₀)), imag(cval))
     end
     return nothing
 end
@@ -135,11 +146,11 @@ q!(imλ::Vector{Complex{Float64}}) = q!(imsol, init, imλ, c, f, fJac, nrm, τst
 # slowQwrap(λ) = slowQ(c, λ, nwet, f, fJac, nrm, τstop)
 # vnorm(f(ones(length(x₀)),p₀))
 # Q₀ = Qwrap(λ₀)
-Dq!(λ::Vector{Float64}) = Dq!(MyJ, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "")
-Dq!(ελ::Vector{Dual{Float64}}) = Dq!(MyεJ, εsol, init, ελ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "")
-Dq!(imλ::Vector{Complex{Float64}}) = Dq!(MyimJ, imsol, init, imλ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "")
+Dq!(λ::Vector{Float64}) = Dq!(J, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "  ")
+Dq!(ελ::Vector{Dual{Float64}}) = Dq!(εJ, εsol, init, ελ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "  ")
+Dq!(imλ::Vector{Complex{Float64}}) = Dq!(imJ, imsol, init, imλ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "  ")
 # slowDQwrap(λ) = slowDQ(Dc, λ, nwet, f, fJac, Dpf, nrm, τstop)
-D2q!(λ::Vector{Float64}) = D2q!(MyJ, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, D2λ2p, "")
+D2q!(λ::Vector{Float64}) = D2q!(J, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, D2λ2p, "  ")
 
 slowDq!(λ::Vector{Float64}) = Calculus.gradient(q!, λ)'
 slowD2q!(λ::Vector{Float64}) = Calculus.hessian(q!, λ)

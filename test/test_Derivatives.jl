@@ -19,13 +19,27 @@ end
 
 # Test the gradient of q (not working yet)
 
-function CSD(f, x::Vector{U}) where U # f : Rⁿ -> R
-    out = zero(x)
-    h = 1e-50abs.(x)
-    for ix in 1:length(x)
-        xc = convert(Vector{Complex{U}}, x)
-        xc[ix] += h[ix] * im
-        out[ix] = imag.(f(xc)) / h[ix]
+function ComplexStepGradient(f, x::Vector{U}) where U # f : Rⁿ -> R
+    n = length(x)
+    out = zeros(U, n)
+    h = 1e-50
+    for i in 1:length(x)
+        imx = convert(Vector{Complex{U}}, x)
+        imx[i] += h * im
+        out[i] = imag.(f(imx)) / h
+    end
+    return out
+end
+
+
+function ComplexStepJacobian(f, x::Vector{U}) where U # f : Rⁿ -> Rⁿ
+    n = length(x)
+    out = zeros(U, n, n)
+    h = 1e-50
+    for i in 1:n
+        imx = convert(Vector{Complex{U}}, x)
+        imx[i] += h * im
+        out[:, i] .= imag.(vec(f(imx))) / h
     end
     return out
 end

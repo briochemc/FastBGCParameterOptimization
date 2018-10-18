@@ -47,7 +47,7 @@ Base.vec(p::Para) = collect((p...,))
 Para(v::Vector) = Para(v...)
 # read non-real part (for update of init)
 DualNumbers.realpart(p::Para{Dual{Float64}}) = Para(realpart.(vec(p)))
-real(p::Para{Complex{Float64}}) = Para(real.(vec(p)))
+Base.real(p::Para{Complex{Float64}}) = Para(real.(vec(p)))
 # Overload +, -, and * for parameters
 Base.:+(p₁::Para, p₂::Para) = Para(vec(p₁) .+ vec(p₂))
 Base.:-(p₁::Para, p₂::Para) = Para(vec(p₁) .- vec(p₂))
