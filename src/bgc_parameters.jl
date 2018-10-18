@@ -132,15 +132,16 @@ function latexify(val::R) where R<:Real
     return str
 end
 
-using DataFrames
-function tablify(p::Para)
-    s = collect(latexSymbol(p)) # Parameter Symbol
-    d = collect(describe(p)) # Parameter Description
-    v = [ustrip(uconvert(printunits(p, f), getfield(p, f) * units(p, f))) for f in fieldnames(typeof(p))] # Value in print units
-    u = collect(printunits(p)) # print units
-    o = collect(flattenable(p))
-    return DataFrame(Parameter=s, Description=d, Value=v, Unit=u, optimized=o)
-end
+# TODO use DataFrames, but solve export conflicts with, e.g., `compress`
+#using DataFrames
+#function tablify(p::Para)
+#    s = collect(latexSymbol(p)) # Parameter Symbol
+#    d = collect(describe(p)) # Parameter Description
+#    v = [ustrip(uconvert(printunits(p, f), getfield(p, f) * units(p, f))) for f in fieldnames(typeof(p))] # Value in print units
+#    u = collect(printunits(p)) # print units
+#    o = collect(flattenable(p))
+#    return DataFrame(Parameter=s, Description=d, Value=v, Unit=u, optimized=o)
+#end
 
 # # macro for printing p::Para?
 # function printPara(p::Para)

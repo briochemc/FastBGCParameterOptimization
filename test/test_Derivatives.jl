@@ -19,16 +19,16 @@ end
 
 # Test the gradient of q (not working yet)
 
-#function CSD(f, x::Vector{U}) where U # f : Rⁿ -> R
-#    out = zero(x)
-#    h = 1e-50abs.(x)
-#    for ix in 1:length(x)
-#        xc = convert(Vector{Complex{U}}, x)
-#        xc[ix] += h[ix] * im
-#        out[ix] = imag.(f(xc)) / h[ix]
-#    end
-#    return out
-#end
+function CSD(f, x::Vector{U}) where U # f : Rⁿ -> R
+    out = zero(x)
+    h = 1e-50abs.(x)
+    for ix in 1:length(x)
+        xc = convert(Vector{Complex{U}}, x)
+        xc[ix] += h[ix] * im
+        out[ix] = imag.(f(xc)) / h[ix]
+    end
+    return out
+end
 #
 #@testset "Check that Dq!(λ) ≈ CSD(q!, λ)" begin
 #    for i in 1:10
