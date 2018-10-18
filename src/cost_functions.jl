@@ -21,7 +21,9 @@ function Dc(x)
 end
 
 c_noweight(p::Para) = 0.5 * p2λ(p)' * p2λ(p)
+c_noweight(p::Para{Complex{Float64}}) = 0.5 * transpose(p2λ(p)) * p2λ(p)
 Dc_noweight(p::Para) = Dp2λ(p)' .* p2λ(p)'
+Dc_noweight(p::Para{Complex{Float64}}) = transpose(Dp2λ(p) .* p2λ(p))
 const x₀ = [DSiobs; DSiobs / 10] * 1.1
 const ω = 1e-2 * c(x₀) # To be determined!
 c(p::Para) = ω * c_noweight(p)
@@ -47,6 +49,14 @@ function q!(εsol::DualSolution, init::RealSolution, εp::Para{Dual{Float64}}, c
         return q!(εsol, init, εp, c, f, nrm, τstop, "")
     end
 end
+function q!(imsol::ComplexSolution, init::RealSolution, imp::Para{Complex{Float64}}, c, f, fJac, nrm, τstop, verbose::Bool)
+    if verbose
+        show(IOContext(stdout, :compact => true), εp)
+        return q!(imsol, init, imp, c, f, nrm, τstop, "    ")
+    else
+        return q!(imsol, init, imp, c, f, nrm, τstop, "")
+    end
+end
 
 # Preallocate initial state and Jacobian, and τstop for wrapping qprint
 const λ₀ = p2λ(p₀)
@@ -58,9 +68,15 @@ MyJ = MyRealJacobianFactors(factorize(fJac(x₀, p₀)), p₀)
 εx₀ = convert(Vector{Dual{Float64}}, x₀)
 εsol = DualSolution(εx₀, εp₀)
 MyεJ = MyDualJacobianFactors(factorize(fJac(εx₀, εp₀)), εp₀)
+# Also preallocate the Complex containers
+imp₀ = Para(convert(Vector{Complex{Float64}}, vec(p₀)))
+imx₀ = convert(Vector{Complex{Float64}}, x₀)
+imsol = ComplexSolution(imx₀, imp₀)
+MyimJ = MyComplexJacobianFactors(factorize(fJac(imx₀, imp₀)), imp₀)
 const τstop = 1e6 * 365e6 * spd
 q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop, false)
 q!(p::Para{Dual{Float64}}) = q!(εsol, init, p, c, f, fJac, nrm, τstop, false)
+q!(p::Para{Complex{Float64}}) = q!(imsol, init, p, c, f, fJac, nrm, τstop, false)
 
 # Need to define the function with a storage argument first
 function q!(init::RealSolution, λ::Vector{Float64}, c, f, fJac, nrm, τstop, λ2p, verbose::Bool)
@@ -85,6 +101,17 @@ function q!(εsol::DualSolution, init::RealSolution, ελ::Vector{Dual{Float64}}
         return qval
     end
 end
+function q!(imsol::ComplexSolution, init::RealSolution, imλ::Vector{Complex{Float64}}, c, f, fJac, nrm, τstop, λ2p, verbose::Bool)
+    if verbose
+        show(IOContext(stdout, :compact => true), λ2p(imλ))
+        qval = q!(imsol, init, imλ, c, f, fJac, nrm, τstop, λ2p, "    ")
+        print_cost(qval, "    ")
+        return qval
+    else
+        qval = q!(imsol, init, imλ, c, f, fJac, nrm, τstop, λ2p, "")
+        return qval
+    end
+end
 
 function print_cost(cval, preprint = "")
     if preprint ≠ ""
@@ -103,12 +130,14 @@ end
 
 q!(λ::Vector{Float64}) = q!(init, λ, c, f, fJac, nrm, τstop, λ2p, false)
 q!(ελ::Vector{Dual{Float64}}) = q!(εsol, init, ελ, c, f, fJac, nrm, τstop, λ2p, true)
+q!(imλ::Vector{Complex{Float64}}) = q!(imsol, init, imλ, c, f, fJac, nrm, τstop, λ2p, true)
 # Qwrap(λ) = Q!(c, λ, SaJ, f, Dxf, vnorm, τstop)
 # slowQwrap(λ) = slowQ(c, λ, nwet, f, fJac, nrm, τstop)
 # vnorm(f(ones(length(x₀)),p₀))
 # Q₀ = Qwrap(λ₀)
 Dq!(λ::Vector{Float64}) = Dq!(MyJ, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "")
 Dq!(ελ::Vector{Dual{Float64}}) = Dq!(MyεJ, εsol, init, ελ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "")
+Dq!(imλ::Vector{Complex{Float64}}) = Dq!(MyimJ, imsol, init, imλ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "")
 # slowDQwrap(λ) = slowDQ(Dc, λ, nwet, f, fJac, Dpf, nrm, τstop)
 D2q!(λ::Vector{Float64}) = D2q!(MyJ, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, D2λ2p, "")
 
