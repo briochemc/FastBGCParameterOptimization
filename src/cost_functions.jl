@@ -84,40 +84,6 @@ q!(p::Para{Dual{Float64}}) = q!(εsol, init, p, c, f, fJac, nrm, τstop, false)
 q!(p::Para{Complex{Float64}}) = q!(imsol, init, p, c, f, fJac, nrm, τstop, false)
 
 # Need to define the function with a storage argument first
-function q!(init::RealSolution, λ::Vector{Float64}, c, f, fJac, nrm, τstop, λ2p, verbose::Bool)
-    if verbose
-        show(IOContext(stdout, :compact => true), λ2p(λ))
-        qval = q!(init, λ, c, f, fJac, nrm, τstop, λ2p, "    ")
-        print_cost(qval, "    ")
-        return qval
-    else
-        qval = q!(init, λ, c, f, fJac, nrm, τstop, λ2p, "")
-        return qval
-    end
-end
-function q!(εsol::DualSolution, init::RealSolution, ελ::Vector{Dual{Float64}}, c, f, fJac, nrm, τstop, λ2p, verbose::Bool)
-    if verbose
-        show(IOContext(stdout, :compact => true), λ2p(ελ))
-        qval = q!(εsol, init, ελ, c, f, fJac, nrm, τstop, λ2p, "    ")
-        print_cost(qval, "    ")
-        return qval
-    else
-        qval = q!(εsol, init, ελ, c, f, fJac, nrm, τstop, λ2p, "")
-        return qval
-    end
-end
-function q!(imsol::ComplexSolution, init::RealSolution, imλ::Vector{Complex{Float64}}, c, f, fJac, nrm, τstop, λ2p, verbose::Bool)
-    if verbose
-        show(IOContext(stdout, :compact => true), λ2p(imλ))
-        qval = q!(imsol, init, imλ, c, f, fJac, nrm, τstop, λ2p, "    ")
-        print_cost(qval, "    ")
-        return qval
-    else
-        qval = q!(imsol, init, imλ, c, f, fJac, nrm, τstop, λ2p, "")
-        return qval
-    end
-end
-
 function print_cost(cval, preprint = "")
     if preprint ≠ ""
         print(preprint)
@@ -140,9 +106,7 @@ function print_cost(cval::Complex{Float64}, preprint = "")
     return nothing
 end
 
-q!(λ::Vector{Float64}) = q!(init, λ, c, f, fJac, nrm, τstop, λ2p, false)
-q!(ελ::Vector{Dual{Float64}}) = q!(εsol, init, ελ, c, f, fJac, nrm, τstop, λ2p, true)
-q!(imλ::Vector{Complex{Float64}}) = q!(imsol, init, imλ, c, f, fJac, nrm, τstop, λ2p, true)
+q!(λ::Vector) = q!(λ2p(λ))
 # Qwrap(λ) = Q!(c, λ, SaJ, f, Dxf, vnorm, τstop)
 # slowQwrap(λ) = slowQ(c, λ, nwet, f, fJac, nrm, τstop)
 # vnorm(f(ones(length(x₀)),p₀))
