@@ -40,25 +40,25 @@ end
 function q!(init::RealSolution, p::Para{Float64}, c, f, fJac, nrm, τstop, verbose::Bool)
     if verbose
         show(IOContext(stdout, :compact => true), p)
-        return q!(init, p, c, f, nrm, τstop, "    ")
+        return q!(init, p, c, f, fJac, nrm, τstop, "    ")
     else
-        return q!(init, p, c, f, nrm, τstop, "")
+        return q!(init, p, c, f, fJac, nrm, τstop, "")
     end
 end
 function q!(εsol::DualSolution, init::RealSolution, εp::Para{Dual{Float64}}, c, f, fJac, nrm, τstop, verbose::Bool)
     if verbose
         show(IOContext(stdout, :compact => true), εp)
-        return q!(εsol, init, εp, c, f, nrm, τstop, "    ")
+        return q!(εsol, init, εp, c, f, fJac, nrm, τstop, "    ")
     else
-        return q!(εsol, init, εp, c, f, nrm, τstop, "")
+        return q!(εsol, init, εp, c, f, fJac, nrm, τstop, "")
     end
 end
 function q!(imsol::ComplexSolution, init::RealSolution, imp::Para{Complex{Float64}}, c, f, fJac, nrm, τstop, verbose::Bool)
     if verbose
         show(IOContext(stdout, :compact => true), εp)
-        return q!(imsol, init, imp, c, f, nrm, τstop, "    ")
+        return q!(imsol, init, imp, c, f, fJac, nrm, τstop, "    ")
     else
-        return q!(imsol, init, imp, c, f, nrm, τstop, "")
+        return q!(imsol, init, imp, c, f, fJac, nrm, τstop, "")
     end
 end
 
@@ -78,6 +78,7 @@ imx₀ = convert(Vector{Complex{Float64}}, x₀)
 imsol = ComplexSolution(imx₀, imp₀)
 imJ = ComplexJacobianFactors(factorize(fJac(imx₀, imp₀)), imp₀)
 const τstop = 1e6 * 365e6 * spd
+#q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop, false)
 q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop, false)
 q!(p::Para{Dual{Float64}}) = q!(εsol, init, p, c, f, fJac, nrm, τstop, false)
 q!(p::Para{Complex{Float64}}) = q!(imsol, init, p, c, f, fJac, nrm, τstop, false)
