@@ -37,30 +37,15 @@ function c(x, p::Para) # with respect to both x and p
     return c(x) + c(p)
 end
 
-function q!(init::RealSolution, p::Para{Float64}, c, f, fJac, nrm, τstop, verbose::Bool)
+function q!(args...; verbose::Bool)
     if verbose
         show(IOContext(stdout, :compact => true), p)
-        return q!(init, p, c, f, fJac, nrm, τstop, "    ")
+        return q!(args...; preprint="    ")
     else
-        return q!(init, p, c, f, fJac, nrm, τstop, "")
+        return q!(args...; preprint="")
     end
 end
-function q!(εsol::DualSolution, init::RealSolution, εp::Para{Dual{Float64}}, c, f, fJac, nrm, τstop, verbose::Bool)
-    if verbose
-        show(IOContext(stdout, :compact => true), εp)
-        return q!(εsol, init, εp, c, f, fJac, nrm, τstop, "    ")
-    else
-        return q!(εsol, init, εp, c, f, fJac, nrm, τstop, "")
-    end
-end
-function q!(imsol::ComplexSolution, init::RealSolution, imp::Para{Complex{Float64}}, c, f, fJac, nrm, τstop, verbose::Bool)
-    if verbose
-        show(IOContext(stdout, :compact => true), εp)
-        return q!(imsol, init, imp, c, f, fJac, nrm, τstop, "    ")
-    else
-        return q!(imsol, init, imp, c, f, fJac, nrm, τstop, "")
-    end
-end
+
 
 # Preallocate initial state and Jacobian, and τstop for wrapping qprint
 const λ₀ = p2λ(p₀)
@@ -79,9 +64,9 @@ imsol = ComplexSolution(imx₀, imp₀)
 imJ = ComplexJacobianFactors(factorize(fJac(imx₀, imp₀)), imp₀)
 const τstop = 1e6 * 365e6 * spd
 #q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop, false)
-q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop, false)
-q!(p::Para{Dual{Float64}}) = q!(εsol, init, p, c, f, fJac, nrm, τstop, false)
-q!(p::Para{Complex{Float64}}) = q!(imsol, init, p, c, f, fJac, nrm, τstop, false)
+q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop; verbose=false)
+q!(p::Para{Dual{Float64}}) = q!(εsol, init, p, c, f, fJac, nrm, τstop; verbose=false)
+q!(p::Para{Complex{Float64}}) = q!(imsol, init, p, c, f, fJac, nrm, τstop; verbose=false)
 
 # Need to define the function with a storage argument first
 function print_cost(cval, preprint = "")
