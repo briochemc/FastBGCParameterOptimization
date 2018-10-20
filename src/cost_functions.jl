@@ -1,24 +1,47 @@
 # Cost functions
+
+# Must import the functions to which I add methods
 import TransportMatrixTools.q!, TransportMatrixTools.Dq!, TransportMatrixTools.D2q!
 
+"""
+    nrm(x)
+
+Gives the "tracer" norm:
+`nrm(x)` is the square root of the sum the squares of the volume-weighted norms of (the real parts of) each tracer.
+This choice is arbitrary but is simple.
+However, it has a weird unit of mol m^(-3/2).
+This is OK because we normalize everything later.
+(Particularly important for the cost function and the solver tolerances.)
+Note: `nrm` **should not** be used with the complex step method or dual numbers.
+"""
 function nrm(x)
     DSi, PSi = unpackx(x)
     return sqrt(vnorm²(DSi) + vnorm²(PSi))
-end# This could change if I want with some other norm
+end
 function nrm(x::Vector{Dual{U}}) where U
     DSi, PSi = unpackx(x)
     return sqrt(vnorm²(realpart.(DSi)) + vnorm²(realpart.(PSi)))
-end# This could change if I want with some other norm
+end
 function nrm(x::Vector{Complex{U}}) where U
     DSi, PSi = unpackx(x)
     return sqrt(vnorm²(real.(DSi)) + vnorm²(real.(PSi)))
-end# This
+end
 
-# cost function
+"""
+    c(x)
+
+Returns the cost of state `x`.
+"""
 function c(x) # with respect to x
     DSi, _ = unpackx(x)
     return vnorm²(DSi - DSiobs) / vnorm²(DSiobs)
 end
+
+"""
+    Dc(x)
+
+Returns the gradient of cost of `x` (at `x`).
+"""
 function Dc(x)
     DSi, _ = unpackx(x)
     kron([1 0], Dvnorm²(DSi - DSiobs) / vnorm²(DSiobs))
@@ -28,83 +51,150 @@ c_noweight(p::Para) = 0.5 * p2λ(p)' * p2λ(p)
 c_noweight(p::Para{Complex{Float64}}) = 0.5 * transpose(p2λ(p)) * p2λ(p)
 Dc_noweight(p::Para) = Dp2λ(p)' .* p2λ(p)'
 Dc_noweight(p::Para{Complex{Float64}}) = transpose(Dp2λ(p) .* p2λ(p))
+
+"""
+    x₀ :: Vector{Float64}
+
+Constant state used to start with.
+"""
 const x₀ = [DSiobs; DSiobs / 10] * 1.1
+
+"""
+    ω :: Float64
+
+Constant parameter for the relative weight of the cost of `p` relative to the cost of `x`.
+Can be used for Bayesian priors I guess.
+Right now used to impose a parabolic shape to the overall cost function (avoids compensations).
+"""
 const ω = 1e-2 * c(x₀) # To be determined!
+
+"""
+    c(p)
+
+Returns the cost of parameters `p`.
+"""
 c(p::Para) = ω * c_noweight(p)
+
+"""
+    Dc(p)
+
+Returns the gradient of cost of parameters `p` (at `p`).
+"""
 Dc(p::Para) = ω * Dc_noweight(p)
 
+"""
+    c(x, p)
+
+Returns the cost of state `x` plus the cost of parameters `p`.
+The costs are added to be used in a Bayesian framework eventually.
+(And also because it is simpler.)
+"""
 function c(x, p::Para) # with respect to both x and p
     return c(x) + c(p)
 end
 
-function q!(args...; verbose::Bool)
-    if verbose
-        show(IOContext(stdout, :compact => true), p)
-        return q!(args...; preprint="    ")
-    else
-        return q!(args...; preprint="")
-    end
-end
+# Preallocate real, complex, and dual states and Jacobians
+init, εsol, imsol, J, εJ, imJ = preallocateNewTypes(Para, fJac, x₀, p₀)
 
+"""
+    τstop
 
-# Preallocate initial state and Jacobian, and τstop for wrapping qprint
-const λ₀ = p2λ(p₀)
-# SaJ = StateAndJacobian(x₀, factorize(fJac(x₀, p₀)), fJac(x₀, p₀), p₀) # the Jacobian factors
-init = RealSolution(x₀, p₀)
-J = RealJacobianFactors(factorize(fJac(x₀, p₀)), p₀)
-# Also preallocate the Dual containers
-εp₀ = Para(convert(Vector{Dual{Float64}}, vec(p₀)))
-εx₀ = convert(Vector{Dual{Float64}}, x₀)
-εsol = DualSolution(εx₀, εp₀)
-εJ = DualJacobianFactors(factorize(fJac(εx₀, εp₀)), εp₀)
-# Also preallocate the Complex containers
-imp₀ = Para(convert(Vector{Complex{Float64}}, vec(p₀)))
-imx₀ = convert(Vector{Complex{Float64}}, x₀)
-imsol = ComplexSolution(imx₀, imp₀)
-imJ = ComplexJacobianFactors(factorize(fJac(imx₀, imp₀)), imp₀)
+Constant value for the solver stopping criteria.
+Currently set at 1 million years.
+"""
 const τstop = 1e6 * 365e6 * spd
-#q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop, false)
-q!(p::Para{Float64}) = q!(init, p, c, f, fJac, nrm, τstop; verbose=false)
-q!(p::Para{Dual{Float64}}) = q!(εsol, init, p, c, f, fJac, nrm, τstop; verbose=false)
-q!(p::Para{Complex{Float64}}) = q!(imsol, init, p, c, f, fJac, nrm, τstop; verbose=false)
 
-# Need to define the function with a storage argument first
-function print_cost(cval, preprint = "")
+"""
+    q!(p; preprint)
+
+Full cost `c(sol(p), p)` at `p`.
+`f(x, p) = 0` will be solved for a solution `sol` if required.
+"""
+q!(p::Para{Float64}; preprint="") = q!(c, f, fJac, nrm, init, p, τstop; preprint=preprint)
+q!(p::Para{Dual{Float64}}; preprint="") = q!(c, f, fJac, nrm, εsol, init, p, τstop; preprint=preprint)
+q!(p::Para{Complex{Float64}}; preprint="") = q!(c, f, fJac, nrm, imsol, init, p, τstop; preprint=preprint)
+
+"""
+    print_cost(cval; preprint)
+
+Prints the cost as a root mean square (RMS) error in percent.
+(Will also print the imaginary or dual part if any.)
+"""
+function print_cost(cval; preprint = "")
     if preprint ≠ ""
         print(preprint)
-        @printf("RMS = %.2f%%\n", 100 * sqrt(cval / c(0*x₀)))
+        printRMS(cval)
     end
     return nothing
 end
-function print_cost(cval::Dual{Float64}, preprint = "")
-    if preprint ≠ ""
-        print(preprint)
-        @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(realpart(cval) / c(0*x₀)), dualpart(cval))
-    end
-    return nothing
+printRMS(cval) = @printf("RMS = %.2f%%\n", 100 * sqrt(cval / c(0*x₀)))
+printRMS(cval::Dual) = @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(realpart(cval) / c(0*x₀)), dualpart(cval))
+printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(real(cval) / c(0*x₀)), imag(cval))
+
+"""
+    q!(λ; preprint)
+
+Full cost `c(sol(λ), λ)` at `λ`.
+`f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
+"""
+q!(λ::Vector; preprint="") = q!(λ2p(λ); preprint=preprint)
+
+"""
+    Dq!(λ; preprint)
+
+Evaluates the Gradient of the full cost at `λ`.
+`f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
+"""
+function Dq!(λ::Vector{Float64}; preprint="")
+    return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, J, init, λ, τstop; preprint=preprint)
 end
-function print_cost(cval::Complex{Float64}, preprint = "")
-    if preprint ≠ ""
-        print(preprint)
-        @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(real(cval) / c(0*x₀)), imag(cval))
-    end
-    return nothing
+function Dq!(ελ::Vector{Dual{Float64}}; preprint="")
+    return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, εJ, εsol, init, ελ, τstop; preprint=preprint)
+end
+function Dq!(imλ::Vector{Complex{Float64}}; preprint="")
+    return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, imJ, imsol, init, imλ, τstop; preprint=preprint)
 end
 
-q!(λ::Vector) = q!(λ2p(λ))
-# Qwrap(λ) = Q!(c, λ, SaJ, f, Dxf, vnorm, τstop)
-# slowQwrap(λ) = slowQ(c, λ, nwet, f, fJac, nrm, τstop)
-# vnorm(f(ones(length(x₀)),p₀))
-# Q₀ = Qwrap(λ₀)
-Dq!(λ::Vector{Float64}) = Dq!(J, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "  ")
-Dq!(ελ::Vector{Dual{Float64}}) = Dq!(εJ, εsol, init, ελ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "  ")
-Dq!(imλ::Vector{Complex{Float64}}) = Dq!(imJ, imsol, init, imλ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, "  ")
-# slowDQwrap(λ) = slowDQ(Dc, λ, nwet, f, fJac, Dpf, nrm, τstop)
-D2q!(λ::Vector{Float64}) = D2q!(J, init, λ, Dc, f, fJac, Dpf, nrm, τstop, λ2p, Dλ2p, D2λ2p, "  ")
+"""
+    D2q!(λ; preprint)
 
-slowDq!(λ::Vector{Float64}) = Calculus.gradient(q!, λ)'
-slowD2q!(λ::Vector{Float64}) = Calculus.hessian(q!, λ)
+Evaluates the Hessian of the full cost at `λ`.
+`f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
+"""
+D2q!(λ::Vector{Float64}; preprint="") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
 
+"""
+    gradient_q!(λ; preprint)
+
+Evaluates the gradient of the full cost at `λ` using the `Calculus` package.
+(Warning: could be slow and inacurrate!)
+"""
+gradient_q!(λ::Vector{Float64}) = Calculus.gradient(q!, λ)'
+
+"""
+    gradient_q!(λ; preprint)
+
+Evaluates the gradient of the full cost at `λ` using the `Calculus` package.
+(Warning: could be slow and inacurrate!)
+"""
+jacobian_q!(λ::Vector{Float64}) = Calculus.jacobian(λ -> [q!(λ)], λ, :central)
+
+"""
+    hessian_q!(λ; preprint)
+
+Evaluates the Hessian of the full cost at `λ` using the `Calculus` package.
+(Warning: could be slow and inacurrate!)
+"""
+hessian_q!(λ::Vector{Float64}) = Calculus.hessian(q!, λ)
+
+"""
+    jacobian_of_gradient_q!(λ; preprint)
+
+Evaluates the Hessian of the full cost at `λ` using the `Calculus` package.
+The difference with `hessian_q` is that it uses my fast `Dq!` and calculates its jacobian.
+(Warning: could be slow and inacurrate!)
+"""
+jacobian_Dq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> vec(Dq!(λ)), λ, :central)
 
 function Dq!(storage, λ)
     storage[1:npopt] .= vec(Dq!(λ))
