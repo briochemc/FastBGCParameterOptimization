@@ -172,7 +172,7 @@ Evaluates the gradient of the full cost at `λ` using the `Calculus` package.
 gradient_q!(λ::Vector{Float64}) = Calculus.gradient(q!, λ)'
 
 """
-    gradient_q!(λ; preprint)
+    jacobian_q!(λ; preprint)
 
 Evaluates the gradient of the full cost at `λ` using the `Calculus` package.
 (Warning: could be slow and inacurrate!)
