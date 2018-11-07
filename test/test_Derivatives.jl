@@ -25,46 +25,7 @@ These tests should be run everytime to make sure the tests are passed on the fun
 end
 
 # Test the gradient of q (not working yet)
-"""
-    ComplexStepGradient(q, λ::Vector{U})
 
-Returns the gradient using the complex step method.
-Only good for small sizes.
-`q` is an application from Rⁿ to R in this case.
-"""
-function ComplexStepGradient(q, λ::Vector{U}) where U # q : Rⁿ -> R
-    n = length(λ)
-    out = zeros(U, n)
-    h = 1e-50
-    for i in 1:length(λ)
-        imλ = convert(Vector{Complex{U}}, λ)
-        imλ[i] += h * im
-        out[i] = imag.(q(imλ)) / h
-    end
-    return out
-end
-CSDq!(λ) = ComplexStepGradient(q!, λ)'
-
-"""
-    ComplexStepJacobian(Dq, λ::Vector{U})
-
-Returns the Jacobian using the complex step method.
-Only good for small sizes.
-(Do not use for the state model `J` if using OCIM!)
-`Dq` is an application from Rⁿ to Rⁿ in this case.
-"""
-function ComplexStepJacobian(Dq, λ::Vector{U}) where U<:Float64
-    n = length(λ)
-    out = zeros(U, n, n)
-    h = 1e-50
-    for i in 1:n
-        imλ = convert(Vector{Complex{U}}, λ)
-        imλ[i] += h * im
-        out[:, i] .= imag.(vec(Dq(imλ))) / h
-    end
-    return out
-end
-CSD2q!(λ) = ComplexStepJacobian(Dq!, λ)
 
 
 @testset "Check Derivatives of cost functions" begin

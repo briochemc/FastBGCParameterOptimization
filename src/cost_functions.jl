@@ -172,29 +172,84 @@ Evaluates the gradient of the full cost at `λ` using the `Calculus` package.
 gradient_q!(λ::Vector{Float64}) = Calculus.gradient(q!, λ)'
 
 """
-    jacobian_q!(λ; preprint)
+    FDq!(λ; preprint)
 
 Evaluates the gradient of the full cost at `λ` using the `Calculus` package.
 (Warning: could be slow and inacurrate!)
 """
-jacobian_q!(λ::Vector{Float64}) = Calculus.jacobian(λ -> [q!(λ)], λ, :central)
+FDq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> [q!(λ)], λ, :central)
 
 """
-    hessian_q!(λ; preprint)
+    FD2q!(λ; preprint)
 
 Evaluates the Hessian of the full cost at `λ` using the `Calculus` package.
 (Warning: could be slow and inacurrate!)
 """
-hessian_q!(λ::Vector{Float64}) = Calculus.hessian(q!, λ)
+FD2q!(λ::Vector{Float64}) = Calculus.hessian(q!, λ)
 
 """
-    jacobian_of_gradient_q!(λ; preprint)
+    FDDq!(λ; preprint)
 
 Evaluates the Hessian of the full cost at `λ` using the `Calculus` package.
 The difference with `hessian_q` is that it uses my fast `Dq!` and calculates its jacobian.
 (Warning: could be slow and inacurrate!)
 """
-jacobian_Dq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> vec(Dq!(λ)), λ, :central)
+FDDq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> vec(Dq!(λ)), λ, :central)
+
+"""
+    ComplexStepGradient(q, λ::Vector{U})
+
+Returns the gradient using the complex step method.
+Only good for small sizes.
+`q` is an application from Rⁿ to R in this case.
+"""
+function ComplexStepGradient(q, λ::Vector{U}) where U # q : Rⁿ -> R
+    n = length(λ)
+    out = zeros(U, n)
+    h = 1e-50
+    for i in 1:length(λ)
+        imλ = convert(Vector{Complex{U}}, λ)
+        imλ[i] += h * im
+        out[i] = imag.(q(imλ)) / h
+    end
+    return out
+end
+
+"""
+    CSDq!(λ)
+
+Evaluates the gradient of the full cost at `λ` using the complex-step method.
+(Warning: could be slow!)
+"""
+CSDq!(λ) = ComplexStepGradient(q!, λ)'
+
+"""
+    ComplexStepJacobian(Dq, λ::Vector{U})
+
+Returns the Jacobian using the complex step method.
+Only good for small sizes.
+(Do not use for the state model `J` if using OCIM!)
+`Dq` is an application from Rⁿ to Rⁿ in this case.
+"""
+function ComplexStepJacobian(Dq, λ::Vector{U}) where U<:Float64
+    n = length(λ)
+    out = zeros(U, n, n)
+    h = 1e-50
+    for i in 1:n
+        imλ = convert(Vector{Complex{U}}, λ)
+        imλ[i] += h * im
+        out[:, i] .= imag.(vec(Dq(imλ))) / h
+    end
+    return out
+end
+"""
+    CSDDq!(λ)
+
+Evaluates the Hessian of the full cost at `λ` using the complex-step method.
+Uses the analytical `Dq!`.
+(Warning: could be slow!)
+"""
+CSDDq!(λ) = ComplexStepJacobian(Dq!, λ)
 
 function Dq!(storage, λ)
     storage[1:npopt] .= vec(Dq!(λ))
@@ -203,9 +258,19 @@ function D2q!(storage, λ)
     storage[1:npopt, 1:npopt] .= D2q!(λ)
 end
 
-function slowDq!(storage, λ)
-    storage[1:npopt] .= vec(slowDq!(λ))
+function CSDq!(storage, λ)
+    storage[1:npopt] .= vec(CSDq!(λ))
 end
-function slowD2q!(storage, λ)
-    storage[1:npopt, 1:npopt] .= slowD2q!(λ)
+function FDq!(storage, λ)
+    storage[1:npopt] .= vec(FDq!(λ))
+end
+
+function CSDDq!(storage, λ)
+    storage[1:npopt, 1:npopt] .= CSDDq!(λ)
+end
+function FD2q!(storage, λ)
+    storage[1:npopt, 1:npopt] .= FD2q!(λ)
+end
+function FDDq!(storage, λ)
+    storage[1:npopt, 1:npopt] .= FDDq!(λ)
 end
