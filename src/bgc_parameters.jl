@@ -3,34 +3,57 @@
 # BGC parameters
 # Define some metadata
 @metadata printunits nothing
-@metadata describe ""
+@metadata description ""
 @metadata latexSymbol ""
 # Define the year unit (not in Unitful)
 @unit(yr, "yr", Year, 365.0u"d", true)
 Unitful.register(@__MODULE__)
 """
-    Para
+    Para{U} <: AbstractPara{U}
 
 Biogeochemical parameters (type).
 You can create parameters `p` by using the default constructor `p = Para()`, which will have the default values.
 Or you can specify some of the parameter values via `p = Para(p₁ = <value1>, p₂ = <value2>, ...)`.
 Make sure you know what the parameters are!
 Each parameter in `p` comes with a bunch of metadata for each field `f`:
-- `latexSymbol(p, f)` is the LaTeX string of the unicode symbol (string)
-- `describe(p, f)` describes the parameter (string)
-- `flattenable(p, f)` — is p.f optimizable? (boolean)
+- `latexSymbol(p, f)` is the LaTeX string of the unicode symbol (`String`)
+- `description(p, f)` describes the parameter (`String`)
+- `flattenable(p, f)` — is p.f optimizable? (`Boolean`)
+- `prior(p, f)` gives the prior distribution (`Distribution type`)
 - `printunits(p, f)` gives the unit used for `show(p)`
 - `units(p, f)` gives the unit used in the model (SI)
-- `default(p, f)` gives the default value
+- `default(p, f)` gives the default value (type `U`)
 Modify this part of the code if you need new/different parameters!
 """
-@latexSymbol @describe @flattenable @printunits @units @default_kw struct Para{U} <: AbstractPara{U}
-    τu::U | 500.0 * spd | u"s"    | u"d"    | true  | "Specific uptake rate timescale"        | "\\tau_\\mathbf{u}"
-    w₀::U |     1 / spd | u"m/s"  | u"m/d"  | true  | "Sinking velocity at surface"           | "w_0"
-    w′::U |     1 / spd | u"s^-1" | u"d^-1" | false | "Vertical gradient of sinking velocity" | "w'"
-    κ::U  |  0.25 / spd | u"s^-1" | u"d^-1" | false | "Remineralization rate"                 | "\\kappa"
-    τg::U | 365e6 * spd | u"s"    | u"yr"   | false | "Geological Restoring"                  | "\\tau_\\mathrm{geo}"
+@latexSymbol @description @flattenable @prior @printunits @units @default_kw struct Para{U} <: AbstractPara{U}
+    τu::U | 500.0 * spd | u"s"    | u"d"    | LN(250 * spd, 100 * spd)  | true  | "Specific uptake rate timescale"        | "\\tau_\\mathbf{u}"
+    w₀::U |     1 / spd | u"m/s"  | u"m/d"  | LN(1 / spd, 0.5 / spd)    | true  | "Sinking velocity at surface"           | "w_0"
+    w′::U |     1 / spd | u"s^-1" | u"d^-1" | LN(1 / spd, 0.5 / spd)    | true | "Vertical gradient of sinking velocity" | "w'"
+    κ::U  |  0.25 / spd | u"s^-1" | u"d^-1" | LN(0.25 / spd, 0.1 / spd) | true | "Remineralization rate"                 | "\\kappa"
+    τg::U | 365e6 * spd | u"s"    | u"yr"   | nothing                   | false | "Geological Restoring"                  | "\\tau_\\mathrm{geo}"
 end
+
+"""
+    LN(m, s)
+
+Gives the `LogNormal` distribution that has a mean `m` and standard deviation `s`.
+(I use the standard deviation rather than the variance to avoid unit-conversion confusion.)
+"""
+LN(m, s) = LogNormal(μ_LogNormal(m, s), σ_LogNormal(m, s))
+
+"""
+    μ_LogNormal(m, s)
+
+Gives the mean, `μ`, of the log of the lognormal distribution with mean `m` and standard deviation `s`.
+"""
+μ_LogNormal(m, s) = log(m / sqrt(1 + (s / m)^2))
+
+"""
+    σ_LogNormal(m, s)
+
+Gives the standard deviation, `σ`, of the log of the lognormal distribution with mean `m` standard deviation `s`.
+"""
+σ_LogNormal(m, s) = sqrt(log(1 + (s / m)^2))
 
 """
     p₀
@@ -190,7 +213,7 @@ function print_LaTeX_table(p::Para)
     for f in fieldnames(typeof(p))
         LaTeX_line = "        " # Indent
         LaTeX_line = LaTeX_line * "\$" * latexSymbol(p, f) * "\$" # Parameter Symbol
-        LaTeX_line = LaTeX_line * " & " * describe(p, f) # Parameter Description
+        LaTeX_line = LaTeX_line * " & " * description(p, f) # Parameter Description
         val = uconvert(printunits(p, f), getfield(p, f) * units(p, f)) # Value in print units
         LaTeX_line = LaTeX_line * " & \$" * latexify(ustrip(val)) * "\$"
         LaTeX_line = LaTeX_line * " & " * latexify(printunits(p, f)) # print units
@@ -231,7 +254,7 @@ end
 #using DataFrames
 #function tablify(p::Para)
 #    s = collect(latexSymbol(p)) # Parameter Symbol
-#    d = collect(describe(p)) # Parameter Description
+#    d = collect(description(p)) # Parameter Description
 #    v = [ustrip(uconvert(printunits(p, f), getfield(p, f) * units(p, f))) for f in fieldnames(typeof(p))] # Value in print units
 #    u = collect(printunits(p)) # print units
 #    o = collect(flattenable(p))

@@ -52,6 +52,11 @@ c_noweight(p::Para{Complex{Float64}}) = 0.5 * transpose(p2λ(p)) * p2λ(p)
 Dc_noweight(p::Para) = Dp2λ(p)' .* p2λ(p)'
 Dc_noweight(p::Para{Complex{Float64}}) = transpose(Dp2λ(p) .* p2λ(p))
 
+#c(p::Para) = 0.5 * 
+#δ(p::Para) = p2λ(p)
+
+
+
 """
     x₀ :: Vector{Float64}
 

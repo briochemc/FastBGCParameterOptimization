@@ -8,8 +8,9 @@ using SparseArrays, SuiteSparse, LinearAlgebra, Printf, DualNumbers
 using JLD2, Calculus, Optim
 # Packages for unitful parameters :)
 using FieldDefaults, Flatten, FieldMetadata, Unitful
+using Distributions
 import FieldDefaults: get_default
-import FieldMetadata: @units, units # use the metadata of units already in it
+import FieldMetadata: @units, units, @prior, prior, @description, description # 
 import Flatten: flattenable
 
 
