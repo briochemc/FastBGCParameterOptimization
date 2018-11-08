@@ -1,6 +1,4 @@
 
-# TRANSPORT
-# TODO: Replace with dataDeps.jl!!
 @load (homedir() * "/.julia/v0.6/OCIMtools/data/OCIM1.1_CTL.jld2") wet3d grd T
 
 # For standard use with OCIM
@@ -13,9 +11,12 @@ const v = v3d[iwet]
 const vtot = sum(v)
 const V = d₀(v)
 vnorm²(x) = x' * V * x # Volume-weighted norm squared
+vnorm²(x::Vector{Complex{Float64}}) = transpose(x) * V * x # Volume-weighted norm squared
 Dvnorm²(x) = (2v .* x)' # Volume-weighted norm squared
+Dvnorm²(x::Vector{Complex{Float64}}) = transpose(2v .* x) # Volume-weighted norm squared
 vnorm(x) = sqrt(vnorm²(x))      # volume-weighted norm
 vmean(x) = v'x / vtot   # volume-weighted mean
+vmean(x::Vector{Complex{Float64}}) = transpose(v) * x / vtot   # volume-weighted mean
 const z = grd["ZT3d"][iwet]
 const ztop = grd["ZW3d"][iwet]
 const spd = 24 * 60 * 60.0 # Think about using Unitful.jl
