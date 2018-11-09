@@ -47,15 +47,10 @@ function Dc(x)
     kron([1 0], Dvnorm²(DSi - DSiobs) / vnorm²(DSiobs))
 end
 
-c_noweight(p::Para) = 0.5 * p2λ(p)' * p2λ(p)
-c_noweight(p::Para{Complex{Float64}}) = 0.5 * transpose(p2λ(p)) * p2λ(p)
-Dc_noweight(p::Para) = Dp2λ(p)' .* p2λ(p)'
-Dc_noweight(p::Para{Complex{Float64}}) = transpose(Dp2λ(p) .* p2λ(p))
-
-#c(p::Para) = 0.5 * 
-#δ(p::Para) = p2λ(p)
-
-
+c_noweight(p::Para) = 0.5 * p2λ(p)' * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
+c_noweight(p::Para{Complex{Float64}}) = 0.5 * transpose(p2λ(p)) * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
+Dc_noweight(p::Para) = (Dp2λ(p) .* σ²obs.^-1 .* p2λ(p))'
+Dc_noweight(p::Para{Complex{Float64}}) = transpose(Dp2λ(p) .* σ²obs.^-1 .* p2λ(p))
 
 """
     x₀ :: Vector{Float64}
@@ -142,7 +137,7 @@ printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(re
 Full cost `c(sol(λ), λ)` at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-q!(λ::Vector; preprint="") = q!(λ2p(λ); preprint=preprint)
+q!(λ::Vector; preprint=" ") = q!(λ2p(λ); preprint=preprint)
 
 """
     Dq!(λ; preprint)
@@ -150,7 +145,7 @@ q!(λ::Vector; preprint="") = q!(λ2p(λ); preprint=preprint)
 Evaluates the Gradient of the full cost at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-function Dq!(λ::Vector{Float64}; preprint="")
+function Dq!(λ::Vector{Float64}; preprint=" ")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, J, init, λ, τstop; preprint=preprint)
 end
 function Dq!(ελ::Vector{Dual{Float64}}; preprint="")
@@ -166,7 +161,7 @@ end
 Evaluates the Hessian of the full cost at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-D2q!(λ::Vector{Float64}; preprint="") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
+D2q!(λ::Vector{Float64}; preprint=" ") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
 
 """
     gradient_q!(λ; preprint)
