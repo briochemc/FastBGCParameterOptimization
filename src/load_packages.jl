@@ -14,7 +14,7 @@ using SparseArrays, SuiteSparse, LinearAlgebra
 using Printf
 
 # Differentiating sutff
-using DualNumbers, Calculus
+using DualNumbers, HyperDualNumbers, HyperDualMatrixTools, Calculus
 
 # Loading and saving data
 using JLD2, MAT
