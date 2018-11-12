@@ -63,12 +63,18 @@ The (constant) default values of non-optimized parameters.
 const p₀ = Para()
 
 """
-    pobs
+    μobs
 
-The (constant) observed values of parameters.
-Can be used eventually for Bayesian framework.
+The (constant) mean of the log of the observed parameters (the μ of the lognormal prior).
 """
-const pobs = Para(τu = 50.0 * spd, w₀ = 100 / spd)
+const μobs = [meanlogx.(metaflatten(p₀, prior))...]
+
+"""
+    σ²obs
+
+The (constant) variance of the log of the observed parameters (the σ² of the lognormal prior).
+"""
+const σ²obs = [varlogx.(metaflatten(p₀, prior))...]
 
 """
     optimizable_parameters
@@ -123,6 +129,7 @@ Base.:-(p₁::Para, p₂::Para) = Para(vec(p₁) .- vec(p₂))
 Base.:*(p₁::Para, p₂::Para) = Para(vec(p₁) .* vec(p₂))
 Base.:*(s::Number, p::Para) = Para(s .* vec(p))
 Base.:*(p::Para, s::Number) = Para(s .* vec(p))
+Base.isapprox(p₁::Para, p₂::Para) = isapprox(vec(p₁), vec(p₂))
 
 # Convert p to λ and vice versa, needed by TransportMatrixTools!
 optvec(p::Para) = flatten(Vector, p)
@@ -134,7 +141,8 @@ Returns the `λ` that corresponds to `p`.
 `p2λ` and `λ2p` allow for functionality:
 E.g., conditions like being positive can be imposed using `exp`, etc.
 """
-p2λ(p::Para) = log.(optvec(p) ./ optvec(pobs))
+p2λ(p::Para) = log.(optvec(p)) - μobs
+
 
 """
     λ₀
@@ -165,21 +173,21 @@ end
 Returns the `p` that corresponds to `λ`.
 See `p2λ`.
 """
-λ2p(λ) = optPara(exp.(λ) .* optvec(pobs))
+λ2p(λ) = optPara(exp.(λ .+ μobs))
 
 """
     Dλ2p(λ)
 
 Returns the gradient of `p` with respect to `λ`.
 """
-Dλ2p(λ) = exp.(λ) .* optvec(pobs)
+Dλ2p(λ) = exp.(λ .+ μobs)
 
 """
     D2λ2p(λ)
 
 Returns the Hessian of `p` with respect to `λ`.
 """
-D2λ2p(λ) = exp.(λ) .* optvec(pobs)
+D2λ2p(λ) = exp.(λ .+ μobs)
 
 """
     show(io::IO, p::Para)

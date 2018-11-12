@@ -37,10 +37,14 @@ function remineralization(PSi, p::Para)
     κ = p.κ
     return κ * PSi
 end
-# Remineralization derivative
+# Remineralization derivatives
 function remineralizationJac(PSi, p::Para)
     κ = p.κ
     return κ * I
+end
+function Dremineralization_Dκ(PSi, p::Para)
+    κ = p.κ
+    return PSi
 end
 
 # Indices for DSi and PSi (needed for Rate of change f(x,p))
@@ -98,29 +102,21 @@ function fJac(x, p::Para)
     return foo
 end
 
-# # Derivative of f with respect to p
-# function Dpf(x, p)
-#     DSi, PSi = unpackx(x)
-#     foo = zeros(promote_type(eltype(x), eltype(p)), 2nwet, np)
-#     foo[iPSi, 1] .= DuptakeDτu(DSi, p)
-#     foo[iDSi, 1] .= -foo[iPSi, 1]
-#     foo[iPSi, 2] .= -S1 * PSi
-#     foo[iPSi, 3] .= -Sz * PSi
-#     return foo
+"""
+    Dpf(x, p::Para)
 
-# end
-
-
-
+Evaluates the jacobian of `f` with respect to `p`.
+Concatenates `Dpf(x, p::Para, s::Symbol)` for all optimizable parameter symbols `s`.
+"""
 Dpf(x, p::Para) = hcat((Dpf(x, p, popt) for popt in optimizable_parameters)...)
 
 """
     Dpf(x, p::Para, s::Symbol)
 
-Evaluates the derivative of `s` with respect to `p.s` where `s` is the name of the parameter (of type `Symbol`).
+Evaluates the derivative of `f` with respect to `p.s` where `s` is the name of the parameter (of type `Symbol`).
 
 You should fill this function with all the first derivatives of f with respoect to each parameter.
-Called without the symbol `s`, this function will loop through all the optimizable parameters and create the corresponding matrix.
+Called without the symbol `s`, this function will loop through all the optimizable parameters and create the corresponding Jacobian matrix.
 """
 function Dpf(x, p::Para, s::Symbol)
     DSi, PSi = unpackx(x)
@@ -133,7 +129,8 @@ function Dpf(x, p::Para, s::Symbol)
     elseif s == :w′
         foo[iPSi] .= -Sz * PSi
     elseif s == :κ
-        foo[iPSi] .= -Sz * PSi
+        foo[iDSi] .= Dremineralization_Dκ(PSi, p)
+        foo[iPSi] .= -foo[iDSi]
     else
         error("There is no $s parameter")
     end
