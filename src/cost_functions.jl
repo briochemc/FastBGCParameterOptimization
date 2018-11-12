@@ -98,8 +98,8 @@ function c(x, p::Para) # with respect to both x and p
     return c(x) + c(p)
 end
 
-# Preallocate real, complex, and dual states and Jacobians
-init, εsol, imsol, J, εJ, imJ = preallocateNewTypes(Para, fJac, x₀, p₀)
+# Preallocate real, dual, complex, and hyperdual states (and Jacobians)
+init, J, εsol, εJ, imsol, imJ, hsol = preallocateNewTypes(Para, fJac, x₀, p₀)
 
 """
     τstop
@@ -117,6 +117,7 @@ Full cost `c(sol(p), p)` at `p`.
 """
 q!(p::Para{Float64}; preprint="") = q!(c, f, fJac, nrm, init, p, τstop; preprint=preprint)
 q!(p::Para{Dual{Float64}}; preprint="") = q!(c, f, fJac, nrm, εsol, init, p, τstop; preprint=preprint)
+q!(p::Para{Hyper{Float64}}; preprint="") = q!(c, f, fJac, nrm, hsol, init, p, τstop; preprint=preprint)
 q!(p::Para{Complex{Float64}}; preprint="") = q!(c, f, fJac, nrm, imsol, init, p, τstop; preprint=preprint)
 
 """
@@ -134,6 +135,7 @@ function print_cost(cval; preprint = "")
 end
 printRMS(cval) = @printf("RMS = %.2f%%\n", 100 * sqrt(cval / c(0*x₀)))
 printRMS(cval::Dual) = @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(realpart(cval) / c(0*x₀)), dualpart(cval))
+printRMS(cval::Hyper) = @printf("RMS = %.2f%% (ε₁:%.2g, ε₂:%.2g, ε₁ε₂:%.2g)\n", 100 * sqrt(real(cval) / c(0*x₀)), eps1(cval), eps2(cval), eps1eps2(cval))
 printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(real(cval) / c(0*x₀)), imag(cval))
 
 """
