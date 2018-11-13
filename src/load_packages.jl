@@ -14,10 +14,14 @@ using SparseArrays, SuiteSparse, LinearAlgebra
 using Printf
 
 # Differentiating sutff
-using DualNumbers, HyperDualNumbers, HyperDualMatrixTools, Calculus
+using Calculus
+using DualNumbers, HyperDualNumbers
+using DualMatrixTools, HyperDualMatrixTools
 
 # Loading and saving data
-using JLD2, MAT
+using JLD2
+# using JLD2, MAT
+# Note: I put MAT only where it is called because problems compiling MAT.jl in Julia v1.0+
 
 # Optimization package
 using Optim

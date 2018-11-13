@@ -13,30 +13,6 @@ git-tree-sha1 = "9930c1a6cd49d9fcd7218df6be417e6ae4f1468a"
 uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
 version = "0.5.2"
 
-[[Blosc]]
-deps = ["BinaryProvider", "CMakeWrapper", "Compat", "Libdl"]
-git-tree-sha1 = "71fb23581e1f0b0ae7be8ccf0ebfb3600e23ca41"
-uuid = "a74b3585-a348-5f62-a45c-50e91977d574"
-version = "0.5.1"
-
-[[BufferedStreams]]
-deps = ["Compat", "Test"]
-git-tree-sha1 = "5d55b9486590fdda5905c275bb21ce1f0754020f"
-uuid = "e1450e63-4bb3-523b-b2a4-4ffa8c0fd77d"
-version = "1.0.0"
-
-[[CMake]]
-deps = ["BinDeps", "Libdl", "Test"]
-git-tree-sha1 = "74853a75c26a4a73ac391ee26ee29ebeb5583d9f"
-uuid = "631607c0-34d2-5d66-819e-eb0f9aa2061a"
-version = "1.1.0"
-
-[[CMakeWrapper]]
-deps = ["BinDeps", "CMake", "Libdl", "Parameters", "Test"]
-git-tree-sha1 = "2b43d451639984e3571951cc687b8509b0a86c6d"
-uuid = "d5fb7624-851a-54ee-a528-d3f3bac0b4a0"
-version = "0.2.2"
-
 [[Calculus]]
 deps = ["Compat"]
 git-tree-sha1 = "f60954495a7afcee4136f78d1d60350abd37a409"
@@ -133,6 +109,14 @@ version = "0.0.7"
 deps = ["LinearAlgebra", "Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
+[[DualMatrixTools]]
+deps = ["DualNumbers", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
+git-tree-sha1 = "09824290f4b2966bb764c96fb5aa439bcc6bebf1"
+repo-rev = "master"
+repo-url = "https://github.com/briochemc/DualMatrixTools.jl.git"
+uuid = "ecce4fbc-e76b-11e8-3191-a744feec026c"
+version = "0.1.0"
+
 [[DualNumbers]]
 deps = ["Calculus", "Compat", "NaNMath", "SpecialFunctions", "Test"]
 git-tree-sha1 = "46e6b3970b9e7a8d965d9e419d8fb3fb8c6e9565"
@@ -179,23 +163,17 @@ version = "0.10.1"
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
-[[HDF5]]
-deps = ["BinDeps", "Blosc", "Distributed", "Homebrew", "Libdl", "LinearAlgebra", "Mmap", "Pkg", "Test", "WinRPM"]
-git-tree-sha1 = "8c3bcdb44db436cd20106e2381e1c1ac96aa0ee3"
-uuid = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
-version = "0.10.2"
+[[HyperDualMatrixTools]]
+deps = ["HyperDualNumbers", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
+git-tree-sha1 = "05bf5a687cfe200d1feb4a92365c905811b6d133"
+uuid = "04d39a18-1502-5db8-a704-9ca743349cef"
+version = "0.1.0"
 
-[[HTTPClient]]
-deps = ["Compat", "LibCURL"]
-git-tree-sha1 = "161d5776ae8e585ac0b8c20fb81f17ab755b3671"
-uuid = "0862f596-cf2d-50af-8ef4-f2be67dfa83f"
-version = "0.2.1"
-
-[[Homebrew]]
-deps = ["BinDeps", "InteractiveUtils", "JSON", "Libdl", "Test", "Unicode"]
-git-tree-sha1 = "5582ec74f735cf8d12e562a2e65c47f34063bd51"
-uuid = "d9be37ee-ecc9-5288-90f1-b9ca67657a75"
-version = "0.7.0"
+[[HyperDualNumbers]]
+deps = ["Compat", "SpecialFunctions", "Test"]
+git-tree-sha1 = "5c42d87287c4348ad7c98858a41348451cd6356e"
+uuid = "50ceba7f-c3ee-5a84-a6e8-3ad40456ec97"
+version = "3.0.1"
 
 [[InteractiveUtils]]
 deps = ["LinearAlgebra", "Markdown"]
@@ -225,29 +203,11 @@ git-tree-sha1 = "7ab9b8788cfab2bdde22adf9004bda7ad9954b6c"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 version = "1.0.3"
 
-[[LibCURL]]
-deps = ["BinaryProvider", "Compat", "Libdl", "Printf"]
-git-tree-sha1 = "6339c87cb76923a3cf947fcd213cbc364355c9c9"
-uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.4.1"
-
-[[LibExpat]]
-deps = ["Compat"]
-git-tree-sha1 = "fde352ec13479e2f90e57939da2440fb78c5e388"
-uuid = "522f3ed2-3f36-55e3-b6df-e94fee9b0c07"
-version = "0.5.0"
-
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
-
-[[Libz]]
-deps = ["BufferedStreams", "Random", "Test"]
-git-tree-sha1 = "d405194ffc0293c3519d4f7251ce51baac9cc871"
-uuid = "2ec943e9-cfe8-584d-b93d-64dcb6d567b7"
-version = "1.0.0"
 
 [[LineSearches]]
 deps = ["LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "Printf", "Test"]
@@ -261,14 +221,6 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
-
-[[MAT]]
-deps = ["BufferedStreams", "Compat", "HDF5", "Libz", "LinearAlgebra", "SparseArrays", "Test"]
-git-tree-sha1 = "1184559d34f9f12f263459811e014f496ab9861f"
-repo-rev = "v0.7-update"
-repo-url = "https://github.com/halleysfifthinc/MAT.jl"
-uuid = "23992714-dd62-5051-b70f-ba57cb901cac"
-version = "0.4.0+"
 
 [[MacroTools]]
 deps = ["Compat"]
@@ -443,8 +395,10 @@ uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.8.1"
 
 [[TransportMatrixTools]]
-deps = ["DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-path = "/Users/UCIben/.julia/dev/TransportMatrixTools"
+deps = ["DualMatrixTools", "DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "HyperDualMatrixTools", "HyperDualNumbers", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
+git-tree-sha1 = "b634828abd4073f2d01bb1fba00757503f7b6c63"
+repo-rev = "master"
+repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
 version = "0.1.0"
 
@@ -478,9 +432,3 @@ deps = ["Missings", "Random", "Test"]
 git-tree-sha1 = "1087e8be380f2c8b96434b02bb1150fc1c511135"
 uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
 version = "0.5.3"
-
-[[WinRPM]]
-deps = ["BinDeps", "Compat", "HTTPClient", "LibExpat", "Libdl", "Libz", "URIParser"]
-git-tree-sha1 = "2a889d320f3b77d17c037f295859fe570133cfbf"
-uuid = "c17dfb99-b4f7-5aad-8812-456da1ad7187"
-version = "0.4.2"
