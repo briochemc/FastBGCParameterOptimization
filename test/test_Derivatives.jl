@@ -34,7 +34,7 @@ end
             @test isapprox(gradient_q!(λ₀), Dq!(λ₀), rtol=1e-3)
         end
         @testset "Against Calculus.jacobian (large rtol)" begin
-            @test isapprox(jacobian_q!(λ₀), Dq!(λ₀), rtol=1e-3)
+            @test isapprox(FDq!(λ₀), Dq!(λ₀), rtol=1e-3)
         end
         @testset "Against complex-step gradient (mine)" begin
             @test isapprox(CSDq!(λ₀), Dq!(λ₀))
@@ -45,7 +45,7 @@ end
             @test isapprox(jacobian_Dq!(λ₀), D2q!(λ₀), rtol=1e-3)
         end
         @testset "Against complex-step jacobian (mine)" begin
-            @test isapprox(CSD2q!(λ₀), D2q!(λ₀))
+            @test isapprox(CSDDq!(λ₀), D2q!(λ₀))
         end
     end
 end

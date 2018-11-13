@@ -199,25 +199,6 @@ The difference with `hessian_q` is that it uses my fast `Dq!` and calculates its
 FDDq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> vec(Dq!(λ)), λ, :central)
 
 """
-    ComplexStepGradient(q, λ::Vector{U})
-
-Returns the gradient using the complex step method.
-Only good for small sizes.
-`q` is an application from Rⁿ to R in this case.
-"""
-function ComplexStepGradient(q, λ::Vector{U}) where U # q : Rⁿ -> R
-    n = length(λ)
-    out = zeros(U, n)
-    h = 1e-50
-    for i in 1:length(λ)
-        imλ = convert(Vector{Complex{U}}, λ)
-        imλ[i] += h * im
-        out[i] = imag.(q(imλ)) / h
-    end
-    return out
-end
-
-"""
     CSDq!(λ)
 
 Evaluates the gradient of the full cost at `λ` using the complex-step method.
@@ -225,25 +206,6 @@ Evaluates the gradient of the full cost at `λ` using the complex-step method.
 """
 CSDq!(λ) = ComplexStepGradient(q!, λ)'
 
-"""
-    ComplexStepJacobian(Dq, λ::Vector{U})
-
-Returns the Jacobian using the complex step method.
-Only good for small sizes.
-(Do not use for the state model `J` if using OCIM!)
-`Dq` is an application from Rⁿ to Rⁿ in this case.
-"""
-function ComplexStepJacobian(Dq, λ::Vector{U}) where U<:Float64
-    n = length(λ)
-    out = zeros(U, n, n)
-    h = 1e-50
-    for i in 1:n
-        imλ = convert(Vector{Complex{U}}, λ)
-        imλ[i] += h * im
-        out[:, i] .= imag.(vec(Dq(imλ))) / h
-    end
-    return out
-end
 """
     CSDDq!(λ)
 
