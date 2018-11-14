@@ -50,7 +50,7 @@ function DualNumbersGradient(q, λ::Vector{U}) where U # q : Rⁿ -> R
     for i in 1:length(λ)
         ελ = convert(Vector{Dual{U}}, λ)
         ελ[i] += ε
-        out[i] = dualpart.(q(ελ))
+        out[i] = dualpart(q(ελ))
     end
     return out
 end
@@ -75,20 +75,22 @@ function DualNumbersJacobian(Dq, λ::Vector{U}) where U<:Float64
 end
 
 """
-    DualNumbersHessian(q, λ::Vector{U})
+    HyperDualNumbersHessian(q, λ::Vector{U})
 
 Returns the Hessian using HyperDualNumbers.
 Only good for small sizes.
 `q` is an application from Rⁿ to R in this case.
 """
-function DualNumbersHessian(Dq, λ::Vector{U}) where U<:Float64
+function HyperDualNumbersHessian(q, λ::Vector{U}) where U<:Float64
     n = length(λ)
     out = zeros(U, n, n)
     for i in 1:n, j in 1:n
         hλ = convert(Vector{Hyper{U}}, λ)
         hλ[i] += ε₁ ## unfinished business here
         hλ[j] += ε₂ ## unfinished business here
-        out[i, j] .= eps1eps2.(q(hλ))
+        out[i, j] = eps1eps2(q(hλ))
     end
     return out
 end
+
+Base.conj(x::Hyper) = Hyper(conj(real(x)), conj(eps1(x)), conj(eps2(x)), conj(eps1eps2(x)))

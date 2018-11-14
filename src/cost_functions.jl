@@ -26,6 +26,10 @@ function nrm(x::Vector{Complex{U}}) where U
     DSi, PSi = unpackx(x)
     return sqrt(vnorm²(real.(DSi)) + vnorm²(real.(PSi)))
 end
+function nrm(x::Vector{Hyper{U}}) where U
+    DSi, PSi = unpackx(x)
+    return sqrt(vnorm²(real.(DSi)) + vnorm²(real.(PSi)))
+end
 
 """
     c(x)
@@ -150,10 +154,10 @@ Evaluates the Gradient of the full cost at `λ`.
 function Dq!(λ::Vector{Float64}; preprint=" ")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, J, init, λ, τstop; preprint=preprint)
 end
-function Dq!(ελ::Vector{Dual{Float64}}; preprint="")
+function Dq!(ελ::Vector{Dual{Float64}}; preprint=" ")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, εJ, εsol, init, ελ, τstop; preprint=preprint)
 end
-function Dq!(imλ::Vector{Complex{Float64}}; preprint="")
+function Dq!(imλ::Vector{Complex{Float64}}; preprint=" ")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, imJ, imsol, init, imλ, τstop; preprint=preprint)
 end
 
@@ -214,6 +218,28 @@ Uses the analytical `Dq!`.
 (Warning: could be slow!)
 """
 CSDDq!(λ) = ComplexStepJacobian(Dq!, λ)
+
+"""
+    ADq!(λ)
+
+Evaluates the gradient of the full cost at `λ` using DualNumbers.
+"""
+ADq!(λ) = DualNumbersGradient(q!, λ)'
+
+"""
+    ADDq!(λ)
+
+Evaluates the Hessian of the full cost at `λ` using DualNumbers.
+Uses the analytical `Dq!`.
+"""
+ADDq!(λ) = DualNumbersJacobian(Dq!, λ)
+
+"""
+AD2q!(λ)
+
+Evaluates the Hessian of the full cost at `λ` using HyperDualNumbers.
+"""
+AD2q!(λ) = HyperDualNumbersHessian(q!, λ)
 
 function Dq!(storage, λ)
     storage[1:npopt] .= vec(Dq!(λ))

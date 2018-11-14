@@ -2,7 +2,6 @@ const spd = 24 * 60 * 60.0 # Think about using Unitful.jl
 
 function load_OCIM_mat_file()
     println("loading OCIM with MAT")
-    using MAT
     vars = matread(homedir() * "/Dropbox/OCIM1.1/CTL.mat")
     T = -vars["output"]["TR"] / 365spd
     grd = vars["output"]["grid"]

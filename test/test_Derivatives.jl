@@ -39,13 +39,25 @@ end
         @testset "Against complex-step gradient (mine)" begin
             @test isapprox(CSDq!(λ₀), Dq!(λ₀))
         end
+        @testset "Against DualNumbers gradient (mine)" begin
+            @test isapprox(ADq!(λ₀), Dq!(λ₀))
+        end
     end
     @testset "Check `D2q!`" begin
         @testset "Against Calculus.jacobian (large rtol)" begin
-            @test isapprox(jacobian_Dq!(λ₀), D2q!(λ₀), rtol=1e-3)
+            @test isapprox(FDDq!(λ₀), D2q!(λ₀), rtol=1e-3)
+        end
+        @testset "Against Calculus.hessian (large rtol)" begin
+            @test isapprox(FD2q!(λ₀), D2q!(λ₀), rtol=1e-3)
         end
         @testset "Against complex-step jacobian (mine)" begin
             @test isapprox(CSDDq!(λ₀), D2q!(λ₀))
+        end
+        @testset "Against DualNumbers jacobian (mine)" begin
+            @test isapprox(ADDq!(λ₀), D2q!(λ₀))
+        end
+        @testset "Against HyperDualNumbers Hessian (mine)" begin
+            @test isapprox(AD2q!(λ₀), D2q!(λ₀))
         end
     end
 end
