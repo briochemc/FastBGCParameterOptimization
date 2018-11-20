@@ -23,6 +23,10 @@ J.fac, J.p = factorize(fJac(x₀, p₀)), p₀
 
 init.x, init.p = x₀, p₀
 J.fac, J.p = factorize(fJac(x₀, p₀)), p₀
+@btime results["AD2q"] = optimize(q!, ADq!, AD2q!, λ₀, Newton(), opt)
+
+init.x, init.p = x₀, p₀
+J.fac, J.p = factorize(fJac(x₀, p₀)), p₀
 @btime results["FDDq"] = optimize(q!, Dq!, FDDq!, λ₀, Newton(), opt)
 
 #init.x, init.p = x₀, p₀
