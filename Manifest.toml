@@ -20,10 +20,10 @@ uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 version = "0.4.1"
 
 [[CategoricalArrays]]
-deps = ["Compat", "Future", "JSON", "Missings", "Printf", "Reexport"]
-git-tree-sha1 = "6362c49130b5888f5628bc197ee5f17aec7d2a88"
+deps = ["Compat", "Future", "Missings", "Printf", "Reexport", "Requires"]
+git-tree-sha1 = "64651a0315fc342e7e35d03d67b2da920937c9be"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
-version = "0.4.0"
+version = "0.5.0"
 
 [[CodecZlib]]
 deps = ["BinaryProvider", "Libdl", "Test", "TranscodingStreams"]
@@ -51,9 +51,9 @@ version = "0.2.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "2d9e14d19bad3f9ad5cc5e4cffabc3cfa59de825"
+git-tree-sha1 = "ec61a16eed883ad0cfa002d7489b3ce6d039bb9a"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "1.3.0"
+version = "1.4.0"
 
 [[Conda]]
 deps = ["Compat", "JSON", "VersionParsing"]
@@ -111,10 +111,8 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[DualMatrixTools]]
 deps = ["DualNumbers", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "09824290f4b2966bb764c96fb5aa439bcc6bebf1"
-repo-rev = "master"
-repo-url = "https://github.com/briochemc/DualMatrixTools.jl.git"
-uuid = "ecce4fbc-e76b-11e8-3191-a744feec026c"
+git-tree-sha1 = "b5da82ec2cafe7b4879293250f701da0dbbdc1eb"
+uuid = "31f4e45d-be81-5be7-b2dd-bc577b4f7be8"
 version = "0.1.0"
 
 [[DualNumbers]]
@@ -137,9 +135,9 @@ version = "0.0.1"
 
 [[FileIO]]
 deps = ["Pkg", "Random", "Test"]
-git-tree-sha1 = "481e4db939f005db39f7296599d0543c0744fe30"
+git-tree-sha1 = "884066c07188cc0f57d0ebdcab6c9a09cc734dbc"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
-version = "1.0.2"
+version = "1.0.3"
 
 [[FixedPointNumbers]]
 deps = ["Test"]
@@ -165,9 +163,9 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[HyperDualMatrixTools]]
 deps = ["HyperDualNumbers", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "05bf5a687cfe200d1feb4a92365c905811b6d133"
+git-tree-sha1 = "67cebf475b9c0b46ebe5b9a5cc47907991b7e12d"
 uuid = "04d39a18-1502-5db8-a704-9ca743349cef"
-version = "0.1.0"
+version = "0.1.1"
 
 [[HyperDualNumbers]]
 deps = ["Compat", "SpecialFunctions", "Test"]
@@ -396,7 +394,7 @@ version = "0.8.1"
 
 [[TransportMatrixTools]]
 deps = ["DualMatrixTools", "DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "HyperDualMatrixTools", "HyperDualNumbers", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-git-tree-sha1 = "81f638626e578c06e836b56b8742242b231235bc"
+git-tree-sha1 = "6ce3f3e68098a400a9b0625c018d20c82f58b8f8"
 repo-rev = "master"
 repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
@@ -417,9 +415,9 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[Unitful]]
 deps = ["LinearAlgebra", "Random", "Test"]
-git-tree-sha1 = "cef7da6d4e9735fae7c11cd28e77b76fd87db468"
+git-tree-sha1 = "15c921708e19258fc9e7723aafc5f15c973ee77f"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "0.12.0"
+version = "0.13.0"
 
 [[VersionParsing]]
 deps = ["Compat"]
