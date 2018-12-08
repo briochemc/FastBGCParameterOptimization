@@ -1,5 +1,4 @@
 module SixBoxModel
-
 #= The 6-box model is used because the code to bin WOA data
 requires a regular grid.
 These are the indices of the 6-box model:
@@ -20,6 +19,8 @@ The boxes are grouped as indicated:
 - 4 + 5 + 6 represents the deep box
 =#
 
+using TransportMatrixTools: buildv3d, d₀
+
 build_wet3d() = trues(2, 1, 3)
 
 # Macro to create grd in a simple `@Dict` call
@@ -39,12 +40,6 @@ function build_grd()
     fraction_area_high = 0.15 #
     # Infer other values
     depth_ocean = vtot / area_ocean
-
-    # Corresponding ndices for 3box-model boxes
-    idx_high = [1, 3]
-    idx_low = [2]
-    idx_deep = [4, 5, 6]
-
     # Build DY3d
     earth_perimeter = 40e6 # 40'000 km
     DYocean = earth_perimeter / 2 # distance from south pole to north pole
@@ -64,7 +59,6 @@ function build_grd()
     ZT3d = cumsum(DZT3d, dims=3) - DZT3d / 2
     # ZW3d (depth at top of box)
     ZW3d = cumsum(DZT3d, dims=3) - DZT3d
-
     # lat, lon, depth
     dxt = [360.0]
     xt = dxt / 2
@@ -72,23 +66,28 @@ function build_grd()
     yt = -90.0 .+ cumsum(dyt) .- dyt/2
     dzt = DZT3d[1, 1, :]
     zt = cumsum(dzt) .- dzt/2
-
     return @Dict DXT3d DYT3d DZT3d ZW3d ZT3d dxt xt dyt yt dzt zt
 end
 
-function build_T()
-    grd = build_grd()
+function build_T(grd)
     # Mixing and overturning (F_HD, etc. see Figure 1 of Archer et al.)
     Mixing = zeros(6, 6)
     Mixing[1, 2] = Mixing[2, 1] = 10e6 # between top boxes (1 and 2) (10 Sv = 10e6 cubic meters)
     Mixing[2, 5] = Mixing[5, 2] = 53e6 # between high-lat and deep (1 and 3)
     Mixing[2, 4] = Mixing[4, 2] = 1e6 # between low-lat and deep (2 and 4)
-    Mixing[1, 3] = Mixing[3, 1] = 1e10 # (trick) fast mixing between boxes of the same 3-box-model box
-    Mixing[4, 5] = Mixing[5, 4] = 1e10 # (trick) fast mixing between boxes of the same 3-box-model box
-    Mixing[5, 6] = Mixing[6, 5] = 1e10 # (trick) fast mixing between boxes of the same 3-box-model box
+    # (trick) fast mixing between boxes of the same 3-box-model box
+    idx_high = [1, 3]
+    idx_low = [2]
+    idx_deep = [4, 5, 6]
+    for idx in [idx_high, idx_low, idx_deep]
+        for i in idx, j in idx
+            (i ≠ j) ? Mixing[i, j] = 1e10 : nothing
+        end
+    end
+    # Overturning circulation
     overturning = 19e6
     Overturning = falses(6, 6)
-    Overturning[1, 3] = Overturning[3, 5] = Overturning[5, 6] = Overturning[6, 4] = Overturning[4, 2] = Overturning[2, 1] = true # Overturning circulation
+    Overturning[1, 3] = Overturning[3, 5] = Overturning[5, 6] = Overturning[6, 4] = Overturning[4, 2] = Overturning[2, 1] = true 
     # Build T, as a divergence operator, i.e.,
     # T is positive where tracers are removed.
     T = spzeros(6,6)
@@ -98,7 +97,7 @@ function build_T()
             T[orig, orig] += overturning # add at origin
             T[dest, orig] -= overturning # remove at destination
         end
-
+        # Mixing part
         if !iszero(Mixing[orig, dest])
             T[orig, orig] += Mixing[orig, dest] # add at origin
             T[dest, orig] -= Mixing[orig, dest] # remove at destination
@@ -110,6 +109,12 @@ function build_T()
     T = V⁻¹ * T
     return T
 end
+
+const wet3d = build_wet3d()
+const T = build_T()
+const grd = build_grd()
+
+export wet3d, T, grd
 
 end
 
