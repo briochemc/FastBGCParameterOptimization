@@ -32,4 +32,5 @@ import FieldDefaults: get_default
 import FieldMetadata: @units, units, @prior, prior, @description, description
 import Flatten: flattenable
 
-
+# Package to load and grid WOA data
+using WorldOceanAtlasTools

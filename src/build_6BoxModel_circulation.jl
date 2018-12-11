@@ -21,6 +21,7 @@ The boxes are grouped as indicated:
 
 using TransportMatrixTools: buildv3d, d₀, buildDIV, buildIabove
 using SparseArrays, SuiteSparse
+using WorldOceanAtlasTools
 
 build_wet3d() = trues(2, 1, 3)
 
@@ -111,11 +112,12 @@ function build_T(grd)
     return T
 end
 
+# grid and transport
 const wet3d = build_wet3d()
 const grd = build_grd()
 const T = build_T(grd)
 
-
+# Other constants to set 6-box-model model up
 const iwet = (LinearIndices(wet3d))[findall(!iszero, wet3d)] # replaces find(wet3d) :(
 const nwet = length(iwet)
 const DIV = buildDIV(wet3d, iwet, grd)
@@ -135,16 +137,15 @@ const z = grd["ZT3d"][iwet]
 const ztop = grd["ZW3d"][iwet]
 const spd = 24 * 60 * 60.0 # Think about using Unitful.jl
 
-# Make up observations
-const DSiobs = [10.0, 2.0, 10.0, 200.0, 190.0, 195.0] ; # TODO replace with WorldOceanAtlasTools!
-const DSimean = vmean(DSiobs)
+# Vector of observations
+DINobs3d = WOA13_bin_to_grid(grd, "PO4", "annual", "1°", "mean")
+const DINobs = DINobs3d[iwet]
+const DINobsmean = vmean(DINobs)
 
 # Required for bgc functions
 const maskEup = z .< 120 # Euphotic zone definition (Different from OCIM1.1!)
 
-
-
-export wet3d, T, grd, iwet, nwet, DIV, Iabove, v3d, v, vtot, V, vnorm², Dvnorm², vnorm, vmean, z, ztop, spd, DSiobs, DSimean, makeEup
+export T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
 
 end
 

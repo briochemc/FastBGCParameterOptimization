@@ -1,8 +1,8 @@
 
 # Geological restoring
-function geores(DSi, p::Para)
+function geores(DIN, p::Para)
     τg = p.τg
-    return (DSimean .- DSi) ./ τg
+    return (DINobsmean .- DIN) ./ τg
 end
 function georesJac(p::Para)
     τg = p.τg
@@ -12,54 +12,54 @@ end
 # Uptake
 relu(x) = (x .≥ 0) .* x
 Drelu(x) = (x .≥ 0) .* 1.0
-function uptake(DSi, p::Para)
+function uptake(DIN, p::Para)
     τu = p.τu
-    return maskEup .* relu(DSi - DSiobs) ./ τu
+    return maskEup .* relu(DIN - DINobs) ./ τu
 end
 # overload for numJac
-function uptake(DSi::Array{<:Number,2}, p::Para)
+function uptake(DIN::Array{<:Number,2}, p::Para)
     τu = p.τu
-    DSiobs2 = repeat(DSiobs, 1, size(DSi, 2))
-    return d₀(maskEup) * relu(DSi - DSiobs2) ./ τu
+    DINobs2 = repeat(DINobs, 1, size(DIN, 2))
+    return d₀(maskEup) * relu(DIN - DINobs2) ./ τu
 end
 # Uptake derivatives
-function uptakeJac(DSi, p::Para)
+function uptakeJac(DIN, p::Para)
     τu = p.τu
-    return d₀(maskEup .* Drelu(DSi - DSiobs) ./ τu)
+    return d₀(maskEup .* Drelu(DIN - DINobs) ./ τu)
 end
-function Duptake_Dτu(DSi, p::Para)
+function Duptake_Dτu(DIN, p::Para)
     τu = p.τu
-    return -uptake(DSi, p) ./ τu
+    return -uptake(DIN, p) ./ τu
 end
 
 # Remineralization
-function remineralization(PSi, p::Para)
+function remineralization(POM, p::Para)
     κ = p.κ
-    return κ * PSi
+    return κ * POM
 end
 # Remineralization derivatives
-function remineralizationJac(PSi, p::Para)
+function remineralizationJac(POM, p::Para)
     κ = p.κ
     return κ * I
 end
-function Dremineralization_Dκ(PSi, p::Para)
+function Dremineralization_Dκ(POM, p::Para)
     κ = p.κ
-    return PSi
+    return POM
 end
 
-# Indices for DSi and PSi (needed for Rate of change f(x,p))
-const iDSi = 1:nwet
-const iPSi = iDSi .+ nwet
+# Indices for DIN and POM (needed for Rate of change f(x,p))
+const iDIN = 1:nwet
+const iPOM = iDIN .+ nwet
 function unpackx(x)
-    DSi = x[iDSi]
-    PSi = x[iPSi]
-    return DSi, PSi
+    DIN = x[iDIN]
+    POM = x[iPOM]
+    return DIN, POM
 end
 # add method to deal with arrays for numJac
 function unpackx(x::Array{<:Number,2})
-    DSi = x[iDSi,:]
-    PSi = x[iPSi,:]
-    return DSi, PSi
+    DIN = x[iDIN,:]
+    POM = x[iPOM,:]
+    return DIN, POM
 end
 
 # PFD transport (needed for Rate of change f(x,p))
@@ -72,30 +72,30 @@ end
 
 # Rate of change f(x,p)
 function f(x::Vector{Tx}, p::Para{Tp}) where {Tx, Tp}
-    DSi, PSi = unpackx(x)
-    u = uptake(DSi, p)
-    r = remineralization(PSi, p)
+    DIN, POM = unpackx(x)
+    u = uptake(DIN, p)
+    r = remineralization(POM, p)
     foo = zeros(promote_type(Tx, Tp), size(x))
-    foo[iDSi] .=  -T   * DSi - u + r + geores(DSi, p)
-    foo[iPSi] .= -S(p) * PSi + u - r
+    foo[iDIN] .=  -T   * DIN - u + r + geores(DIN, p)
+    foo[iPOM] .= -S(p) * POM + u - r
     return foo
 end
 # For numJac
 function f(x::Array{<:Number,2}, p::Para)
-    DSi, PSi = unpackx(x)
-    u = uptake(DSi, p)
-    r = remineralization(PSi, p)
+    DIN, POM = unpackx(x)
+    u = uptake(DIN, p)
+    r = remineralization(POM, p)
     foo = zeros(eltype(x), size(x))
-    foo[iDSi, :] .=  -T   * DSi - u + r + geores(DSi, p)
-    foo[iPSi, :] .= -S(p) * PSi + u - r
+    foo[iDIN, :] .=  -T   * DIN - u + r + geores(DIN, p)
+    foo[iPOM, :] .= -S(p) * POM + u - r
     return foo
 end
 
 # Jacobian of f with respect to x
 function fJac(x, p::Para)
-    DSi, PSi = unpackx(x)
-    uJac = uptakeJac(DSi, p)
-    rJac = remineralizationJac(PSi, p)
+    DIN, POM = unpackx(x)
+    uJac = uptakeJac(DIN, p)
+    rJac = remineralizationJac(POM, p)
     foo = [ -T   - uJac + georesJac(p)    rJac       ;
                   +uJac                  -rJac - S(p)]
     dropzeros!(foo)
@@ -119,18 +119,18 @@ You should fill this function with all the first derivatives of f with respoect 
 Called without the symbol `s`, this function will loop through all the optimizable parameters and create the corresponding Jacobian matrix.
 """
 function Dpf(x, p::Para, s::Symbol)
-    DSi, PSi = unpackx(x)
+    DIN, POM = unpackx(x)
     foo = zeros(promote_type(eltype(x), eltype(p)), 2nwet)
     if s == :τu
-        foo[iPSi] .= Duptake_Dτu(DSi, p)
-        foo[iDSi] .= -foo[iPSi]
+        foo[iPOM] .= Duptake_Dτu(DIN, p)
+        foo[iDIN] .= -foo[iPOM]
     elseif s == :w₀
-        foo[iPSi] .= -S1 * PSi
+        foo[iPOM] .= -S1 * POM
     elseif s == :w′
-        foo[iPSi] .= -Sz * PSi
+        foo[iPOM] .= -Sz * POM
     elseif s == :κ
-        foo[iDSi] .= Dremineralization_Dκ(PSi, p)
-        foo[iPSi] .= -foo[iDSi]
+        foo[iDIN] .= Dremineralization_Dκ(POM, p)
+        foo[iPOM] .= -foo[iDIN]
     else
         error("There is no $s parameter")
     end

@@ -15,20 +15,20 @@ This is OK because we normalize everything later.
 Note: `nrm` **should not** be used with the complex step method or dual numbers.
 """
 function nrm(x)
-    DSi, PSi = unpackx(x)
-    return sqrt(vnorm²(DSi) + vnorm²(PSi))
+    DIN, POM = unpackx(x)
+    return sqrt(vnorm²(DIN) + vnorm²(POM))
 end
 function nrm(x::Vector{Dual{U}}) where U
-    DSi, PSi = unpackx(x)
-    return sqrt(vnorm²(DualNumbers.realpart.(DSi)) + vnorm²(DualNumbers.realpart.(PSi)))
+    DIN, POM = unpackx(x)
+    return sqrt(vnorm²(DualNumbers.realpart.(DIN)) + vnorm²(DualNumbers.realpart.(POM)))
 end
 function nrm(x::Vector{Complex{U}}) where U
-    DSi, PSi = unpackx(x)
-    return sqrt(vnorm²(real.(DSi)) + vnorm²(real.(PSi)))
+    DIN, POM = unpackx(x)
+    return sqrt(vnorm²(real.(DIN)) + vnorm²(real.(POM)))
 end
 function nrm(x::Vector{Hyper{U}}) where U
-    DSi, PSi = unpackx(x)
-    return sqrt(vnorm²(HyperDualNumbers.realpart.(DSi)) + vnorm²(HyperDualNumbers.realpart.(PSi)))
+    DIN, POM = unpackx(x)
+    return sqrt(vnorm²(HyperDualNumbers.realpart.(DIN)) + vnorm²(HyperDualNumbers.realpart.(POM)))
 end
 
 """
@@ -37,8 +37,8 @@ end
 Returns the cost of state `x`.
 """
 function c(x) # with respect to x
-    DSi, _ = unpackx(x)
-    return vnorm²(DSi - DSiobs) / vnorm²(DSiobs)
+    DIN, _ = unpackx(x)
+    return vnorm²(DIN - DINobs) / vnorm²(DINobs)
 end
 
 """
@@ -47,8 +47,8 @@ end
 Returns the gradient of cost of `x` (at `x`).
 """
 function Dc(x)
-    DSi, _ = unpackx(x)
-    kron([1 0], Dvnorm²(DSi - DSiobs) / vnorm²(DSiobs))
+    DIN, _ = unpackx(x)
+    kron([1 0], Dvnorm²(DIN - DINobs) / vnorm²(DINobs))
 end
 
 c_noweight(p::Para) = 0.5 * p2λ(p)' * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
@@ -61,7 +61,7 @@ Dc_noweight(p::Para{Complex{Float64}}) = transpose(Dp2λ(p) .* σ²obs.^-1 .* p2
 
 Constant state used to start with.
 """
-const x₀ = [DSiobs; DSiobs / 10] * 1.1
+const x₀ = [DINobs; DINobs / 10] * 1.1
 
 """
     ω :: Float64

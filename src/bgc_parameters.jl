@@ -28,8 +28,8 @@ Modify this part of the code if you need new/different parameters!
 @latexSymbol @description @flattenable @prior @printunits @units @default_kw struct Para{U} <: AbstractPara{U}
     τu::U | 500.0 * spd | u"s"    | u"d"    | LN(250 * spd, 100 * spd)  | true  | "Specific uptake rate timescale"        | "\\tau_\\mathbf{u}"
     w₀::U |     1 / spd | u"m/s"  | u"m/d"  | LN(1 / spd, 0.5 / spd)    | true  | "Sinking velocity at surface"           | "w_0"
-    w′::U |     1 / spd | u"s^-1" | u"d^-1" | LN(1 / spd, 0.5 / spd)    | true | "Vertical gradient of sinking velocity" | "w'"
-    κ::U  |  0.25 / spd | u"s^-1" | u"d^-1" | LN(0.25 / spd, 0.1 / spd) | true | "Remineralization rate"                 | "\\kappa"
+    w′::U |     1 / spd | u"s^-1" | u"d^-1" | LN(1 / spd, 0.5 / spd)    | true  | "Vertical gradient of sinking velocity" | "w'"
+    κ::U  |  0.25 / spd | u"s^-1" | u"d^-1" | LN(0.25 / spd, 0.1 / spd) | true  | "Remineralization rate"                 | "\\kappa"
     τg::U | 365e6 * spd | u"s"    | u"yr"   | nothing                   | false | "Geological Restoring"                  | "\\tau_\\mathrm{geo}"
 end
 
