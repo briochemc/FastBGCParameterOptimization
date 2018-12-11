@@ -15,9 +15,9 @@ version = "0.8.10"
 
 [[BinaryProvider]]
 deps = ["Libdl", "Pkg", "SHA", "Test"]
-git-tree-sha1 = "9930c1a6cd49d9fcd7218df6be417e6ae4f1468a"
+git-tree-sha1 = "055eb2690182ebc31087859c3dd8598371d3ef9e"
 uuid = "b99e7846-7c00-51b0-8f62-c81ae34c0232"
-version = "0.5.2"
+version = "0.5.3"
 
 [[Calculus]]
 deps = ["Compat"]
@@ -27,9 +27,9 @@ version = "0.4.1"
 
 [[CategoricalArrays]]
 deps = ["Compat", "Future", "Missings", "Printf", "Reexport", "Requires"]
-git-tree-sha1 = "64651a0315fc342e7e35d03d67b2da920937c9be"
+git-tree-sha1 = "11419d157ab75a54a8af63315e7a279a593971bc"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
-version = "0.5.0"
+version = "0.5.1"
 
 [[CodecZlib]]
 deps = ["BinaryProvider", "Libdl", "Test", "TranscodingStreams"]
@@ -69,9 +69,9 @@ version = "1.1.1"
 
 [[DataFrames]]
 deps = ["CategoricalArrays", "CodecZlib", "Compat", "DataStreams", "Dates", "InteractiveUtils", "IteratorInterfaceExtensions", "LinearAlgebra", "Missings", "Printf", "Random", "Reexport", "SortingAlgorithms", "Statistics", "StatsBase", "TableTraits", "Tables", "Test", "TranscodingStreams", "Unicode", "WeakRefStrings"]
-git-tree-sha1 = "ad34fefb72b18a8dd5c17fab9089d11111b61935"
+git-tree-sha1 = "41ec35bcf49a860706924b9b3e322eed03164c83"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "0.14.1"
+version = "0.15.2"
 
 [[DataStreams]]
 deps = ["Dates", "Missings", "Test", "WeakRefStrings"]
@@ -123,15 +123,15 @@ version = "0.16.4"
 
 [[DualMatrixTools]]
 deps = ["DualNumbers", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "b5da82ec2cafe7b4879293250f701da0dbbdc1eb"
+git-tree-sha1 = "09824290f4b2966bb764c96fb5aa439bcc6bebf1"
 uuid = "31f4e45d-be81-5be7-b2dd-bc577b4f7be8"
-version = "0.1.0"
+version = "0.1.1"
 
 [[DualNumbers]]
-deps = ["Calculus", "Compat", "NaNMath", "SpecialFunctions", "Test"]
-git-tree-sha1 = "46e6b3970b9e7a8d965d9e419d8fb3fb8c6e9565"
+deps = ["Calculus", "LinearAlgebra", "NaNMath", "SpecialFunctions", "Test"]
+git-tree-sha1 = "b1e66ac804402a32184288ec9a78ab6d3a22ae69"
 uuid = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
-version = "0.6.0"
+version = "0.6.1"
 
 [[FieldDefaults]]
 deps = ["FieldMetadata", "Test"]
@@ -147,9 +147,9 @@ version = "0.0.1"
 
 [[FileIO]]
 deps = ["Pkg", "Random", "Test"]
-git-tree-sha1 = "884066c07188cc0f57d0ebdcab6c9a09cc734dbc"
+git-tree-sha1 = "1a114d08094e7267ba8d4d684f930d5a722184de"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
-version = "1.0.3"
+version = "1.0.4"
 
 [[FixedPointNumbers]]
 deps = ["Test"]
@@ -175,15 +175,15 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[HyperDualMatrixTools]]
 deps = ["HyperDualNumbers", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "67cebf475b9c0b46ebe5b9a5cc47907991b7e12d"
+git-tree-sha1 = "c964286e00a26531e568ec001683871af077a34a"
 uuid = "04d39a18-1502-5db8-a704-9ca743349cef"
-version = "0.1.1"
+version = "1.0.0"
 
 [[HyperDualNumbers]]
-deps = ["Compat", "SpecialFunctions", "Test"]
-git-tree-sha1 = "5c42d87287c4348ad7c98858a41348451cd6356e"
+deps = ["Calculus", "Compat", "LinearAlgebra", "NaNMath", "SpecialFunctions", "Test"]
+git-tree-sha1 = "5fc73172fb953f0bda4572f65ac9ef8988ba1df3"
 uuid = "50ceba7f-c3ee-5a84-a6e8-3ad40456ec97"
-version = "3.0.1"
+version = "4.0.0"
 
 [[InteractiveUtils]]
 deps = ["LinearAlgebra", "Markdown"]
@@ -203,9 +203,9 @@ version = "0.1.2"
 
 [[JSON]]
 deps = ["Dates", "Distributed", "Mmap", "Sockets", "Test", "Unicode"]
-git-tree-sha1 = "fec8e4d433072731466d37ed0061b3ba7f70eeb9"
+git-tree-sha1 = "1f7a25b53ec67f5e9422f1f551ee216503f4a0fa"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-version = "0.19.0"
+version = "0.20.0"
 
 [[LaTeXStrings]]
 deps = ["Compat"]
@@ -244,9 +244,9 @@ uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[Match]]
 deps = ["Test"]
-git-tree-sha1 = "34172c99a3eecb2a4af34cb09d9fa77777af22eb"
+git-tree-sha1 = "8d8253da9e8d38d642cec03d41786a5201479210"
 uuid = "7eb4fadd-790c-5f42-8a69-bfa0b872bfbf"
-version = "1.0.1"
+version = "1.0.2"
 
 [[Missings]]
 deps = ["Dates", "InteractiveUtils", "SparseArrays", "Test"]
@@ -283,15 +283,15 @@ version = "1.0.2"
 
 [[PDMats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "9e3e7a5c9b8cfdba8c01a1bcae38fe0144936fda"
+git-tree-sha1 = "b6c91fc0ab970c0563cbbe69af18d741a49ce551"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.9.5"
+version = "0.9.6"
 
 [[Parameters]]
 deps = ["Markdown", "OrderedCollections", "REPL", "Test"]
-git-tree-sha1 = "40f540ec96e50c0b2b9efdb11b5e4d0c63f90923"
+git-tree-sha1 = "eec0fe16344cc14aa2e6251874ab30d62aff4f7c"
 uuid = "d96e819e-fc66-5662-9728-84c9c7592b0a"
-version = "0.10.1"
+version = "0.10.2"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
@@ -321,9 +321,9 @@ version = "2.6.3"
 
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra", "Test"]
-git-tree-sha1 = "7e8dff9c205f36eceaf6e62a43ff851637ca45fc"
+git-tree-sha1 = "3ce467a8e76c6030d4c3786e7d3a73442017cdc0"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
-version = "2.0.2"
+version = "2.0.3"
 
 [[REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets"]
@@ -382,9 +382,9 @@ version = "0.7.2"
 
 [[StaticArrays]]
 deps = ["InteractiveUtils", "LinearAlgebra", "Random", "Statistics", "Test"]
-git-tree-sha1 = "ebc5c2a27d91d5ec611a9861168182e2168effd3"
+git-tree-sha1 = "97c4bf0f647488dd7ac01ea12be5885f88762938"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "0.9.2"
+version = "0.10.0"
 
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -392,9 +392,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[StatsBase]]
 deps = ["DataStructures", "LinearAlgebra", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "Test"]
-git-tree-sha1 = "723193a13e8078cec6dcd0b8fe245c8bfd81690e"
+git-tree-sha1 = "2722397d88f8ffef551948f6c20e1d74a743298c"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.25.0"
+version = "0.26.0"
 
 [[StatsFuns]]
 deps = ["Rmath", "SpecialFunctions", "Test"]
@@ -414,9 +414,9 @@ version = "0.4.0"
 
 [[Tables]]
 deps = ["Requires", "Test"]
-git-tree-sha1 = "c7fb447deab835fa70ce6717e78c68b0f466a42c"
+git-tree-sha1 = "940944e6b68a35046282897a2218891c7cf14a32"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "0.1.11"
+version = "0.1.12"
 
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
@@ -430,7 +430,7 @@ version = "0.8.1"
 
 [[TransportMatrixTools]]
 deps = ["DualMatrixTools", "DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "HyperDualMatrixTools", "HyperDualNumbers", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-git-tree-sha1 = "6ce3f3e68098a400a9b0625c018d20c82f58b8f8"
+git-tree-sha1 = "7c900b2d04d36843bd8d4182c9ec60e257550b78"
 repo-rev = "master"
 repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"

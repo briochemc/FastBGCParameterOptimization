@@ -88,9 +88,9 @@ function HyperDualNumbersHessian(q, λ::Vector{U}) where U<:Float64
         hλ = convert(Vector{Hyper{U}}, λ)
         hλ[i] += ε₁ ## unfinished business here
         hλ[j] += ε₂ ## unfinished business here
-        out[i, j] = eps1eps2(q(hλ))
+        out[i, j] = ε₁ε₂part(q(hλ))
     end
     return out
 end
 
-Base.conj(x::Hyper) = Hyper(conj(real(x)), conj(eps1(x)), conj(eps2(x)), conj(eps1eps2(x)))
+Base.conj(x::Hyper) = Hyper(conj(real(x)), conj(ε₁part(x)), conj(ε₂part(x)), conj(ε₁ε₂part(x)))

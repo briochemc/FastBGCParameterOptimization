@@ -120,9 +120,9 @@ Base.vec(p::Para) = collect((p...,))
 Para(v::Vector) = Para(v...)
 
 # read non-real part (for update of init)
-DualNumbers.realpart(p::Para{Dual{Float64}}) = Para(realpart.(vec(p)))
+DualNumbers.realpart(p::Para{Dual{Float64}}) = Para(DualNumbers.realpart.(vec(p)))
 Base.real(p::Para{Complex{Float64}}) = Para(real.(vec(p)))
-HyperDualNumbers.real(p::Para{Hyper{Float64}}) = Para(real.(vec(p)))
+HyperDualNumbers.realpart(p::Para{Hyper{Float64}}) = Para(HyperDualNumbers.realpart.(vec(p)))
 
 # Overload +, -, and * for parameters
 Base.:+(p₁::Para, p₂::Para) = Para(vec(p₁) .+ vec(p₂))

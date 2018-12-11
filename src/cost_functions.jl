@@ -20,7 +20,7 @@ function nrm(x)
 end
 function nrm(x::Vector{Dual{U}}) where U
     DSi, PSi = unpackx(x)
-    return sqrt(vnorm²(realpart.(DSi)) + vnorm²(realpart.(PSi)))
+    return sqrt(vnorm²(DualNumbers.realpart.(DSi)) + vnorm²(DualNumbers.realpart.(PSi)))
 end
 function nrm(x::Vector{Complex{U}}) where U
     DSi, PSi = unpackx(x)
@@ -28,7 +28,7 @@ function nrm(x::Vector{Complex{U}}) where U
 end
 function nrm(x::Vector{Hyper{U}}) where U
     DSi, PSi = unpackx(x)
-    return sqrt(vnorm²(real.(DSi)) + vnorm²(real.(PSi)))
+    return sqrt(vnorm²(HyperDualNumbers.realpart.(DSi)) + vnorm²(HyperDualNumbers.realpart.(PSi)))
 end
 
 """
@@ -133,8 +133,8 @@ function print_cost(cval; preprint = "")
     return nothing
 end
 printRMS(cval) = @printf("RMS = %.2f%%\n", 100 * sqrt(cval / c(0*x₀)))
-printRMS(cval::Dual) = @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(realpart(cval) / c(0*x₀)), dualpart(cval))
-printRMS(cval::Hyper) = @printf("RMS = %.2f%% (ε₁:%.2g, ε₂:%.2g, ε₁ε₂:%.2g)\n", 100 * sqrt(real(cval) / c(0*x₀)), eps1(cval), eps2(cval), eps1eps2(cval))
+printRMS(cval::Dual) = @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(DualNumbers.realpart(cval) / c(0*x₀)), dualpart(cval))
+printRMS(cval::Hyper) = @printf("RMS = %.2f%% (ε₁:%.2g, ε₂:%.2g, ε₁ε₂:%.2g)\n", 100 * sqrt(HyperDualNumbers.realpart(cval) / c(0*x₀)), ε₁part(cval), ε₂part(cval), ε₁ε₂part(cval))
 printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(real(cval) / c(0*x₀)), imag(cval))
 
 """
