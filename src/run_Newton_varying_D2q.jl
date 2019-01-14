@@ -32,3 +32,4 @@ J.fac, J.p = factorize(fJac(x₀, p₀)), p₀
 #init.x, init.p = x₀, p₀
 #J.fac, J.p = factorize(fJac(x₀, p₀)), p₀
 #@btime results["FD2q"] = optimize(q!, FDq!, FD2q!, λ₀, Newton(), opt)
+
