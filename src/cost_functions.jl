@@ -143,7 +143,7 @@ printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(re
 Full cost `c(sol(λ), λ)` at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-q!(λ::Vector; preprint=" ") = q!(λ2p(λ); preprint=preprint)
+q!(λ::Vector; preprint="") = q!(λ2p(λ); preprint=preprint)
 
 """
     Dq!(λ; preprint)
@@ -151,13 +151,13 @@ q!(λ::Vector; preprint=" ") = q!(λ2p(λ); preprint=preprint)
 Evaluates the Gradient of the full cost at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-function Dq!(λ::Vector{Float64}; preprint=" ")
+function Dq!(λ::Vector{Float64}; preprint="")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, J, init, λ, τstop; preprint=preprint)
 end
-function Dq!(ελ::Vector{Dual{Float64}}; preprint=" ")
+function Dq!(ελ::Vector{Dual{Float64}}; preprint="")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, εJ, εsol, init, ελ, τstop; preprint=preprint)
 end
-function Dq!(imλ::Vector{Complex{Float64}}; preprint=" ")
+function Dq!(imλ::Vector{Complex{Float64}}; preprint="")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, imJ, imsol, init, imλ, τstop; preprint=preprint)
 end
 
@@ -167,7 +167,7 @@ end
 Evaluates the Hessian of the full cost at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-D2q!(λ::Vector{Float64}; preprint=" ") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
+D2q!(λ::Vector{Float64}; preprint="") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
 
 """
     gradient_q!(λ; preprint)
@@ -254,6 +254,9 @@ end
 function FDq!(storage, λ)
     storage[1:npopt] .= vec(FDq!(λ))
 end
+function ADq!(storage, λ)
+    storage[1:npopt] .= vec(ADq!(λ))
+end
 
 function CSDDq!(storage, λ)
     storage[1:npopt, 1:npopt] .= CSDDq!(λ)
@@ -263,4 +266,7 @@ function FD2q!(storage, λ)
 end
 function FDDq!(storage, λ)
     storage[1:npopt, 1:npopt] .= FDDq!(λ)
+end
+function AD2q!(storage, λ)
+    storage[1:npopt, 1:npopt] .= AD2q!(λ)
 end
