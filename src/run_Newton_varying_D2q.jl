@@ -1,16 +1,7 @@
-# Main script to plot paper figures
-
-# Do those once for the benchmark
-using BenchmarkTools
-q!(λ₀)
-Dq!(λ₀)
-FDq!(λ₀)
-D2q!(λ₀)
-CSDDq!(λ₀)
-FDDq!(λ₀)
-FD2q!(λ₀)
-
+# Set the options for the Newton optimizer
 opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = true, x_tol = 1e-3)
+
+# Dictionary to hold the results
 results = Dict()
 
 init.x, init.p = x₀, p₀
@@ -32,4 +23,5 @@ J.fac, J.p = factorize(fJac(x₀, p₀)), p₀
 #init.x, init.p = x₀, p₀
 #J.fac, J.p = factorize(fJac(x₀, p₀)), p₀
 #@btime results["FD2q"] = optimize(q!, FDq!, FD2q!, λ₀, Newton(), opt)
+
 

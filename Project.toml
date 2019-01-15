@@ -4,7 +4,9 @@ authors = ["Benoit Pasquier <pasquieb@uci.edu>"]
 version = "0.1.0"
 
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 Calculus = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
+Cassette = "7057c7e9-c182-5462-911a-8362d720325c"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 DualMatrixTools = "31f4e45d-be81-5be7-b2dd-bc577b4f7be8"

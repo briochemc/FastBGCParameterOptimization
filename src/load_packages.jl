@@ -34,3 +34,9 @@ import Flatten: flattenable
 
 # Package to load and grid WOA data
 using WorldOceanAtlasTools
+
+# Benchmarking
+using BenchmarkTools
+
+# For counting number of factorizations
+using Cassette
