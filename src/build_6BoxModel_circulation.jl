@@ -1,5 +1,6 @@
 module SixBoxModel
-#= The 6-box model is used because the code to bin WOA data
+#= 
+The 6-box model is used because the code to bin WOA data
 requires a regular grid.
 These are the indices of the 6-box model:
 
