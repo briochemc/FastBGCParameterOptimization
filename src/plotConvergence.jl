@@ -1,9 +1,6 @@
 # Set the options for the Newton optimizer
 opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = false, x_tol = 1e-3)
 
-# Dictionary to hold the results
-numFac = Dict()
-
 # Using Cassette to plot benchmark of convergence
 Cassette.@context BenchmarkData
 
@@ -20,7 +17,6 @@ function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(q!), args...)
     push!(ctx.metadata.ftimer, time())
 end
 
-
 # Initiate BenchmarkData by creating an instance of the `tape`
 struct ProfileCtx
     factorizations::Ref{Int64}
@@ -28,64 +24,41 @@ struct ProfileCtx
     qvalues::Vector{Float64}
     ftimer::Vector{Float64}
 end
-tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
+
+# Dictionary to hold the results
+# Load it if it exists, otherwise creat a new one
+path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
+jld_file = joinpath(path_to_package_root, "data/Convergence_results.jld2")
+isfile(jld_file) ? (@load jld_file convergence_results) : convergence_results = Dict()
 
 # make it into short code by listing the methods differently and
 # interpolating them using the $ sign
-#list_methods = [
-#                (q!, Dq!, D2q!)
-#               ]
+list_methods = [
+    ("D2q", :q!, :Dq!, :D2q!)
+#    ("AD2q", :q!, :Dq!, :CSDDq!)
+#    ("FDDq", :q!, :ADq!, :AD2q!)
+#    ("CSDq", :q!, :Dq!, :FDDq!)
+]
 
-
-init.x, init.p = 1x₀, 3p₀
-J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-Cassette.@overdub(tape, optimize(q!, Dq!, D2q!, λ₀, Newton(), opt))
-numFac["D2q"] = tape.metadata
-
-init.x, init.p = 1x₀, 3p₀
-J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-Cassette.@overdub(tape, optimize(q!, Dq!, CSDDq!, λ₀, Newton(), opt))
-numFac["CSDDq"] = tape.metadata
-
-init.x, init.p = 1x₀, 3p₀
-J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-Cassette.@overdub(tape, optimize(q!, ADq!, AD2q!, λ₀, Newton(), opt))
-numFac["AD2q"] = tape.metadata
-
-init.x, init.p = 1x₀, 3p₀
-J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-Cassette.@overdub(tape, optimize(q!, Dq!, FDDq!, λ₀, Newton(), opt))
-numFac["FDDq"] = tape.metadata
-
+for (method_name, q, Dq, D2q) in list_methods
+    init.x, init.p = 1x₀, 3p₀
+    J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
+    local tape
+    tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
+    eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, Newton(), $opt)) ) )
+    convergence_results[method_name] = tape.metadata
+end
 # Do it again because of the timer
+for (method_name, q, Dq, D2q) in list_methods
+    init.x, init.p = 1x₀, 3p₀
+    J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
+    tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
+    eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, Newton(), $opt)) ) )
+    convergence_results[method_name] = tape.metadata
+end
 
-init.x, init.p = 1x₀, 3p₀
-J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-Cassette.@overdub(tape, optimize(q!, Dq!, D2q!, p2λ(3p₀), Newton(), opt))
-numFac["D2q"] = tape.metadata
+@save jld_file convergence_results
 
-init.x, init.p = 1x₀, 3p₀
-J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-Cassette.@overdub(tape, optimize(q!, Dq!, CSDDq!, p2λ(3p₀), Newton(), opt))
-numFac["CSDDq"] = tape.metadata
-
-init.x, init.p = 1x₀, 3p₀
-J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-Cassette.@overdub(tape, optimize(q!, ADq!, AD2q!, p2λ(3p₀), Newton(), opt))
-numFac["AD2q"] = tape.metadata
-
-init.x, init.p = 1x₀, 3p₀
-J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-Cassette.@overdub(tape, optimize(q!, Dq!, FDDq!, p2λ(3p₀), Newton(), opt))
-numFac["FDDq"] = tape.metadata
 
 
 
