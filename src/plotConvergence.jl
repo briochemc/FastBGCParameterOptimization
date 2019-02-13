@@ -1,4 +1,4 @@
-# Set the options for the Newton optimizer
+# Set the options for the NewtonTrustRegion optimizer
 opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = false, x_tol = 1e-3)
 
 # Using Cassette to plot benchmark of convergence
@@ -45,7 +45,7 @@ for (method_name, q, Dq, D2q) in list_methods
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
     local tape
     tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-    eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, Newton(), $opt)) ) )
+    eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) ) )
     convergence_results[method_name] = tape.metadata
 end
 # Do it again because of the timer
@@ -53,7 +53,7 @@ for (method_name, q, Dq, D2q) in list_methods
     init.x, init.p = 1x₀, 3p₀
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
     tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
-    eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, Newton(), $opt)) ) )
+    eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) ) )
     convergence_results[method_name] = tape.metadata
 end
 
