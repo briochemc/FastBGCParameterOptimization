@@ -125,7 +125,7 @@ q!(p::Para{Complex{Float64}}; preprint="") = q!(c, f, fJac, nrm, imsol, init, p,
 Prints the cost as a root mean square (RMS) error in percent.
 (Will also print the imaginary or dual part if any.)
 """
-function print_cost(cval; preprint = "")
+function print_cost(cval; preprint="")
     if preprint ≠ ""
         print(preprint)
         printRMS(cval)
@@ -143,7 +143,7 @@ printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(re
 Full cost `c(sol(λ), λ)` at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-q!(λ::Vector; preprint="") = q!(λ2p(λ); preprint=preprint)
+q!(λ::Vector; preprint="    ") = q!(λ2p(λ); preprint=preprint)
 
 """
     Dq!(λ; preprint)
