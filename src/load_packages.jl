@@ -3,6 +3,7 @@
 # activate current Julia project
 using Pkg
 Pkg.activate(".")
+Pkg.instantiate()
 
 # use TransportMatrixTools package that I dev
 using TransportMatrixTools

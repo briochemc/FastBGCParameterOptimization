@@ -17,13 +17,22 @@ function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(q!), args...)
     push!(ctx.metadata.ftimer, time())
 end
 
-# Initiate BenchmarkData by creating an instance of the `tape`
+# Create the context type for storing the data
 struct ProfileCtx
     factorizations::Ref{Int64}
     factorization_counter::Vector{Int64}
     qvalues::Vector{Float64}
     ftimer::Vector{Float64}
 end
+
+# Reformat the context type into a tuple of standard Julia types
+read_profile(p::ProfileCtx) = Dict(
+    "facts" => p.factorization_counter,
+    "costs" => p.qvalues,
+    "times" => p.ftimer .- p.ftimer[1]
+)
+
+# TODO Rename factorizations <-> factorization_counter in ProfileCtx and elsewhere
 
 # Dictionary to hold the results
 # Load it if it exists, otherwise creat a new one
@@ -35,9 +44,9 @@ isfile(jld_file) ? (@load jld_file convergence_results) : convergence_results = 
 # interpolating them using the $ sign
 list_methods = [
     ("D2q", :q!, :Dq!, :D2q!)
-    ("AD2q", :q!, :Dq!, :CSDDq!)
-    ("FDDq", :q!, :ADq!, :AD2q!)
-    ("CSDq", :q!, :Dq!, :FDDq!)
+#    ("AD2q", :q!, :Dq!, :CSDDq!)
+#    ("FDDq", :q!, :ADq!, :AD2q!)
+#    ("CSDq", :q!, :Dq!, :FDDq!)
 ]
 
 for (method_name, q, Dq, D2q) in list_methods
@@ -46,7 +55,7 @@ for (method_name, q, Dq, D2q) in list_methods
     local tape
     tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
     eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) ) )
-    convergence_results[method_name * "_1strun"] = tape.metadata
+    convergence_results[method_name * "_1strun"] = read_profile(tape.metadata)
     @save jld_file convergence_results
 end
 # Do it again because of the timer
@@ -55,7 +64,7 @@ for (method_name, q, Dq, D2q) in list_methods
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
     tape = BenchmarkData(metadata=ProfileCtx(Ref(0), [], [], []))
     eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) ) )
-    convergence_results[method_name * "_2ndrun"] = tape.metadata
+    convergence_results[method_name * "_2ndrun"] = read_profile(tape.metadata)
     @save jld_file convergence_results
 end
 
@@ -63,9 +72,10 @@ end
 
 
 
+
 # # Now plot the results using `Plots.jl`
 # using Plots
-# 
+#
 # # Convergence vs time
 # timer = tape.metadata.ftimer .- tape.metadata.ftimer[1]
 # y = tape.metadata.fvalues
@@ -73,12 +83,12 @@ end
 # xlabel!("computing time (ms)")
 # ylabel!("f")
 # legend!("")
-# 
+#
 # # Convergence vs number of calls
 # counter = tape.metadata.fcounter
 # p2 = plot(counter, y, yaxis = :log)
 # xlabel!("number of f calls")
 # ylabel!("f")
-# 
+#
 # # Combine subplotds into single figure
 # plot(p1, p2, layout = (2, 1))
