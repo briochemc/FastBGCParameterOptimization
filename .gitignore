@@ -2,3 +2,4 @@ fig/*
 *.jld
 *.jld2
 *.mat
+cluster_output/*
