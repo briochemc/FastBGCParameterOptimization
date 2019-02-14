@@ -1,5 +1,13 @@
+# figures
 fig/*
+
+# data files
 *.jld
 *.jld2
 *.mat
+
+# cluster output
 cluster_output/*
+
+# others: greenplanet output
+cluster_scripts/slurm.epilog*
