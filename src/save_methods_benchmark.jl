@@ -44,9 +44,9 @@ isfile(jld_file) ? (@load jld_file convergence_results) : convergence_results = 
 # interpolating them using the $ sign
 list_methods = [
     ("D2q", :q!, :Dq!, :D2q!)
-#    ("AD2q", :q!, :Dq!, :CSDDq!)
-#    ("FDDq", :q!, :ADq!, :AD2q!)
-#    ("CSDq", :q!, :Dq!, :FDDq!)
+    ("AD2q", :q!, :Dq!, :CSDDq!)
+    ("FDDq", :q!, :ADq!, :AD2q!)
+    ("CSDq", :q!, :Dq!, :FDDq!)
 ]
 
 for (method_name, q, Dq, D2q) in list_methods
