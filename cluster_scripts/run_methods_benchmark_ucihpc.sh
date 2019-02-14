@@ -8,7 +8,7 @@
 # Load the julia module
 module load julia/1.1.0
 
-# Go to the root folder on greenplanet
+# Go to the root folder on UCI HPC
 cd /data/users/pasquieb/Projects/FastBGCParameterOptimization
 
 # Set DataDeps environment variable to download without asking
