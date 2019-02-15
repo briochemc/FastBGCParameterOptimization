@@ -155,9 +155,9 @@ version = "0.16.4"
 
 [[DualMatrixTools]]
 deps = ["DualNumbers", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "502354f2893909a19c63dea9aaff95f56814b83c"
+git-tree-sha1 = "43ea9a6fba8980dcb8ff9542541cdfac35ca935d"
 uuid = "31f4e45d-be81-5be7-b2dd-bc577b4f7be8"
-version = "1.0.0"
+version = "1.1.0"
 
 [[DualNumbers]]
 deps = ["Calculus", "LinearAlgebra", "NaNMath", "SpecialFunctions", "Test"]
@@ -516,7 +516,7 @@ version = "0.8.1"
 
 [[TransportMatrixTools]]
 deps = ["DualMatrixTools", "DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "HyperDualMatrixTools", "HyperDualNumbers", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-git-tree-sha1 = "7c900b2d04d36843bd8d4182c9ec60e257550b78"
+git-tree-sha1 = "80056f7810bf7e90d6a9ffe9a7a5a772583d8b69"
 repo-rev = "master"
 repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
