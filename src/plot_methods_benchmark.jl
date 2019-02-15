@@ -1,0 +1,88 @@
+using JLD2, Plots
+
+# Load the benchmark data to plot
+# TODO save the files with specific names to where it was run?
+@load "data/methods_benchmark_OCIM1_imac.jld2"
+
+# TODO save the list_methods with the convergence results
+# TODO save the final params and cost to compare them too
+list_methods = [
+    ("D2q", :q!, :Dq!, :D2q!)
+    ("AD2q", :q!, :Dq!, :CSDDq!)
+    ("CSDq", :q!, :Dq!, :FDDq!)
+    ("FDDq", :q!, :ADq!, :AD2q!)
+]
+
+min_ys = Vector{Float64}()
+for (i, method) in enumerate(list_methods)
+    for run_str in ["_1strun", "_2ndrun"]
+        field_name = method[1] * run_str
+        push!(min_ys, minimum(convergence_results[field_name]["costs"]))
+    end
+end
+best_y = minimum(min_ys)
+
+# plot vs timer
+p = plot() ;
+for (i, method) in enumerate(list_methods)
+    for run_str in ["_1strun", "_2ndrun"]
+        field_name = method[1] * run_str
+        x = convergence_results[field_name]["times"]
+        y = convergence_results[field_name]["costs"]
+        y = y .- best_y
+        y .= map(y -> y ≤ 0 ? NaN : y, y)
+        plot!(p, x, y, yaxis = :log)
+        display(p)
+    end
+end
+display(p)
+
+
+# plot vs factorizations
+p = plot() ;
+for (i, method) in enumerate(list_methods)
+    run_str = "_2ndrun"
+    field_name = method[1] * run_str
+    x = convergence_results[field_name]["facts"]
+    y = convergence_results[field_name]["costs"]
+    y = y .- best_y
+    y .= map(y -> y ≤ 0 ? NaN : y, y)
+    plot!(p, x, y, yaxis = :log)
+    display(p)
+end
+display(p)
+
+
+# plot vs factorizations
+p = plot() ;
+for (i, method) in enumerate(list_methods)
+    run_str = "_2ndrun"
+    field_name = method[1] * run_str
+    x = convergence_results[field_name]["facts"]
+    y = convergence_results[field_name]["times"]
+    plot!(p, x, y)
+    display(p)
+end
+display(p)
+
+# # Now plot the results using `Plots.jl`
+# using Plots
+# 
+# # Convergence vs time
+# timer = tape.metadata.ftimer .- tape.metadata.ftimer[1]
+# y = tape.metadata.fvalues
+# p1 = plot(timer, y, yaxis = :log)
+# xlabel!("computing time (ms)")
+# ylabel!("f")
+# legend!("")
+# 
+# # Convergence vs number of calls
+# counter = tape.metadata.fcounter
+# p2 = plot(counter, y, yaxis = :log)
+# xlabel!("number of f calls")
+# ylabel!("f")
+# 
+# # Combine subplotds into single figure
+# plot(p1, p2, layout = (2, 1))
+#
+
