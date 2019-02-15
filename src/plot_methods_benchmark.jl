@@ -7,10 +7,10 @@ using JLD2, Plots
 # TODO save the list_methods with the convergence results
 # TODO save the final params and cost to compare them too
 list_methods = [
-    ("D2q", :q!, :Dq!, :D2q!)
-    ("AD2q", :q!, :Dq!, :CSDDq!)
-    ("CSDq", :q!, :Dq!, :FDDq!)
-    ("FDDq", :q!, :ADq!, :AD2q!)
+    ( "D2q", :q!,  :Dq!,   :D2q!)
+    ("AD2q", :q!, :ADq!,  :AD2q!)
+    ("CSDq", :q!,  :Dq!, :CSDDq!)
+    ("FDDq", :q!,  :Dq!,  :FDDq!)
 ]
 
 min_ys = Vector{Float64}()
@@ -27,15 +27,18 @@ p = plot() ;
 for (i, method) in enumerate(list_methods)
     for run_str in ["_1strun", "_2ndrun"]
         field_name = method[1] * run_str
-        x = convergence_results[field_name]["times"]
+        x = convergence_results[field_name]["times"] / 60
         y = convergence_results[field_name]["costs"]
         y = y .- best_y
         y .= map(y -> y ≤ 0 ? NaN : y, y)
-        plot!(p, x, y, yaxis = :log)
+        plot!(p, x, y, yaxis = :log, label = field_name)
+        xlabel!(p, "time (min)")
+        ylabel!(p, "error in cost function")
         display(p)
     end
 end
 display(p)
+# savefig("fig/methods_benchmark_logDeltaq_vs_time.pdf")
 
 
 # plot vs factorizations
@@ -47,10 +50,13 @@ for (i, method) in enumerate(list_methods)
     y = convergence_results[field_name]["costs"]
     y = y .- best_y
     y .= map(y -> y ≤ 0 ? NaN : y, y)
-    plot!(p, x, y, yaxis = :log)
+    plot!(p, x, y, yaxis = :log, label = method[1])
+    xlabel!(p, "number of calls to `factorize`")
+    ylabel!(p, "error in cost function")
     display(p)
 end
 display(p)
+# savefig("fig/methods_benchmark_logDeltaq_vs_nfact.pdf")
 
 
 # plot vs factorizations
