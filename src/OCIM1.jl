@@ -13,6 +13,14 @@ using SparseArrays, SuiteSparse
 using WorldOceanAtlasTools
 using DataDeps, JLD2, FileIO
 
+function fallback_download(remotepath, localdir)
+    @assert(isdir(localdir))
+    filename = basename(remotepath)  # only works for URLs with filename as last part of name
+    localpath = joinpath(localdir, filename)
+    Base.download(remotepath, localpath; update_period=update_period)
+    return localpath
+end
+
 # Create registry entry for OCIM in JLD2 format
 register(
     DataDep(
@@ -23,7 +31,8 @@ register(
         - DeVries, T. and F. Primeau, 2011: Dynamically and Observationally Constrained Estimates of Water-Mass Distributions and Ages in the Global Ocean. J. Phys. Oceanogr., 41, 2381–2401, https://doi.org/10.1175/JPO-D-10-05011.1
         """,
         "https://ndownloader.figshare.com/files/14330492",
-        sha2_256
+        sha2_256,
+        fetch_method = fallback_download
     )
 )
 
