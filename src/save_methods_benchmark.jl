@@ -16,7 +16,7 @@ function Cassette.prehook(ctx::BenchmarkData, ::typeof(f), args...)
     push!(ctx.metadata.ftimes_before, time())
     push!(ctx.metadata.f_calls, ctx.metadata.f_counter[])
 end
-function Cassette.prehook(ctx::BenchmarkData, output, ::typeof(q!), args...)
+function Cassette.prehook(ctx::BenchmarkData, ::typeof(q!), args...)
     ctx.metadata.q_counter[] += 1
     push!(ctx.metadata.qtimes_before, time())
     push!(ctx.metadata.q_calls, ctx.metadata.q_counter[])

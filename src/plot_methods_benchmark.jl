@@ -17,7 +17,7 @@ min_ys = Vector{Float64}()
 for (i, method) in enumerate(list_methods)
     for run_str in ["_1strun", "_2ndrun"]
         field_name = method[1] * run_str
-        push!(min_ys, minimum(convergence_results[field_name]["costs"]))
+        push!(min_ys, minimum(methods_benchmark_data[field_name]["qvalues"]))
     end
 end
 best_y = minimum(min_ys)
@@ -27,8 +27,8 @@ p = plot() ;
 for (i, method) in enumerate(list_methods)
     for run_str in ["_1strun", "_2ndrun"]
         field_name = method[1] * run_str
-        x = convergence_results[field_name]["times"] / 60
-        y = convergence_results[field_name]["costs"]
+        x = methods_benchmark_data[field_name]["qtimes_before"] / 60
+        y = methods_benchmark_data[field_name]["costs"]
         y = y .- best_y
         y .= map(y -> y ≤ 0 ? NaN : y, y)
         plot!(p, x, y, yaxis = :log, label = field_name)
@@ -39,6 +39,17 @@ for (i, method) in enumerate(list_methods)
 end
 display(p)
 # savefig("fig/methods_benchmark_logDeltaq_vs_time.pdf")
+
+function mystep(tbefore, tafter, vals)
+    x, y = Vector{Float64}(), Vector{Float64}()
+    for (tb, ta, v) in zip(tbefore, tafter, vals)
+        push!(x, tb)
+        push!(y, v)
+        push!(x, ta)
+        push!(y, v)
+    end
+    return x, y
+end
 
 
 # plot vs factorizations
