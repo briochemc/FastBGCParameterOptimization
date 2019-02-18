@@ -37,11 +37,18 @@ function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(factorize), args
     push!(ctx.metadata.factorizetimes_after, time())
 end
 
+# @default_kw struct ftape
+#     counter::Ref{Int64} | Ref(0)
+#     times_before::Float64 | []
+#     times_after::Float64 | []
+# end
+
 # Create the context type for storing the data
 @default_kw struct ProfileCtx
     factorize_counter::Ref{Int64}          | Ref(0)
     f_counter::Ref{Int64}                  | Ref(0)
     q_counter::Ref{Int64}                  | Ref(0)
+#    qvalue::Float64                        | NaN
     factorize_calls::Vector{Int64}         | []
     f_calls::Vector{Int64}                 | []
     q_calls::Vector{Int64}                 | []

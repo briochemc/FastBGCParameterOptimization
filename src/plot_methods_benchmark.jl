@@ -41,12 +41,13 @@ display(p)
 # savefig("fig/methods_benchmark_logDeltaq_vs_time.pdf")
 
 function mystep(tbefore, tafter, vals)
-    x, y = Vector{Float64}(), Vector{Float64}()
+    x, y, oldv = Vector{Float64}(), Vector{Float64}(), NaN
     for (tb, ta, v) in zip(tbefore, tafter, vals)
         push!(x, tb)
-        push!(y, v)
+        push!(y, oldv)
         push!(x, ta)
         push!(y, v)
+        oldv = v
     end
     return x, y
 end
