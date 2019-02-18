@@ -8,6 +8,7 @@ optimize(q!, Dq!, D2q!, λ₀, NewtonTrustRegion(), opt)
 
 using Profile
 Profile.clear()  # in case we have any previous profiling data
+Profile.init(n = 10^7) # increase buffer size
 init.x, init.p = 1x₀, 3p₀
 J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
 @profile optimize(q!, Dq!, D2q!, λ₀, NewtonTrustRegion(), opt)
