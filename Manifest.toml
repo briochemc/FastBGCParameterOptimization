@@ -561,7 +561,7 @@ version = "0.4.1"
 
 [[WorldOceanAtlasTools]]
 deps = ["DataDeps", "Inpaintings", "Interpolations", "Match", "NetCDF"]
-git-tree-sha1 = "6bbd011cff251817c1efd12aaa8f5c2822ee4c45"
+git-tree-sha1 = "60834524390827a78a68a12cfa5812dc3ea281cb"
 repo-rev = "master"
 repo-url = "https://github.com/briochemc/WorldOceanAtlasTools.jl.git"
 uuid = "04f20302-f1b9-11e8-29d9-7d841cb0a64a"
