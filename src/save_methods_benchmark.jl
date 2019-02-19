@@ -93,6 +93,9 @@ list_methods = [
 ]
 
 for (method_name, q, Dq, D2q) in list_methods
+    println("\n\n\n------------------------\n\n\n")
+    println("Running " * method_name * "with Cassette:")
+    println("\n\n\n------------------------\n\n\n")
     init.x, init.p = 1x₀, 3p₀
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
     local tape
@@ -103,6 +106,9 @@ for (method_name, q, Dq, D2q) in list_methods
 end
 # Do it again because of the timer
 for (method_name, q, Dq, D2q) in list_methods
+    println("\n\n\n------------------------\n\n\n")
+    println("Running " * method_name * "with Cassette:")
+    println("\n\n\n------------------------\n\n\n")
     init.x, init.p = 1x₀, 3p₀
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
     tape = BenchmarkData(metadata=ProfileCtx())
