@@ -15,6 +15,7 @@ J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
 
 # Other method to save profile output
 r = Profile.retrieve();
+path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
 profile_file = joinpath(path_to_package_root, "data/D2q_profile_data.bin")
 profile_file_pointer = open(profile_file, "w")
 using Serialization
