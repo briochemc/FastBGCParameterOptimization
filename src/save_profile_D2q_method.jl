@@ -1,6 +1,10 @@
 # Set the options for the NewtonTrustRegion optimizer
 opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = false, x_tol = 1e-3)
 
+# Remove iterative refinements from UMFPACK
+SuiteSparse.UMFPACK.umf_ctrl[8] = 0
+
+
 # run once to trigger compilation
 init.x, init.p = 1x₀, 3p₀
 J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
