@@ -4,24 +4,24 @@ opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = fal
 # Using Cassette to plot benchmark of convergence
 Cassette.@context BenchmarkData
 
-functions_timed = [
-    :q,
-    :Dq,
-    :FDq,
-    :CSDq,
-    :ADq,
-    :D2q,
-    :FD2q,
-    :FDDq,
-    :CSDDq,
-    :ADDq,
-    :AD2q,
-    :factorize,
-    :\,
-    :f,
-    :fJac,
-    :Dpf,
-    :Dxf
+functions = [
+    (:q,         
+    (:Dq,
+    (:FDq,
+    (:CSDq,
+    (:ADq,
+    (:D2q,
+    (:FD2q,
+    (:FDDq,
+    (:CSDDq,
+    (:ADDq,
+    (:AD2q,
+    (:factorize,
+    (:\,
+    (:f,
+    (:fJac,
+    (:Dpf,
+    (:Dxf
 ]
 
 for fsym in functions_timed
@@ -89,9 +89,24 @@ end
 end
 
 
-@default_kw struct ftimer
-    started::Vector{Float64}
-    ended::Vector{Float64}
+@default_kw struct ProfileCtx
+    all_times::Timers               | Timers()
+    q_and_f_values::CostsAndfNorms  | CostsAndfNorms()
+end
+
+# Macro to generate Timers
+@default_kw struct Timers
+    
+end
+
+@default_kw struct CostsAndfNorms
+    q_values::Vector{Float64} | []
+    f_norms::Vector{Float64}  | []
+end
+
+@default_kw struct FunctionTimer
+    tic::Vector{Float64} | []
+    toc::Vector{Float64} | []
 end
 
 @default_kw struct ProfileCtx
