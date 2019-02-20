@@ -4,31 +4,53 @@ opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = fal
 # Using Cassette to plot benchmark of convergence
 Cassette.@context BenchmarkData
 
-functions = [
-    (:q,         
-    (:Dq,
-    (:FDq,
-    (:CSDq,
-    (:ADq,
-    (:D2q,
-    (:FD2q,
-    (:FDDq,
-    (:CSDDq,
-    (:ADDq,
-    (:AD2q,
-    (:factorize,
-    (:\,
-    (:f,
-    (:fJac,
-    (:Dpf,
-    (:Dxf
+myreal(x::Dual) = DualNumbers.realpart(x)
+myreal(x::Hyper) = HyperDualNumbers.realpart(x)
+myreal(x::Complex) = real(x)
+myreal(x::Float64) = x
+
+functions_timed = [
+    (:Dq,    :Dq!),
+    (:FDq,   :FDq!),
+    (:CSDq,  :CSDq!),
+    (:ADq,   :ADq!),
+    (:D2q,   :D2q!),
+    (:FD2q,  :FD2q!),
+    (:FDDq,  :FDDq!),
+    (:CSDDq, :CSDDq!),
+    (:ADDq,  :ADDq!),
+    (:AD2q,  :AD2q!),
+    (:factorize, :factorize),
+    (:backsolve, :\)
 ]
 
-for fsym in functions_timed
-    @eval function Cassette.prehook(ctx::BenchmarkData, ::typeof($fsym), args...)
-        push!(ctx.metadata.factorizetimes_before, time())
+for (fsym1, fsym2) in functions_timed
+    @eval function Cassette.prehook(ctx::BenchmarkData, ::typeof($fsym2), args...)
+        push!(ctx.metadata.$fsym1.tics, time())
+    end
+    @eval function Cassette.posthook(ctx::BenchmarkData, output, ::typeof($fsym2), args...)
+        push!(ctx.metadata.$fsym1.tocs, time())
     end
 end
+function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(q!), args...)
+    push!(ctx.metadata.q.tocs, time())
+    push!(ctx.metadata.qvalues, myreal(output))
+end
+
+
+#=
+
+@default_kw struct ProfileCtx
+    all_times::Timers         | Timers()
+    q_values::Vector{Float64} | []
+    f_norms::Vector{Float64}  | []
+end
+
+# Macro to generate Timers
+@default_kw struct Timers
+
+end
+
 
 # Add prehooks for storing number of calls
 function Cassette.prehook(ctx::BenchmarkData, ::typeof(factorize), args...)
@@ -48,10 +70,6 @@ function Cassette.prehook(ctx::BenchmarkData, ::typeof(q!), args...)
     push!(ctx.metadata.q_calls, ctx.metadata.q_counter[])
 end
 # Add posthook for storing values of objective and time at which it was computed
-myreal(x::Dual) = DualNumbers.realpart(x)
-myreal(x::Hyper) = HyperDualNumbers.realpart(x)
-myreal(x::Complex) = real(x)
-myreal(x::Float64) = x
 function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(q!), args...)
     push!(ctx.metadata.qvalues, myreal(output))
     push!(ctx.metadata.qtimes_after, time())
@@ -62,70 +80,49 @@ end
 function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(factorize), args...)
     push!(ctx.metadata.factorizetimes_after, time())
 end
+=#
 
-# @default_kw struct ftape
-#     counter::Ref{Int64} | Ref(0)
-#     times_before::Float64 | []
-#     times_after::Float64 | []
-# end
+
+
+@default_kw struct FunctionTimer
+    tics::Vector{Float64} | []
+    tocs::Vector{Float64} | []
+end
 
 # Create the context type for storing the data
 @default_kw struct ProfileCtx
-    factorize_counter::Ref{Int64}          | Ref(0)
-    f_counter::Ref{Int64}                  | Ref(0)
-    q_counter::Ref{Int64}                  | Ref(0)
-#    qvalue::Float64                        | NaN
-    factorize_calls::Vector{Int64}         | []
-    f_calls::Vector{Int64}                 | []
-    q_calls::Vector{Int64}                 | []
-    factorize_type::Vector{String}         | []
-    factorizetimes_before::Vector{Float64} | []
-    factorizetimes_after::Vector{Float64}  | []
-    ftimes_before::Vector{Float64}         | []
-    ftimes_after::Vector{Float64}          | []
-    qtimes_before::Vector{Float64}         | []
-    qtimes_after::Vector{Float64}          | []
-    qvalues::Vector{Float64}               | []
-end
-
-
-@default_kw struct ProfileCtx
-    all_times::Timers               | Timers()
-    q_and_f_values::CostsAndfNorms  | CostsAndfNorms()
-end
-
-# Macro to generate Timers
-@default_kw struct Timers
-    
-end
-
-@default_kw struct CostsAndfNorms
-    q_values::Vector{Float64} | []
-    f_norms::Vector{Float64}  | []
-end
-
-@default_kw struct FunctionTimer
-    tic::Vector{Float64} | []
-    toc::Vector{Float64} | []
-end
-
-@default_kw struct ProfileCtx
-    
+    qvalues::Vector{Float64} | []
+    q::FunctionTimer | FunctionTimer()
+    Dq::FunctionTimer | FunctionTimer()
+    FDq::FunctionTimer | FunctionTimer()
+    CSDq::FunctionTimer | FunctionTimer()
+    ADq::FunctionTimer | FunctionTimer()
+    D2q::FunctionTimer | FunctionTimer()
+    FD2q::FunctionTimer | FunctionTimer()
+    FDDq::FunctionTimer | FunctionTimer()
+    CSDDq::FunctionTimer | FunctionTimer()
+    ADDq::FunctionTimer | FunctionTimer()
+    AD2q::FunctionTimer | FunctionTimer()
+    factorize::FunctionTimer | FunctionTimer()
+    backsolve::FunctionTimer | FunctionTimer()
 end
 
 # Reformat the context type into a tuple of standard Julia types
 read_profile(p::ProfileCtx) = Dict(
-    "factorize_calls" => p.factorize_calls,
-    "f_calls" => p.f_calls,
-    "q_calls" => p.q_calls,
-    "factorize_type" => p.factorize_type,
-    "factorizetimes_before" => p.factorizetimes_before,
-    "factorizetimes_after" => p.factorizetimes_after,
-    "ftimes_before" => p.ftimes_before,
-    "ftimes_after" => p.ftimes_after,
-    "qtimes_before" => p.qtimes_before,
-    "qtimes_after" => p.qtimes_after,
-    "qvalues" => p.qvalues
+    "qvalues" => p.qvalues,
+    "q" => (p.q.tics, p.q.tocs),
+    "Dq" => (p.Dq.tics, p.Dq.tocs),
+    "FDq" => (p.FDq.tics, p.FDq.tocs),
+    "CSDq" => (p.CSDq.tics, p.CSDq.tocs),
+    "ADq" => (p.ADq.tics, p.ADq.tocs),
+    "D2q" => (p.D2q.tics, p.D2q.tocs),
+    "FD2q" => (p.FD2q.tics, p.FD2q.tocs),
+    "FDDq" => (p.FDDq.tics, p.FDDq.tocs),
+    "CSDDq" => (p.CSDDq.tics, p.CSDDq.tocs),
+    "ADDq" => (p.ADDq.tics, p.ADDq.tocs),
+    "AD2q" => (p.AD2q.tics, p.AD2q.tocs),
+    "factorize" => (p.factorize.tics, p.factorize.tocs),
+    "backsolve" => (p.backsolve.tics, p.backsolve.tocs)
 )
 
 # Dictionary to hold the results
