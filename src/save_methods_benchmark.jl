@@ -4,6 +4,32 @@ opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = fal
 # Using Cassette to plot benchmark of convergence
 Cassette.@context BenchmarkData
 
+functions_timed = [
+    :q,
+    :Dq,
+    :FDq,
+    :CSDq,
+    :ADq,
+    :D2q,
+    :FD2q,
+    :FDDq,
+    :CSDDq,
+    :ADDq,
+    :AD2q,
+    :factorize,
+    :\,
+    :f,
+    :fJac,
+    :Dpf,
+    :Dxf
+]
+
+for fsym in functions_timed
+    @eval function Cassette.prehook(ctx::BenchmarkData, ::typeof($fsym), args...)
+        push!(ctx.metadata.factorizetimes_before, time())
+    end
+end
+
 # Add prehooks for storing number of calls
 function Cassette.prehook(ctx::BenchmarkData, ::typeof(factorize), args...)
     ctx.metadata.factorize_counter[] += 1
@@ -60,6 +86,16 @@ end
     qtimes_before::Vector{Float64}         | []
     qtimes_after::Vector{Float64}          | []
     qvalues::Vector{Float64}               | []
+end
+
+
+@default_kw struct ftimer
+    started::Vector{Float64}
+    ended::Vector{Float64}
+end
+
+@default_kw struct ProfileCtx
+    
 end
 
 # Reformat the context type into a tuple of standard Julia types
