@@ -32,6 +32,9 @@ for (fsym1, fsym2) in functions_timed
         push!(ctx.metadata.$fsym1.tocs, time())
     end
 end
+function Cassette.prehook(ctx::BenchmarkData, ::typeof(q!), args...)
+    push!(ctx.metadata.q.tics, time())
+end
 function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(q!), args...)
     push!(ctx.metadata.q.tocs, time())
     push!(ctx.metadata.qvalues, myreal(output))
