@@ -79,16 +79,20 @@ display(p)
 #
 ###
 
+markers = [:o, :d, :s, :v]
 
-field_name = "D2q_1strun"
-mbd = msbd[field_name]
 p = plot()
-for f in fields_with_time
-    f == "q" || isempty(mbd[f][1]) ? continue : nothing
-    println(f)
-    tictocs = mbd[f]
-    plot!(p, cumsum(tictocs[2] - tictocs[1])/60, label = f)
-    display(p)
+for (i, method) in enumerate(list_methods)
+    field_name = method[1] * "_1strun"
+    mbd = msbd[field_name]
+    for f in fields_with_time
+        f == "q" || isempty(mbd[f][1]) ? continue : nothing
+        println(f)
+        tictocs = mbd[f]
+        label = method[1] * " - " * f
+        plot!(p, cumsum(tictocs[2] - tictocs[1])/60, axis = :log, label = label, marker = markers[i])
+        display(p)
+    end
 end
 
 
