@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -N run_methods_benchmark
+#$ -N run_Cassette_profile
 #$ -q pub64
 #$ -pe openmp 8-64
 #$ -l mem=64G
@@ -15,4 +15,4 @@ cd /data/users/pasquieb/Projects/FastBGCParameterOptimization
 DATADEPS_ALWAYS_ACCEPT = true
 
 # Run it!
-julia src/run_methods_benchmark.jl
+julia src/run_with_Cassette_profile.jl

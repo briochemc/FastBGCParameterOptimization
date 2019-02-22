@@ -1,11 +1,11 @@
 using JLD2, Plots
 
-# Load the benchmark data to plot
+# Load the Cassette profile data to plot
 # TODO save the files with specific names to where it was run?
-# @load "data/methods_benchmark_OCIM1_imac.jld2"
-@load "data/methods_benchmark_OCIM1_katana.jld2"
-# @load "data/methods_benchmark_data.jld2"
-msbd = methods_benchmark_data
+# @load "data/Cassette_profile_OCIM1_imac.jld2"
+@load "data/Cassette_profile_OCIM1_katana.jld2"
+# @load "data/Cassette_profile.jld2"
+K7profiles = Cassette_profile
 
 # TODO save the list_methods with the convergence results
 # TODO save the final params and cost to compare them too
@@ -16,7 +16,7 @@ list_methods = [
     ("FDDq", :q!,  :Dq!,  :FDDq!)
 ]
 
-fields_with_time = [
+timed_functions = [
     "q",
     "Dq",
     "FDq",
@@ -33,16 +33,16 @@ fields_with_time = [
 ]
 
 start_times = Dict()
-has_timer(mbd, f) = haskey(mbd, f) && ~isempty(mbd[f][1])
+has_timer(K7profile, f) = haskey(K7profile, f) && ~isempty(K7profile[f][1])
 for method in list_methods
     for run_str in ["_1strun", "_2ndrun"]
     #for run_str in ["_1strun"]
         field_name = method[1] * run_str
-        mbd = msbd[field_name]
+        K7profile = K7profiles[field_name]
         #println(field_name)
-        #println(minimum([first(mbd[f][1]) for f in fields_with_time if has_timer(mbd, f)]))
-        #println([msbd[field_name][ftime][1] for ftime in fields_with_time if ~isempty(msbd[field_name][ftime][1])])
-        push!(start_times, field_name => minimum([first(mbd[f][1]) for f in fields_with_time if has_timer(mbd, f)]))
+        #println(minimum([first(K7profile[f][1]) for f in timed_functions if has_timer(K7profile, f)]))
+        #println([K7profiles[field_name][ftime][1] for ftime in timed_functions if ~isempty(K7profiles[field_name][ftime][1])])
+        push!(start_times, field_name => minimum([first(K7profile[f][1]) for f in timed_functions if has_timer(K7profile, f)]))
     end
 end
 
@@ -53,7 +53,7 @@ for method in list_methods
     #for run_str in ["_1strun"]
     for run_str in ["_1strun", "_2ndrun"]
         field_name = method[1] * run_str
-        push!(end_costs, minimum(methods_benchmark_data[field_name]["qvalues"]))
+        push!(end_costs, minimum(Cassette_profile[field_name]["qvalues"]))
     end
 end
 using Statistics
@@ -63,8 +63,8 @@ p = plot()
 for (i, method) in enumerate(list_methods)
     for run_str in ["_1strun", "_2ndrun"]
         field_name = method[1] * run_str
-        x = (methods_benchmark_data[field_name]["q"][2] .- start_times[field_name]) ./ 60
-        y = abs.(methods_benchmark_data[field_name]["qvalues"] .- end_cost)
+        x = (Cassette_profile[field_name]["q"][2] .- start_times[field_name]) ./ 60
+        y = abs.(Cassette_profile[field_name]["qvalues"] .- end_cost)
         plot!(p, x, y, yaxis = :log, label = field_name)
         xlabel!(p, "time (min)")
         ylabel!(p, "cost function error")
@@ -85,11 +85,11 @@ markers = [:o, :d, :s, :v]
 p = plot()
 for (i, method) in enumerate(list_methods)
     field_name = method[1] * "_2ndrun"
-    mbd = msbd[field_name]
+    K7profile = K7profiles[field_name]
     println(method[1], ":")
-    for f in fields_with_time
-        isempty(mbd[f][1]) ? continue : nothing
-        tictocs = mbd[f]
+    for f in timed_functions
+        isempty(K7profile[f][1]) ? continue : nothing
+        tictocs = K7profile[f]
         label = method[1] * " - " * f
         #plot!(p, cumsum(tictocs[2] - tictocs[1])/60, axis = :log, label = label, marker = markers[i])
         plot!(p, cumsum(tictocs[2] - tictocs[1])/60, label = label, marker = markers[i])
@@ -109,7 +109,7 @@ min_ys = Vector{Float64}()
 for (i, method) in enumerate(list_methods)
     for run_str in ["_1strun", "_2ndrun"]
         field_name = method[1] * run_str
-        push!(min_ys, minimum(methods_benchmark_data[field_name]["qvalues"]))
+        push!(min_ys, minimum(Cassette_profile[field_name]["qvalues"]))
     end
 end
 best_y = minimum(min_ys)
@@ -119,8 +119,8 @@ p = plot() ;
 for (i, method) in enumerate(list_methods)
     for run_str in ["_1strun", "_2ndrun"]
         field_name = method[1] * run_str
-        x = methods_benchmark_data[field_name]["qtimes_before"] / 60
-        y = methods_benchmark_data[field_name]["costs"]
+        x = Cassette_profile[field_name]["qtimes_before"] / 60
+        y = Cassette_profile[field_name]["costs"]
         y = y .- best_y
         y .= map(y -> y ≤ 0 ? NaN : y, y)
         plot!(p, x, y, yaxis = :log, label = field_name)
@@ -130,7 +130,7 @@ for (i, method) in enumerate(list_methods)
     end
 end
 display(p)
-# savefig("fig/methods_benchmark_logDeltaq_vs_time.pdf")
+# savefig("fig/Cassette_profile_logDeltaq_vs_time.pdf")
 
 function mystep(tbefore, tafter, vals)
     x, y, oldv = Vector{Float64}(), Vector{Float64}(), NaN
@@ -160,7 +160,7 @@ for (i, method) in enumerate(list_methods)
     display(p)
 end
 display(p)
-# savefig("fig/methods_benchmark_logDeltaq_vs_nfact.pdf")
+# savefig("fig/Cassette_profile_logDeltaq_vs_nfact.pdf")
 
 
 # plot vs factorizations

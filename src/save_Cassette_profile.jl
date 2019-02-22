@@ -1,8 +1,8 @@
 # Set the options for the NewtonTrustRegion optimizer
 opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = false, x_tol = 1e-3)
 
-# Using Cassette to plot benchmark of convergence
-Cassette.@context BenchmarkData
+# Using Cassette to save a profile of the runs and plot benchmark of convergence
+Cassette.@context K7Profile
 
 myreal(x::Dual) = DualNumbers.realpart(x)
 myreal(x::Hyper) = HyperDualNumbers.realpart(x)
@@ -25,17 +25,17 @@ functions_timed = [
 ]
 
 for (fsym1, fsym2) in functions_timed
-    @eval function Cassette.prehook(ctx::BenchmarkData, ::typeof($fsym2), args...)
+    @eval function Cassette.prehook(ctx::K7Profile, ::typeof($fsym2), args...)
         push!(ctx.metadata.$fsym1.tics, time())
     end
-    @eval function Cassette.posthook(ctx::BenchmarkData, output, ::typeof($fsym2), args...)
+    @eval function Cassette.posthook(ctx::K7Profile, output, ::typeof($fsym2), args...)
         push!(ctx.metadata.$fsym1.tocs, time())
     end
 end
-function Cassette.prehook(ctx::BenchmarkData, ::typeof(q!), args...)
+function Cassette.prehook(ctx::K7Profile, ::typeof(q!), args...)
     push!(ctx.metadata.q.tics, time())
 end
-function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(q!), args...)
+function Cassette.posthook(ctx::K7Profile, output, ::typeof(q!), args...)
     push!(ctx.metadata.q.tocs, time())
     push!(ctx.metadata.qvalues, myreal(output))
 end
@@ -56,31 +56,31 @@ end
 
 
 # Add prehooks for storing number of calls
-function Cassette.prehook(ctx::BenchmarkData, ::typeof(factorize), args...)
+function Cassette.prehook(ctx::K7Profile, ::typeof(factorize), args...)
     ctx.metadata.factorize_counter[] += 1
     push!(ctx.metadata.factorize_calls, ctx.metadata.factorize_counter[])
     push!(ctx.metadata.factorizetimes_before, time())
     push!(ctx.metadata.factorize_type, string(typeof(args[1])))
 end
-function Cassette.prehook(ctx::BenchmarkData, ::typeof(f), args...)
+function Cassette.prehook(ctx::K7Profile, ::typeof(f), args...)
     ctx.metadata.f_counter[] += 1
     push!(ctx.metadata.ftimes_before, time())
     push!(ctx.metadata.f_calls, ctx.metadata.f_counter[])
 end
-function Cassette.prehook(ctx::BenchmarkData, ::typeof(q!), args...)
+function Cassette.prehook(ctx::K7Profile, ::typeof(q!), args...)
     ctx.metadata.q_counter[] += 1
     push!(ctx.metadata.qtimes_before, time())
     push!(ctx.metadata.q_calls, ctx.metadata.q_counter[])
 end
 # Add posthook for storing values of objective and time at which it was computed
-function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(q!), args...)
+function Cassette.posthook(ctx::K7Profile, output, ::typeof(q!), args...)
     push!(ctx.metadata.qvalues, myreal(output))
     push!(ctx.metadata.qtimes_after, time())
 end
-function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(f), args...)
+function Cassette.posthook(ctx::K7Profile, output, ::typeof(f), args...)
     push!(ctx.metadata.ftimes_after, time())
 end
-function Cassette.posthook(ctx::BenchmarkData, output, ::typeof(factorize), args...)
+function Cassette.posthook(ctx::K7Profile, output, ::typeof(factorize), args...)
     push!(ctx.metadata.factorizetimes_after, time())
 end
 =#
@@ -131,8 +131,8 @@ read_profile(p::ProfileCtx) = Dict(
 # Dictionary to hold the results
 # Load it if it exists, otherwise creat a new one
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
-jld_file = joinpath(path_to_package_root, "data/methods_benchmark_data.jld2")
-isfile(jld_file) ? (@load jld_file methods_benchmark_data) : methods_benchmark_data = Dict()
+jld_file = joinpath(path_to_package_root, "data/Cassette_profile.jld2")
+Cassette_profile = Dict()
 
 # make it into short code by listing the methods differently and
 # interpolating them using the $ sign
@@ -150,10 +150,10 @@ for (method_name, q, Dq, D2q) in list_methods
     init.x, init.p = 1x₀, 3p₀
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
     local tape
-    tape = BenchmarkData(metadata=ProfileCtx())
+    tape = K7Profile(metadata=ProfileCtx())
     eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) ) )
-    methods_benchmark_data[method_name * "_1strun"] = read_profile(tape.metadata)
-    @save jld_file methods_benchmark_data
+    Cassette_profile[method_name * "_1strun"] = read_profile(tape.metadata)
+    @save jld_file Cassette_profile
 end
 # Do it again because of the timer
 for (method_name, q, Dq, D2q) in list_methods
@@ -162,10 +162,10 @@ for (method_name, q, Dq, D2q) in list_methods
     println("\n------------------------\n\n\n")
     init.x, init.p = 1x₀, 3p₀
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-    tape = BenchmarkData(metadata=ProfileCtx())
+    tape = K7Profile(metadata=ProfileCtx())
     eval( :( Cassette.@overdub($tape, optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) ) )
-    methods_benchmark_data[method_name * "_2ndrun"] = read_profile(tape.metadata)
-    @save jld_file methods_benchmark_data
+    Cassette_profile[method_name * "_2ndrun"] = read_profile(tape.metadata)
+    @save jld_file Cassette_profile
 end
 
 

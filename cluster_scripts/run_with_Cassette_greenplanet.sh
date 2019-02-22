@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --job-name=run_methods_benchmark
-#SBATCH --output=cluster_output/run_methods_benchmark.out
-#SBATCH --error=cluster_output/run_methods_benchmark.err
+#SBATCH --job-name=run_Cassette_profile
+#SBATCH --output=cluster_output/run_Cassette_profile.out
+#SBATCH --error=cluster_output/run_Cassette_profile.err
 #SBATCH --partition=brd2.4,has2.5,ilg2.3,m-c1.9,m-c2.2,nes2.8,sib2.9
 #SBATCH --time=24:00:00
 #SBATCH --nodes=1
@@ -19,4 +19,4 @@ cd /DFS-L/DATA/moore/pasquieb/Projects/FastBGCParameterOptimization
 DATADEPS_ALWAYS_ACCEPT = true
 
 # Run it!
-julia src/run_methods_benchmark.jl
+julia src/run_with_Cassette_profile.jl

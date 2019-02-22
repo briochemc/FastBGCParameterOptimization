@@ -14,7 +14,7 @@
 # cd FastBGCParameterOptimization
 
 # Run it
-# /home/briochemc/julia-1.1.0/bin/julia src/run_methods_benchmark.jl
+# /home/briochemc/julia-1.1.0/bin/julia src/run_with_Cassette_profile.jl
 
 # Build NetCDF if it bugs
 # /home/briochemc/julia-1.1.0/bin/julia -e 'using Pkg; Pkg.add("NetCDF"); Pkg.build("NetCDF")'
@@ -25,5 +25,5 @@
 DATADEPS_ALWAYS_ACCEPT = true
 
 # Run it!
-julia src/run_methods_benchmark.jl
+julia src/run_with_Cassette_profile.jl
 
