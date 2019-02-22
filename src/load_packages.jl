@@ -10,6 +10,7 @@ using TransportMatrixTools
 
 # Matrix stuff
 using SparseArrays, SuiteSparse, LinearAlgebra
+SuiteSparse.UMFPACK.umf_ctrl[8] = 0 # turn iterative refinements off
 
 # pretty print
 using Printf
