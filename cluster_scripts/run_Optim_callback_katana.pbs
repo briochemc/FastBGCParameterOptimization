@@ -6,8 +6,8 @@
 #PBS -j oe
 #PBS -M briochemc@gmail.com
 #PBS -m abe
-#PBS -e $HOME/Projects/FastBGCParameterOptimization/cluster_output/error.txt
-#PBS -o $HOME/Projects/FastBGCParameterOptimization/cluster_output/output.txt
+#PBS -e $HOME/Projects/FastBGCParameterOptimization/cluster_output/Optim_callback_error.txt
+#PBS -o $HOME/Projects/FastBGCParameterOptimization/cluster_output/Optim_callback_output.txt
 
 # Load the julia module
 module load julia/1.1.0
