@@ -7,7 +7,7 @@ const to = TimerOutput()
 qt!(λ)        = @timeit to "q"                  q!(λ)
 Dqt!(s, λ)    = @timeit to "Dq"                 Dq!(s, λ)
 D2qt!(s, λ)   = @timeit to "D2q (mine)"         D2q!(s, λ)
-ADDqt!(s, λ)  = @timeit to "D2q (dual)"         AD2q!(s, λ)
+ADDqt!(s, λ)  = @timeit to "D2q (dual)"         ADDq!(s, λ)
 CSDDqt!(s, λ) = @timeit to "D2q (complex)"      CSDDq!(s, λ)
 FDDqt!(s, λ)  = @timeit to "D2q (finite-diff)"  FDDq!(s, λ)
 

@@ -270,3 +270,6 @@ end
 function AD2q!(storage, λ)
     storage[1:npopt, 1:npopt] .= AD2q!(λ)
 end
+function ADDq!(storage, λ)
+    storage[1:npopt, 1:npopt] .= ADDq!(λ)
+end
