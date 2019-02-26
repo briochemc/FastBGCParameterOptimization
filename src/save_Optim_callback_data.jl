@@ -35,6 +35,7 @@ for (method_name, q, Dq, D2q) in list_methods
     println("│ Optimizing using method " * method_name * ", and printing time and q :\n│")
     init.x, init.p = 1x₀, 3p₀
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
+    println("│    ", time())
     eval( :( optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) ) 
     println("└────────────────────────")
 end
