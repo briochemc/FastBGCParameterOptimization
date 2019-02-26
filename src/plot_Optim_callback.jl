@@ -1,4 +1,4 @@
-using Plots # for stacked bars
+using Plots # 
 using LaTeXStrings # for LaTeX labels
 using ColorBrewer # for better colors
 
@@ -8,6 +8,7 @@ data = Dict()
 #    time                   iteration      q(λ)           |Dq(λ)|
 push!(data,
     "D2q" => [
+        1551149960     NaN NaN NaN
         1551150019.9061338902     0     6.541958e-02     5.495858e-02
         1551150076.0596220493     1     1.415066e-02     2.477936e-02
         1551150130.7264719009     2     8.033722e-03     2.222672e-03
@@ -19,6 +20,7 @@ push!(data,
 
 push!(data,
     "FDDq" => [
+        1551150254     NaN NaN NaN
         1551150510.9229331017     0     6.541958e-02     5.495858e-02
         1551150763.8934819698     1     1.436116e-02     2.516030e-02
         1551151015.3333981037     2     8.052481e-03     2.266362e-03
@@ -30,6 +32,7 @@ push!(data,
 
 push!(data,
     "ADDq" => [
+        1551151541     NaN NaN NaN
         1551151756.3082830906     0     6.541958e-02     5.495858e-02
         1551152178.9288620949     1     1.415066e-02     2.477936e-02
         1551152624.4756920338     2     8.033722e-03     2.222672e-03
@@ -41,6 +44,7 @@ push!(data,
 
 push!(data,
     "CSDDq" => [
+        1551153312     NaN NaN NaN
         1551153792.2142388821     0     6.541958e-02     5.495858e-02
         1551154774.6777191162     1     1.415066e-02     2.477936e-02
         1551155349.13905406       2     8.033722e-03     2.222672e-03
@@ -57,9 +61,24 @@ list_methods = [
     "CSDDq"
 ]
 
+function mystepped_x_and_y(times, values)
+    t₀ = times[1]
+    x = [t₀]
+    oldv = values[2]
+    y = [oldv]
+    for (t, v) in zip(times[2:end], values[2:end])
+        push!(x, t)
+        push!(x, t)
+        push!(y, oldv)
+        push!(y, v)
+        oldv = v
+    end
+    return x .- t₀, y
+end
+
 p = plot()
 for (i, method) in enumerate(list_methods)
-    x, y = data[method][:, 1], data[method][:, 4]
+    x, y = mystepped_x_and_y(data[method][:, 1], data[method][:, 4])
     global p
     p = plot!(p,
         x, y,
@@ -68,15 +87,18 @@ for (i, method) in enumerate(list_methods)
     )
 end
 
-p = plot!(p, 
+p = plot!(p,
     legend=:topright,
-    xlabel="time",
-    ylabel="norm of gradient",
+    xlabel="Time (Seconds)",
+    ylabel="Norm of gradient",
+    xminorticks=0:60:3600,
+    xticks=0:300:3600,
     yaxis=:log
 )
 
+
 display(p)
-savefig(p, "fig/TimerOutputs_data_katana.pdf")
+savefig(p, "fig/Optim_callback_katana.pdf")
 display(p)
 
 #=
