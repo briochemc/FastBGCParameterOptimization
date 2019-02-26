@@ -63,28 +63,20 @@ Constant state used to start with.
 """
 const x₀ = [DINobs; DINobs / 10] * 1.1
 
-"""
-    ω :: Float64
-
-Constant parameter for the relative weight of the cost of `p` relative to the cost of `x`.
-Can be used for Bayesian priors I guess.
-Right now used to impose a parabolic shape to the overall cost function (avoids compensations).
-"""
-const ω = 1e-2 * c(x₀) # To be determined!
 
 """
     c(p)
 
 Returns the cost of parameters `p`.
 """
-c(p::Para) = ω * c_noweight(p)
+c(p::Para) = p.ω * c_noweight(p)
 
 """
     Dc(p)
 
 Returns the gradient of cost of parameters `p` (at `p`).
 """
-Dc(p::Para) = ω * Dc_noweight(p)
+Dc(p::Para) = p.ω * Dc_noweight(p)
 
 """
     c(x, p)
