@@ -56,19 +56,6 @@ Gives the standard deviation, `σ`, of the log of the lognormal distribution wit
 """
 σ_LogNormal(m, s) = sqrt(log(1 + (s / m)^2))
 
-"""
-    μobs
-
-The (constant) mean of the log of the observed parameters (the μ of the lognormal prior).
-"""
-const μobs = [meanlogx.(metaflatten(p₀, prior))...]
-
-"""
-    σ²obs
-
-The (constant) variance of the log of the observed parameters (the σ² of the lognormal prior).
-"""
-const σ²obs = [varlogx.(metaflatten(p₀, prior))...]
 
 """
     optimizable_parameters
@@ -76,7 +63,7 @@ const σ²obs = [varlogx.(metaflatten(p₀, prior))...]
 Tuple (constant) of the symbols of the optimizable parameters.
 Uses the `Flatten.jl` package.
 """
-const optimizable_parameters = fieldnameflatten(p₀)
+const optimizable_parameters = fieldnameflatten(Para())
 
 """
     npopt
@@ -90,7 +77,7 @@ const npopt = length(optimizable_parameters)
 
 Number of parameters including non-optimizable ones (constant).
 """
-const np = length(fieldnames(typeof(p₀)))
+const np = length(fieldnames(typeof(Para())))
 
 """
     eltype(::Para{U})
@@ -104,7 +91,7 @@ Base.eltype(::Para{U}) where U = U
 
 Returns the number of optimizable parameters of `p`.
 """
-Base.length(p::Para) = length(fieldnameflatten(p₀))
+Base.length(p::Para) = length(fieldnameflatten(p))
 
 # Defining an iterator for the parameters to be able to `collect` it into a vector
 Base.iterate(p::Para, i=1) = i > np ? nothing : (getfield(p, i), i + 1)
