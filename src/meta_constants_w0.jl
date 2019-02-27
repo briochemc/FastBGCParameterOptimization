@@ -4,6 +4,7 @@
 The (constant) default values of non-optimized parameters.
 """
 const p₀ = Para(ω = 0)
+str_out = "_w0"
 
 
 

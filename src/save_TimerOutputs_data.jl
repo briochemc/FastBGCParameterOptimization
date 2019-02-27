@@ -39,7 +39,7 @@ for (i, myrun) in enumerate(myruns)
         J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀ # and J
 
         # Open the file to print TimerOutputs
-        file_name = joinpath(path_to_package_root, "data", "TimerOutputs_" * method_name * myruns2[i] * ".txt")
+        file_name = joinpath(path_to_package_root, "data", "TimerOutputs_" * method_name * myruns2[i] * str_out * ".txt")
         io = open(file_name, "w")
 
         # Run the timed optimization!
