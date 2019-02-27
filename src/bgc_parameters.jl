@@ -57,13 +57,6 @@ Gives the standard deviation, `σ`, of the log of the lognormal distribution wit
 σ_LogNormal(m, s) = sqrt(log(1 + (s / m)^2))
 
 """
-    p₀
-
-The (constant) default values of non-optimized parameters.
-"""
-const p₀ = Para()
-
-"""
     μobs
 
 The (constant) mean of the log of the observed parameters (the μ of the lognormal prior).
@@ -145,13 +138,6 @@ E.g., conditions like being positive can be imposed using `exp`, etc.
 """
 p2λ(p::Para) = log.(optvec(p)) - μobs
 
-
-"""
-    λ₀
-
-Default `λ` corresponding to `p₀` (constant).
-"""
-const λ₀ = p2λ(p₀)
 
 """
     Dp2λ(p::Para)

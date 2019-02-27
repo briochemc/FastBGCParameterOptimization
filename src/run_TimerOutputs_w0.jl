@@ -24,6 +24,6 @@ include("bgc_functions.jl")
 include("cost_functions.jl")
 
 # set meta constants: p₀, λ₀, τstop, x₀, etc.
-include("meta_constants.jl")
+include("meta_constants_w0.jl")
 
 include("save_TimerOutputs_data.jl")

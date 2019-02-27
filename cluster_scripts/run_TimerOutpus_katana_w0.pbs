@@ -6,8 +6,8 @@
 #PBS -j oe
 #PBS -M briochemc@gmail.com
 #PBS -m abe
-#PBS -e $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_TimerOutputs.err
-#PBS -o $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_TimerOutputs.out
+#PBS -e $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_TimerOutputs_w0.err
+#PBS -o $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_TimerOutputs_w0.out
 
 # Load the julia module
 module load julia/1.1.0
@@ -19,5 +19,5 @@ cd $HOME/Projects/FastBGCParameterOptimization
 DATADEPS_ALWAYS_ACCEPT = true
 
 # Run it!
-julia src/run_TimerOutputs.jl
+julia src/run_TimerOutputs_w0.jl
 

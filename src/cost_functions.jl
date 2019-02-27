@@ -57,14 +57,6 @@ Dc_noweight(p::Para) = (Dp2λ(p) .* σ²obs.^-1 .* p2λ(p))'
 Dc_noweight(p::Para{Complex{Float64}}) = transpose(Dp2λ(p) .* σ²obs.^-1 .* p2λ(p))
 
 """
-    x₀ :: Vector{Float64}
-
-Constant state used to start with.
-"""
-const x₀ = [DINobs; DINobs / 10] * 1.1
-
-
-"""
     c(p)
 
 Returns the cost of parameters `p`.
@@ -88,17 +80,6 @@ The costs are added to be used in a Bayesian framework eventually.
 function c(x, p::Para) # with respect to both x and p
     return c(x) + c(p)
 end
-
-# Preallocate real, dual, complex, and hyperdual states (and Jacobians)
-init, J, εsol, εJ, imsol, imJ, hsol = preallocateNewTypes(Para, fJac, x₀, p₀)
-
-"""
-    τstop
-
-Constant value for the solver stopping criteria.
-Currently set at 1 million years.
-"""
-const τstop = 1e6 * 365e6 * spd
 
 """
     q!(p; preprint)
