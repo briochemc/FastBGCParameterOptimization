@@ -6,8 +6,8 @@
 #PBS -j oe
 #PBS -M briochemc@gmail.com
 #PBS -m abe
-#PBS -e $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_D2q_benchmark.txt
-#PBS -o $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_D2q_benchmark.txt
+#PBS -e $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_D2q_benchmark_w0.txt
+#PBS -o $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_D2q_benchmark_w0.txt
 
 # Load the julia module
 module load julia/1.1.0
@@ -19,5 +19,5 @@ cd $HOME/Projects/FastBGCParameterOptimization
 DATADEPS_ALWAYS_ACCEPT = true
 
 # Run it!
-julia src/run_D2q_benchmark.jl
+julia src/run_D2q_benchmark_w0.jl
 

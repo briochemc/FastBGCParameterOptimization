@@ -23,7 +23,7 @@ include("bgc_functions.jl")
 include("cost_functions.jl")
 
 # set meta constants: p₀, λ₀, τstop, x₀, etc.
-include("meta_constants.jl")
+include("meta_constants_w0.jl")
 
 # Run benchmark on q, Dq, D2q, etc.
 include("save_Optim_callback_data.jl")

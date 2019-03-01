@@ -1,4 +1,3 @@
-# Main script to plot paper figures
 
 # Load the packages
 include("load_packages.jl")

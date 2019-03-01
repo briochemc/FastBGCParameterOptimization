@@ -41,6 +41,6 @@ results = run(suite)
 
 # Save the results in a Julia data file
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
-jld_file = joinpath(path_to_package_root, "data", "BenchmarkTools_data.jld2")
+jld_file = joinpath(path_to_package_root, "data", "BenchmarkTools_data" * str_out * ".jld2")
 @save jld_file results list_functions
 

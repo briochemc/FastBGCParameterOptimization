@@ -2,12 +2,12 @@
 
 #PBS -l nodes=1:ppn=12
 #PBS -l vmem=94gb
-#PBS -l walltime=48:00:00
+#PBS -l walltime=24:00:00
 #PBS -j oe
 #PBS -M briochemc@gmail.com
 #PBS -m abe
-#PBS -e $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_D2q_benchmark.txt
-#PBS -o $HOME/Projects/FastBGCParameterOptimization/cluster_output/run_D2q_benchmark.txt
+#PBS -e $HOME/Projects/FastBGCParameterOptimization/cluster_output/Optim_callback_w0_error.txt
+#PBS -o $HOME/Projects/FastBGCParameterOptimization/cluster_output/Optim_callback_w0_output.txt
 
 # Load the julia module
 module load julia/1.1.0
@@ -19,5 +19,5 @@ cd $HOME/Projects/FastBGCParameterOptimization
 DATADEPS_ALWAYS_ACCEPT = true
 
 # Run it!
-julia src/run_D2q_benchmark.jl
+julia src/run_Optim_callback_w0.jl
 
