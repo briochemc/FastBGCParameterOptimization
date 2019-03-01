@@ -25,5 +25,8 @@ include("bgc_functions.jl")
 # load cost functions
 include("cost_functions.jl")
 
+# set meta constants: p₀, λ₀, τstop, x₀, etc.
+include("meta_constants.jl")
+
 # Run benchmark on q, Dq, D2q, etc.
 include("save_D2q_benchmark_data.jl")
