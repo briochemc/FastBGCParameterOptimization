@@ -29,6 +29,24 @@ list_timed_methods = [
 myruns = ["Run 1", "Run 2"]
 myruns2 = ["_Run1", "_Run2"]
 
+# TimerDict
+timers = Dict()
+function print_mytimer!(d::Dict, f::String, t::TimerOutput)
+    d2 = Dict() # sub dictionary to fill with the timer data
+    t2 = t.inner_timers["Trust Region"]
+    push!(d2, "total_time" => copy(t2.accumulated_data.time))
+    push!(d2, "total_mem" => copy(t2.accumulated_data.allocs))
+    for f2 in keys(t2.inner_timers)
+        t3 = t2.inner_timers[f2]
+        d3 = Dict()
+        push!(d3, "time" => copy(t3.accumulated_data.time))
+        push!(d3, "ncalss" => copy(t3.accumulated_data.ncalls))
+        push!(d3, "allocs" => copy(t3.accumulated_data.allocs))
+        push!(d2, string(f2) => d3)
+    end
+    push!(d, f => d2)
+end
+
 for (i, myrun) in enumerate(myruns)
     for (method_name, q, Dq, D2q) in list_timed_methods
         println("\n\n\n------------------------\n") # print what you are doing
@@ -52,7 +70,17 @@ for (i, myrun) in enumerate(myruns)
         # Close the file
         close(io)
 
+        # Save into Dict
+        print_mytimer!(timers, method_name * myruns2[i], to)
+
     end
 end
+
+# Save the results in a Julia data file
+using JLD2
+path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
+jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * ".jld2")
+@save jld_file timers list_timed_methods
+
 
 
