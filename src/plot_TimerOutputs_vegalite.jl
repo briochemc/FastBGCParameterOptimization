@@ -14,7 +14,7 @@ using VegaLite, DataFrames # for stacked bars
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
 str_out = "_default"
-jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * ".jld2")
+jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * "_katana" * ".jld2")
 @load jld_file timers
 
 # Reshape data into a DataFrame
