@@ -1,47 +1,85 @@
-# Load plotting package 
-using StatsPlots # for stacked bars
-# using LaTeXStrings # for LaTeX labels
-using ColorBrewer # for better colors
+# Load plotting package
+using VegaLite, DataFrames # for stacked bars
 
+
+
+
+
+
+# using LaTeXStrings # for LaTeX labels
+#using ColorBrewer # for better colors
+
+
+# Load data
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
 str_out = "_default"
 jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * ".jld2")
 @load jld_file timers
 
-function timer_to_array(timers::Dict)
-    m = Array{Float64}(undef, 0, 3)
-    leg = []
-    for k in keys(timers) 
-        if occursin("Run2", string(k))
+# Reshape data into a DataFrame
+function timer_to_DataFrame(timers::Dict)
+    df = DataFrame(
+        method = Array{String}(undef, 0),
+        fgh = Array{String}(undef, 0),
+        time = Array{Float64}(undef, 0),
+        allocs = Array{Float64}(undef, 0),
+        ncalls = Array{Int64}(undef, 0)
+    )
+    for k in keys(timers)
+        if ~occursin("compiling", string(k))
             t = timers[k]
-            kD2q = first([string(k) for k in keys(t) if occursin("D2q", string(k))])
-            times = 1e6 * [t["q"]["time"] t["Dq"]["time"] t[kD2q]["time"]]
-            m = vcat(m, times)
-            push!(leg, string(k))
+            for k2 in ["q", "Dq", "D2q"]
+                push!(
+                    df,
+                    Dict(
+                        :method => string(k),
+                        :fgh => k2,
+                        :time => t[k2]["time"] * 1e-9,
+                        :allocs => t[k2]["allocs"] * 2^-30,
+                        :ncalls => t[k2]["ncalls"]
+                    )
+                )
+            end
         end
     end
-    return m, leg
+    return df
 end
+df = timer_to_DataFrame(timers)
 
-m, leg = timer_to_array(timers)
-
-p = plot()
-
-p = groupedbar(
-    color=ColorBrewer.palette("Set2", 3)[1:3]',
-    m .* 1e-9,
-    bar_position=:stack,
-    labels=["q", "Dq", "D2q"],
-    legend=:topright,
-    xticks=(1:length(leg), leg),
-    xlabel="Method",
-    ylabel="Time (seconds)",
-    yminorticks=collect(0:60:3600),
-    yticks=collect(0:300:3600)
+ptime = df |> @vlplot(
+    :bar,
+    x={"sum(time)", title="Computation time (seconds)"},
+    y=:method,
+    color={:fgh, title=""}
 )
 
-display(p)
+# print to PDF
+pdf_file_time = joinpath(path_to_package_root, "fig", "TimerOutputs_time.pdf")
+save(pdf_file_time, ptime)
+
+
+pmem = df |> @vlplot(
+    :bar,
+    x={"sum(allocs)", title="Memory allocations (GiB)"},
+    y=:method,
+    color={:fgh, title=""}
+)
+
+# print to PDF
+pdf_file_mem = joinpath(path_to_package_root, "fig", "TimerOutputs_mem.pdf")
+save(pdf_file_mem, pmem)
+
+pncalls = df |> @vlplot(
+    :bar,
+    x={"sum(ncalls)", title="Number of calls"},
+    y=:method,
+    color={:fgh, title=""}
+)
+
+# print to PDF
+pdf_file_ncalls = joinpath(path_to_package_root, "fig", "TimerOutputs_ncalls.pdf")
+save(pdf_file_ncalls, pncalls)
 
 #savefig(p, "fig/TimerOutputs_data_test.pdf")
 #

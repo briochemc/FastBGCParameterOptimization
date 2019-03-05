@@ -4,12 +4,12 @@ using TimerOutputs
 const to = TimerOutput()
 
 # timed version for all functions called in Optim
-qt!(λ)        = @timeit to "q"                  q!(λ)
-Dqt!(s, λ)    = @timeit to "Dq"                 Dq!(s, λ)
-D2qt!(s, λ)   = @timeit to "D2q (mine)"         D2q!(s, λ)
-ADDqt!(s, λ)  = @timeit to "D2q (dual)"         ADDq!(s, λ)
-CSDDqt!(s, λ) = @timeit to "D2q (complex)"      CSDDq!(s, λ)
-FDDqt!(s, λ)  = @timeit to "D2q (finite-diff)"  FDDq!(s, λ)
+qt!(λ)        = @timeit to "q"    q!(λ)
+Dqt!(s, λ)    = @timeit to "Dq"   Dq!(s, λ)
+D2qt!(s, λ)   = @timeit to "D2q"  D2q!(s, λ)
+ADDqt!(s, λ)  = @timeit to "D2q"  ADDq!(s, λ)
+CSDDqt!(s, λ) = @timeit to "D2q"  CSDDq!(s, λ)
+FDDqt!(s, λ)  = @timeit to "D2q"  FDDq!(s, λ)
 
 # Dictionary to hold the results
 # Load it if it exists, otherwise creat a new one
@@ -26,8 +26,8 @@ list_timed_methods = [
     ( "FDDq", :qt!, :Dqt!,  :FDDqt!)
 ]
 
-myruns = ["Run 1", "Run 2"]
-myruns2 = ["_Run1", "_Run2"]
+myruns = ["Compiling run", "Precompiled run"]
+myruns2 = ["_compiling_run", ""]
 
 # TimerDict
 timers = Dict()
@@ -40,7 +40,7 @@ function print_mytimer!(d::Dict, f::String, t::TimerOutput)
         t3 = t2.inner_timers[f2]
         d3 = Dict()
         push!(d3, "time" => copy(t3.accumulated_data.time))
-        push!(d3, "ncalss" => copy(t3.accumulated_data.ncalls))
+        push!(d3, "ncalls" => copy(t3.accumulated_data.ncalls))
         push!(d3, "allocs" => copy(t3.accumulated_data.allocs))
         push!(d2, string(f2) => d3)
     end
