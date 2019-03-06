@@ -13,7 +13,7 @@ using VegaLite, DataFrames # for stacked bars
 # Load data
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
-str_out = "_default"
+str_out = "_w0"
 jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * "_katana" * ".jld2")
 @load jld_file timers
 
@@ -58,7 +58,7 @@ ptime = df |> @vlplot(
 )
 
 # print to PDF
-pdf_file_time = joinpath(path_to_package_root, "fig", "TimerOutputs_time.pdf")
+pdf_file_time = joinpath(path_to_package_root, "fig", "TimerOutputs_time_w0.pdf")
 save(pdf_file_time, ptime)
 
 
@@ -70,7 +70,7 @@ pmem = df |> @vlplot(
 )
 
 # print to PDF
-pdf_file_mem = joinpath(path_to_package_root, "fig", "TimerOutputs_mem.pdf")
+pdf_file_mem = joinpath(path_to_package_root, "fig", "TimerOutputs_mem_w0.pdf")
 save(pdf_file_mem, pmem)
 
 pncalls = df |> @vlplot(
@@ -81,7 +81,7 @@ pncalls = df |> @vlplot(
 )
 
 # print to PDF
-pdf_file_ncalls = joinpath(path_to_package_root, "fig", "TimerOutputs_ncalls.pdf")
+pdf_file_ncalls = joinpath(path_to_package_root, "fig", "TimerOutputs_ncalls_w0.pdf")
 save(pdf_file_ncalls, pncalls)
 
 #savefig(p, "fig/TimerOutputs_data_test.pdf")
