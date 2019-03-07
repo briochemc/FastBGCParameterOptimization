@@ -16,7 +16,7 @@ These tests should be run everytime to make sure the tests are passed on the fun
 
 
 @testset "Checks fJac(x, p) ≈ numJac(x, p)" begin
-    C = build_big_compressor(wet3d, SixBoxModel.iwet, nwet, 2, 2)
+    C = build_big_compressor(wet3d, Circulation.iwet, nwet, 2, 2)
     for i in 1:10, j in 1:10
         x = exp.(randn(length(x₀))) .* x₀
         p = Para(exp.(randn(length(vec(p₀))))) * p₀ # * overloaded to multiply element-wise Para types
