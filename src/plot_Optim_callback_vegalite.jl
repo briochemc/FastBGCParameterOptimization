@@ -24,7 +24,7 @@ println("The data being plotted was copy-pasted from Katana output!")
 #    time                   iteration      q(λ)           |Dq(λ)|
 method_name = "D2q"
 time_iter_q_normgradq = [
-    1.55175691039612e9       -1      6.541958e-02     5.495858e-02
+    1.55175691039612e9       -1     6.541958e-02     5.495858e-02
     1551756970.0654759407     0     6.541958e-02     5.495858e-02
     1551757029.2447180748     1     1.415066e-02     2.477936e-02
     1551757078.6766560078     2     8.033722e-03     2.222672e-03
@@ -37,7 +37,7 @@ mypush!(df, method_name, time_iter_q_normgradq)
 
 method_name = "FDDq"
 time_iter_q_normgradq = [
-    1.551757206021395e9            -1      6.541958e-02     5.495858e-02
+    1.551757206021395e9      -1     6.541958e-02     5.495858e-02
     1551757463.1829349995     0     6.541958e-02     5.495858e-02
     1551757724.1325070858     1     1.436116e-02     2.516030e-02
     1551757983.5896670818     2     8.052515e-03     2.266454e-03
@@ -49,9 +49,9 @@ mypush!(df, method_name, time_iter_q_normgradq)
 
 method_name = "ADDq"
 time_iter_q_normgradq = [
-    1.551758535051019e9            -1      6.541958e-02     5.495858e-02
+    1.551758535051019e9      -1     6.541958e-02     5.495858e-02
     1551758749.3396151066     0     6.541958e-02     5.495858e-02
-    1551759391.038105011     1     1.415066e-02     2.477936e-02
+    1551759391.038105011      1     1.415066e-02     2.477936e-02
     1551759913.1118679047     2     8.033722e-03     2.222672e-03
     1551760364.7857260704     3     7.626427e-03     6.482999e-04
     1551760613.9882490635     4     7.623451e-03     3.599584e-06
@@ -61,7 +61,7 @@ mypush!(df, method_name, time_iter_q_normgradq)
 
 method_name = "CSDDq"
 time_iter_q_normgradq = [
-    1.551760651124301e9            -1      6.541958e-02     5.495858e-02
+    1.551760651124301e9      -1     6.541958e-02     5.495858e-02
     1551761136.4315431118     0     6.541958e-02     5.495858e-02
     1551761720.1648418903     1     1.415066e-02     2.477936e-02
     1551762415.2240309715     2     8.033722e-03     2.222673e-03
@@ -87,7 +87,8 @@ p = df |>
     },
     x={:time, title="Elapsed computation time (seconds)"},
     y={:normgradq, title="norm of dq(p)", scale={typ=:log}},
-    color={:method, scale={scheme="category10"}}
+    color={:method, scale={scheme="redgrey-4"}, sort=true},
+    shape={:method, sort=true, legend=false}
 )
 
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)

@@ -4,11 +4,11 @@ include("../src/load_packages.jl")
 
 # Setup OCIM1.1 or toy model (comment/uncomment to use the one you need for now)
 
-include("../src/build_6BoxModel_circulation.jl")
-using .SixBoxModel: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
+# include("../src/build_6BoxModel_circulation.jl")
+# using .SixBoxModel: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
 
-# include("OCIM1.jl")
-# using .OCIM1: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
+include("OCIM1.jl")
+using .OCIM1: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
 
 # load biogeochmistry parameters
 include("../src/bgc_parameters.jl")
