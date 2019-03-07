@@ -26,12 +26,13 @@ Each parameter in `p` comes with a bunch of metadata for each field `f`:
 Modify this part of the code if you need new/different parameters!
 """
 @latexSymbol @description @flattenable @prior @printunits @units @default_kw struct Para{U} <: AbstractPara{U}
-    τu::U | 500.0 * spd | u"s"    | u"d"    | LN(250 * spd, 100 * spd)  | true  | "Specific uptake rate timescale"        | "\\tau_\\mathbf{u}"
-    w₀::U |     1 / spd | u"m/s"  | u"m/d"  | LN(1 / spd, 0.5 / spd)    | true  | "Sinking velocity at surface"           | "w_0"
-    w′::U |     1 / spd | u"s^-1" | u"d^-1" | LN(1 / spd, 0.5 / spd)    | true  | "Vertical gradient of sinking velocity" | "w'"
-    κ ::U |  0.25 / spd | u"s^-1" | u"d^-1" | LN(0.25 / spd, 0.1 / spd) | true  | "Remineralization rate"                 | "\\kappa"
-    τg::U | 365e6 * spd | u"s"    | u"yr"   | nothing                   | false | "Geological Restoring"                  | "\\tau_\\mathrm{geo}"
-    ω ::U |        1e-4 | u"1"    | u"1"    | nothing                   | false | "Relative weight of params in cost"     | "\\omega"
+    umax::U | 10e-3 / spd | u"mol/m^3/s" | u"mmol/m^3/d" | LN(10e-3 / spd, 5e-3 / spd) | true  | "Maximum uptake rate (Michaelis-Menten)"      | "\\mathbf{u}_\\mathrm{max}"
+    ku  ::U |        1e-3 | u"mol/m^3"   | u"mmol/m^3"   | LN(1e-3, 0.5e-3)            | true  | "Half-saturation constant (Michaelis-Menten)" | "k_\\mathbf{u}"
+    w₀  ::U |     1 / spd | u"m/s"       | u"m/d"        | LN(1 / spd, 0.5 / spd)      | true  | "Sinking velocity at surface"                 | "w_0"
+    w′  ::U |     1 / spd | u"s^-1"      | u"d^-1"       | LN(1 / spd, 0.5 / spd)      | true  | "Vertical gradient of sinking velocity"       | "w'"
+    κ   ::U |  0.25 / spd | u"s^-1"      | u"d^-1"       | LN(0.25 / spd, 0.1 / spd)   | true  | "Remineralization rate"                       | "\\kappa"
+    τg  ::U | 365e6 * spd | u"s"         | u"yr"         | nothing                     | false | "Geological Restoring"                        | "\\tau_\\mathrm{geo}"
+    ω   ::U |        1e-4 | u"1"         | u"1"          | nothing                     | false | "Relative weight of params in cost"           | "\\omega"
 end
 
 """

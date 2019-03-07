@@ -11,25 +11,33 @@ end
 
 # Uptake
 relu(x) = (x .≥ 0) .* x
-Drelu(x) = (x .≥ 0) .* 1.0
+drelu(x) = (x .≥ 0) .* 1.0
+# Michaelis-Menten
+mm(x, μ, k)     =  μ * x ./ (x .+ k)
+∂mm_∂x(x, μ, k) =  μ * k ./ (x .+ k).^2
+∂mm_∂μ(x, μ, k) =      x ./ (x .+ k)
+∂mm_∂k(x, μ, k) = -μ * x ./ (x .+ k).^2
 function uptake(DIN, p::Para)
-    τu = p.τu
-    return maskEup .* relu(DIN - DINobs) ./ τu
+    umax, ku = p.umax, p.ku
+    return maskEup .* mm(relu(DIN), umax, ku)
 end
 # overload for numJac
 function uptake(DIN::Array{<:Number,2}, p::Para)
-    τu = p.τu
-    DINobs2 = repeat(DINobs, 1, size(DIN, 2))
-    return d₀(maskEup) * relu(DIN - DINobs2) ./ τu
+    umax, ku = p.umax, p.ku
+    return d₀(maskEup) * mm(relu(DIN), umax, ku)
 end
 # Uptake derivatives
 function uptakeJac(DIN, p::Para)
-    τu = p.τu
-    return d₀(maskEup .* Drelu(DIN - DINobs) ./ τu)
+    umax, ku = p.umax, p.ku
+    return d₀(maskEup .* ∂mm_∂x(relu(DIN), umax, ku) .* drelu(DIN))
 end
-function Duptake_Dτu(DIN, p::Para)
-    τu = p.τu
-    return -uptake(DIN, p) ./ τu
+function ∂uptake_∂umax(DIN, p::Para)
+    umax, ku = p.umax, p.ku
+    return maskEup .* ∂mm_∂μ(relu(DIN), umax, ku)
+end
+function ∂uptake_∂ku(DIN, p::Para)
+    umax, ku = p.umax, p.ku
+    return maskEup .* ∂mm_∂k(relu(DIN), umax, ku)
 end
 
 # Remineralization
@@ -42,7 +50,7 @@ function remineralizationJac(POM, p::Para)
     κ = p.κ
     return κ * I
 end
-function Dremineralization_Dκ(POM, p::Para)
+function ∂remineralization_∂κ(POM, p::Para)
     κ = p.κ
     return POM
 end
@@ -121,15 +129,18 @@ Called without the symbol `s`, this function will loop through all the optimizab
 function Dpf(x, p::Para, s::Symbol)
     DIN, POM = unpackx(x)
     foo = zeros(promote_type(eltype(x), eltype(p)), 2nwet)
-    if s == :τu
-        foo[iPOM] .= Duptake_Dτu(DIN, p)
+    if s == :umax
+        foo[iPOM] .= ∂uptake_∂umax(DIN, p)
+        foo[iDIN] .= -foo[iPOM]
+    elseif s == :ku
+        foo[iPOM] .= ∂uptake_∂ku(DIN, p)
         foo[iDIN] .= -foo[iPOM]
     elseif s == :w₀
         foo[iPOM] .= -S1 * POM
     elseif s == :w′
         foo[iPOM] .= -Sz * POM
     elseif s == :κ
-        foo[iDIN] .= Dremineralization_Dκ(POM, p)
+        foo[iDIN] .= ∂remineralization_∂κ(POM, p)
         foo[iPOM] .= -foo[iDIN]
     else
         error("There is no $s parameter")
