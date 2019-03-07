@@ -7,7 +7,7 @@ include("../src/load_packages.jl")
 # include("../src/build_6BoxModel_circulation.jl")
 # using .SixBoxModel: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
 
-include("OCIM1.jl")
+include("../src/OCIM1.jl")
 using .OCIM1: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
 
 # load biogeochmistry parameters
