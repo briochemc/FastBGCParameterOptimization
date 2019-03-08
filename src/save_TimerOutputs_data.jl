@@ -6,8 +6,10 @@ const to = TimerOutput()
 # timed version for all functions called in Optim
 qt!(λ)        = @timeit to "q"    q!(λ)
 Dqt!(s, λ)    = @timeit to "Dq"   Dq!(s, λ)
+ADqt!(s, λ)   = @timeit to "Dq"   ADq!(s, λ)
 D2qt!(s, λ)   = @timeit to "D2q"  D2q!(s, λ)
 ADDqt!(s, λ)  = @timeit to "D2q"  ADDq!(s, λ)
+AD2qt!(s, λ)  = @timeit to "D2q"  AD2q!(s, λ)
 CSDDqt!(s, λ) = @timeit to "D2q"  CSDDq!(s, λ)
 FDDqt!(s, λ)  = @timeit to "D2q"  FDDq!(s, λ)
 
@@ -20,10 +22,11 @@ methods_TimerOutputs_data = Dict()
 # make it into short code by listing the methods differently and
 # interpolating them using the $ sign
 list_timed_methods = [
-    (  "D2q", :qt!, :Dqt!,   :D2qt!)
-    ( "ADDq", :qt!, :Dqt!,  :ADDqt!)
-    ("CSDDq", :qt!, :Dqt!, :CSDDqt!)
-    ( "FDDq", :qt!, :Dqt!,  :FDDqt!)
+    ("FLASH"     , :qt!,  :Dqt!,   :D2qt!)
+    ("HyperDual" , :qt!, :ADqt!,  :AD2qt!)
+    ("Dual"      , :qt!,  :Dqt!,  :ADDqt!)
+    ("Complex"   , :qt!,  :Dqt!, :CSDDqt!)
+    ("FiniteDiff", :qt!,  :Dqt!,  :FDDqt!)
 ]
 
 myruns = ["Compiling run", "Precompiled run"]
@@ -66,6 +69,7 @@ for (i, myrun) in enumerate(myruns)
 
         # Print the TimerOutput
         print_timer(io, to)
+        print(io, method_name * "\n" * read(io, String))
 
         # Close the file
         close(io)
