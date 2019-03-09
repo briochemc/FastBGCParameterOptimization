@@ -3,10 +3,11 @@
 
 # List of functions to be benchmarked
 list_methods = [
-    (  "D2q", :q!,  :Dq!,   :D2q!)
-    ( "FDDq", :q!,  :Dq!,  :FDDq!)
-    ( "ADDq", :q!,  :Dq!,  :ADDq!)
-    ("CSDDq", :q!,  :Dq!, :CSDDq!)
+    ("FLASH"     , :q!,  :Dq!,   :D2q!)
+    ("FiniteDiff", :q!,  :Dq!,  :FDDq!)
+    ("Dual"      , :q!,  :Dq!,  :ADDq!)
+    ("Complex"   , :q!,  :Dq!, :CSDDq!)
+    ("HyperDual" , :q!, :ADq!,  :AD2q!)
 ]
 
 function print_time_and_q(λ)
