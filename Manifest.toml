@@ -610,13 +610,15 @@ version = "0.5.0"
 
 [[TranscodingStreams]]
 deps = ["Pkg", "Random", "Test"]
-git-tree-sha1 = "8a032ceb5cf7a28bf1bdb77746b250b9e9fda565"
+git-tree-sha1 = "90f845c65c50bc57d6ffc815dbab2a4003ccf75c"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.9.0"
+version = "0.9.1"
 
 [[TransportMatrixTools]]
 deps = ["DualMatrixTools", "DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "HyperDualMatrixTools", "HyperDualNumbers", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-path = "/Users/benoitpasquier/.julia/dev/TransportMatrixTools"
+git-tree-sha1 = "759d853b0fcc75cdad2011b3e20ec5030afc38a2"
+repo-rev = "master"
+repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
 version = "0.1.0"
 
