@@ -23,10 +23,10 @@ methods_TimerOutputs_data = Dict()
 # interpolating them using the $ sign
 list_timed_methods = [
     ("FLASH"     , :qt!,  :Dqt!,   :D2qt!)
-    ("HyperDual" , :qt!, :ADqt!,  :AD2qt!)
+    ("FiniteDiff", :qt!,  :Dqt!,  :FDDqt!)
     ("Dual"      , :qt!,  :Dqt!,  :ADDqt!)
     ("Complex"   , :qt!,  :Dqt!, :CSDDqt!)
-    ("FiniteDiff", :qt!,  :Dqt!,  :FDDqt!)
+    ("HyperDual" , :qt!, :ADqt!,  :AD2qt!)
 ]
 
 myruns = ["Compiling run", "Precompiled run"]
