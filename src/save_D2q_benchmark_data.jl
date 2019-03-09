@@ -14,7 +14,12 @@ list_functions = [
     :CSDDq!
     :FDDq!
     :ADDq!
+    :AD2q!
+    :ADq!
 ]
+
+
+
 
 # Create a BenchmarkGroup for each function
 for fun in list_functions
@@ -28,7 +33,7 @@ myseed = rand(1:10000)
 for fun in list_functions # for each function
     #suite[string(fun)] = @benchmarkable $fun(λᵣ) setup=(λᵣ = copy(λ₀ .* (1 .+ randn(npopt)/10)))seconds=18000
     #suite[string(fun)] = @benchmarkable $fun(λᵣ) seconds=18000 samples=2 setup=(λᵣ = copy(λ₀ .* (1 .+ randn(npopt)/10)))
-    suite[string(fun)] = @benchmarkable $fun(λ₀ .+ randn(npopt)/10) seconds=18000 samples=1 evals=50 setup=(Random.seed!(myseed))
+    suite[string(fun)] = @benchmarkable $fun(λ₀ .+ randn(npopt)/10) seconds=18000 samples=1 evals=40 setup=(Random.seed!(myseed))
 end
 
 # Run each function once for precompiling before benchmark
