@@ -17,7 +17,7 @@ str_out = "_default"
 jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * "_katana" * ".jld2")
 @load jld_file timers
 
-translate_for_legend = Dict("q"=>"q", "Dq"=>"dq", "D2q"=>"d²q")
+translate_for_legend = Dict("q"=>"objective", "Dq"=>"gradient", "D2q"=>"Hessian")
 
 # Reshape data into a DataFrame
 function timer_to_DataFrame(timers::Dict)
@@ -52,7 +52,7 @@ df = timer_to_DataFrame(timers)
 ptime = df |> @vlplot(
     :bar,
     x={"sum(time)", title="Computation time (seconds)"},
-    y={:method, sort=["D2q", "FDDq", "ADDq", "CSDDq"]},
+    y={:method, sort=["FLASH", "Dual", "FiniteDiff", "Complex", "HyperDual"]},
     color={:fgh, title="", scale={scheme="set2"}, sort=["q", "dq", "d²q"]},
     order={field=:method, sort=["q", "dq", "d²q"]}
 )
