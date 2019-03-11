@@ -1,4 +1,4 @@
-# This script is to run the optimization and print out the times as it goes in order to plot it after 
+# This script is to run the optimization and print out the times as it goes in order to plot it after
 
 
 # List of functions to be benchmarked
@@ -8,6 +8,8 @@ list_methods = [
     ("Dual"      , :q!,  :Dq!,  :ADDq!)
     ("Complex"   , :q!,  :Dq!, :CSDDq!)
     ("HyperDual" , :q!, :ADq!,  :AD2q!)
+    ("sHyperDual", :q!, :ADq!, :AD2Sq!)
+    ("bHyperDual", :dq,  :no!,    :no!)
 ]
 
 function print_time_and_q(λ)
@@ -29,7 +31,7 @@ function print_full_state(x)
 end
 
 # Set the options for the NewtonTrustRegion optimizer
-opt = Optim.Options(store_trace = false, show_trace = false, extended_trace = false, x_tol = 1e-3, callback=print_full_state)
+opt = Optim.Options(store_trace = false, show_trace = false, extended_trace = false, callback=print_full_state)
 
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
@@ -40,7 +42,11 @@ for (method_name, q, Dq, D2q) in list_methods
     init.x, init.p = 1x₀, 3p₀
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
     println("│    ", time())
-    eval( :( results = optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) ) 
+    if method_name == "bHyperDual"
+        eval( :( results = optimize($q, $λ₀, NewtonTrustRegion(), $opt)) )
+    else
+        eval( :( results = optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) )
+    end
     println("└────────────────────────")
     # Save output
     jld_file = joinpath(path_to_package_root, "data", "Optim_callback_data" * method_name * str_out * ".jld2")

@@ -42,6 +42,9 @@ end
         @testset "Against DualNumbers gradient (mine)" begin
             @test isapprox(ADq!(λ₀), Dq!(λ₀))
         end
+        @testset "Against DualNumbers gradient (mine)" begin
+            @test isapprox(dq.g(λ₀), Dq!(λ₀))
+        end
     end
     @testset "Check `D2q!`" begin
         @testset "Against Calculus.jacobian (large rtol)" begin

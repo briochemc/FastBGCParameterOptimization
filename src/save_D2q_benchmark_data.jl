@@ -16,7 +16,9 @@ list_functions = [
     :ADDq!
     :AD2q!
     :ADq!
+    :AD2Sq!
 ]
+
 
 
 

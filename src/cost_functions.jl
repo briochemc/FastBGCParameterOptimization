@@ -87,10 +87,10 @@ end
 Full cost `c(sol(p), p)` at `p`.
 `f(x, p) = 0` will be solved for a solution `sol` if required.
 """
-q!(p::Para{Float64}; preprint=" ") = q!(c, f, fJac, nrm, init, p, τstop; preprint=preprint)
-q!(p::Para{Dual{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, εsol, init, p, τstop; preprint=preprint)
-q!(p::Para{Hyper{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, J, hsol, init, p, τstop; preprint=preprint)
-q!(p::Para{Complex{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, imsol, init, p, τstop; preprint=preprint)
+q!(p::Para{Float64}; preprint="") = q!(c, f, fJac, nrm, init, p, τstop; preprint=preprint)
+q!(p::Para{Dual{Float64}}; preprint="") = q!(c, f, fJac, nrm, εsol, init, p, τstop; preprint=preprint)
+q!(p::Para{Hyper{Float64}}; preprint="") = q!(c, f, fJac, nrm, J, hsol, init, p, τstop; preprint=preprint)
+q!(p::Para{Complex{Float64}}; preprint="") = q!(c, f, fJac, nrm, imsol, init, p, τstop; preprint=preprint)
 
 """
     print_cost(cval; preprint)
@@ -98,7 +98,7 @@ q!(p::Para{Complex{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, imsol, init, p
 Prints the cost as a root mean square (RMS) error in percent.
 (Will also print the imaginary or dual part if any.)
 """
-function print_cost(cval; preprint=" ")
+function print_cost(cval; preprint="")
     if preprint ≠ ""
         print(preprint)
         printRMS(cval)
@@ -116,7 +116,7 @@ printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(re
 Full cost `c(sol(λ), λ)` at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-q!(λ::Vector; preprint=" ") = q!(λ2p(λ); preprint=preprint)
+q!(λ::Vector; preprint="") = q!(λ2p(λ); preprint=preprint)
 
 """
     Dq!(λ; preprint)
@@ -124,13 +124,13 @@ q!(λ::Vector; preprint=" ") = q!(λ2p(λ); preprint=preprint)
 Evaluates the Gradient of the full cost at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-function Dq!(λ::Vector{Float64}; preprint=" ")
+function Dq!(λ::Vector{Float64}; preprint="")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, J, init, λ, τstop; preprint=preprint)
 end
-function Dq!(ελ::Vector{Dual{Float64}}; preprint=" ")
+function Dq!(ελ::Vector{Dual{Float64}}; preprint="")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, εJ, εsol, init, ελ, τstop; preprint=preprint)
 end
-function Dq!(imλ::Vector{Complex{Float64}}; preprint=" ")
+function Dq!(imλ::Vector{Complex{Float64}}; preprint="")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, imJ, imsol, init, imλ, τstop; preprint=preprint)
 end
 
@@ -140,7 +140,7 @@ end
 Evaluates the Hessian of the full cost at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-D2q!(λ::Vector{Float64}; preprint=" ") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
+D2q!(λ::Vector{Float64}; preprint="") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
 
 """
     gradient_q!(λ; preprint)
@@ -213,6 +213,7 @@ AD2q!(λ)
 Evaluates the Hessian of the full cost at `λ` using HyperDualNumbers.
 """
 AD2q!(λ) = HyperDualNumbersHessian(q!, λ)
+AD2Sq!(λ) = HyperDualNumbersSymmetricHessian(q!, λ)
 
 function Dq!(storage, λ)
     storage[1:npopt] .= vec(Dq!(λ))
@@ -230,6 +231,9 @@ end
 function ADq!(storage, λ)
     storage[1:npopt] .= vec(ADq!(λ))
 end
+function bADq!(storage, λ, buffer, last_λ)
+    storage[1:npopt] .= vec(HyperDualNumbersBufferedgradient!(q!, buffer, last_λ, λ))
+end
 
 function CSDDq!(storage, λ)
     storage[1:npopt, 1:npopt] .= CSDDq!(λ)
@@ -243,6 +247,21 @@ end
 function AD2q!(storage, λ)
     storage[1:npopt, 1:npopt] .= AD2q!(λ)
 end
+function AD2Sq!(storage, λ)
+    storage[1:npopt, 1:npopt] .= AD2Sq!(λ)
+end
 function ADDq!(storage, λ)
     storage[1:npopt, 1:npopt] .= ADDq!(λ)
 end
+function bAD2Sq!(storage, λ, buffer, last_λ)
+    storage[1:npopt, 1:npopt] .= HyperDualNumbersBufferedHessian!(q!, buffer, last_λ, λ)
+end
+
+buffer = zeros(Hyper256, npopt) # Preallocate an appropriate buffer
+last_λ = zeros(Float64, npopt)
+dq = TwiceDifferentiable(
+    λ -> q!(λ),
+    (stor, λ) -> bADq!(stor, λ, buffer, last_λ),
+    (stor, λ) -> bAD2Sq!(stor, λ, buffer, last_λ),
+    last_λ .- 1.0 # really not sure why this is needed
+)

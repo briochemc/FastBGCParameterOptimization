@@ -86,11 +86,69 @@ function HyperDualNumbersHessian(q, λ::Vector{U}) where U<:Float64
     out = zeros(U, n, n)
     for i in 1:n, j in 1:n
         hλ = convert(Vector{Hyper{U}}, λ)
-        hλ[i] += ε₁ ## unfinished business here
-        hλ[j] += ε₂ ## unfinished business here
+        hλ[i] += ε₁
+        hλ[j] += ε₂
         out[i, j] = ε₁ε₂part(q(hλ))
     end
     return out
+end
+
+"""
+    HyperDualNumbersSymmetricHessian(q, λ::Vector{U})
+
+Returns the Hessian using HyperDualNumbers.
+Does not compute all the terms (because output should be symmetric)
+Only good for small sizes.
+`q` is an application from Rⁿ to R in this case.
+"""
+function HyperDualNumbersSymmetricHessian(q, λ::Vector{U}) where U<:Float64
+    n = length(λ)
+    out = zeros(U, n, n)
+    for i in 1:n, j in i:n
+        hλ = convert(Vector{Hyper{U}}, λ)
+        hλ[i] += ε₁
+        hλ[j] += ε₂
+        out[i, j] = ε₁ε₂part(q(hλ))
+        i ≠ j ? out[j, i] = out[i, j] : nothing
+    end
+    return out
+end
+
+
+function update_HD_buffer!(q, buffer, last_λ, λ::Vector{U}) where U<:Float64
+    if λ != last_λ
+        copyto!(last_λ, λ)
+        n = length(λ)
+        for i in 1:n
+            hλ = convert(Vector{Hyper{U}}, λ)
+            hλ[i] += ε₁
+            hλ[1] += ε₂
+            buffer[i] = q(hλ)
+        end
+    end
+end
+
+function HyperDualNumbersBufferedHessian!(q, buffer, last_λ, λ::Vector{U}) where U<:Float64
+    n = length(λ)
+    out = zeros(U, n, n)
+    update_HD_buffer!(q, buffer, last_λ, λ::Vector{U})
+    out[1, :] .= ε₁ε₂part.(buffer)
+    out[:, 1] .= out[1, :]
+    for i in 2:n, j in i:n
+        hλ = convert(Vector{Hyper{U}}, λ)
+        hλ[i] += ε₁
+        hλ[j] += ε₂
+        out[i, j] = ε₁ε₂part(q(hλ))
+        i ≠ j ? out[j, i] = out[i, j] : nothing
+    end
+    return out
+end
+
+function HyperDualNumbersBufferedgradient!(q, buffer, last_λ, λ::Vector{U}) where U<:Float64
+    n = length(λ)
+    out = zeros(U, n, n)
+    update_HD_buffer!(q, buffer, last_λ, λ::Vector{U})
+    return ε₁part.(buffer)
 end
 
 Base.conj(x::Hyper) = Hyper(conj(real(x)), conj(ε₁part(x)), conj(ε₂part(x)), conj(ε₁ε₂part(x)))

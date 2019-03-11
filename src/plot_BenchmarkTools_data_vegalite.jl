@@ -1,4 +1,4 @@
-using JLD2, BenchmarkTools, VegaLite
+using JLD2, BenchmarkTools, VegaLite, DataFrames
 
 #@load "data/BenchmarkTools_data.jld2"
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
@@ -14,12 +14,14 @@ end
 # Reorder keys to plot in my order
 #     key       fgh       method
 mykeys = [
-    ("q!"    , "q"  , "q"     ),
-    ("Dq!"   , "dq" , "dq"     ),
-    ("D2q!"  , "d²q", "D2q"  ),
-    ("FDDq!" , "d²q", "FDDq" ),
-    ("ADDq!" , "d²q", "ADDq" ),
-    ("CSDDq!", "d²q", "CSDDq")
+    ("q!"    , "f"  , "f"         ),
+    ("Dq!"   , "∇f" , "∇f"        ),
+    ("ADq!"  , "∇f" , "Dual"      ),
+    ("D2q!"  , "∇²f", "FLASH"     ),
+    ("FDDq!" , "∇²f", "FINITEDIFF"),
+    ("ADDq!" , "∇²f", "DUAL"      ),
+    ("CSDDq!", "∇²f", "COMPLEX"   ),
+    ("AD2q!" , "∇²f", "HYPERDUAL" )
 ]
 
 
