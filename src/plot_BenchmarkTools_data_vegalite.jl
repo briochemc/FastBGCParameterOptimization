@@ -6,10 +6,6 @@ str_out = "_default"
 jld_file = joinpath(path_to_package_root, "data", "BenchmarkTools_data" * str_out * ".jld2")
 @load jld_file results
 
-for k in keys(results)
-    println(results[k])
-end
-
 
 # Reorder keys to plot in my order
 #     key       fgh       method
@@ -18,12 +14,22 @@ mykeys = [
     ("Dq!"   , "∇f" , "∇f"        ),
     ("ADq!"  , "∇f" , "Dual"      ),
     ("D2q!"  , "∇²f", "FLASH"     ),
-    ("FDDq!" , "∇²f", "FINITEDIFF"),
     ("ADDq!" , "∇²f", "DUAL"      ),
     ("CSDDq!", "∇²f", "COMPLEX"   ),
+    ("FDDq!" , "∇²f", "FINITEDIFF"),
     ("AD2q!" , "∇²f", "HYPERDUAL" )
 ]
 
+#sorting = [
+#    "f"
+#    "∇f"
+#    "Dual"
+#    "FLASH"
+#    "DUAL"
+#    "COMPLEX"
+#    "FINITEDIFF"
+#    "HYPERDUAL"
+#]
 
 function results_to_df(results, mykeys)
     df = DataFrame(
@@ -33,14 +39,12 @@ function results_to_df(results, mykeys)
         allocs = Array{Float64}(undef, 0)
     )
     for (k, f, m) in mykeys
-        println(typeof(results[k].times[]))
-        println(results[k].times)
         df = push!(
             df,
             Dict(
                 :method => m,
                 :fgh => f,
-                :time => results[k].times[] * 1e-9,
+                :time => round(results[k].times[] * 1e-9),
                 :allocs => results[k].allocs[] * 2^-27
             )
         )
@@ -52,12 +56,29 @@ df = results_to_df(results, mykeys)
 
 
 p = df |> @vlplot(
-    :bar,
-    x={:time, title="Computation time (seconds)"},
-    y={:method, sort=["q", "dq", "D2q", "FDDq", "ADDq", "CSDDq"]},
-    color={:fgh, title="", scale={scheme="set2"}, sort=["q", "dq", "d²q"]},
-    order={field=:method, sort=["q", "dq", "d²q"]}
+    encoding={
+        x={:time, title="Computation time (seconds)"},
+        y={:method, sort=true},
+        color={:fgh, title="", scale={scheme="set2"}},
+        text={:time},
+    },
+    resolve={
+        scale={
+            y ="shared"
+        }
+    }
+) +
+@vlplot(:bar) + 
+@vlplot(
+    mark={
+        :text,
+        align=:left,
+        baseline=:middle,
+        dx=5
+    }
 )
+
+display(p)
 
 # print to PDF
 pdf_file = joinpath(path_to_package_root, "fig",  "BenchmarkTools_data" * str_out * ".pdf")
