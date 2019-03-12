@@ -87,10 +87,10 @@ end
 Full cost `c(sol(p), p)` at `p`.
 `f(x, p) = 0` will be solved for a solution `sol` if required.
 """
-q!(p::Para{Float64}; preprint="") = q!(c, f, fJac, nrm, init, p, τstop; preprint=preprint)
-q!(p::Para{Dual{Float64}}; preprint="") = q!(c, f, fJac, nrm, εsol, init, p, τstop; preprint=preprint)
-q!(p::Para{Hyper{Float64}}; preprint="") = q!(c, f, fJac, nrm, J, hsol, init, p, τstop; preprint=preprint)
-q!(p::Para{Complex{Float64}}; preprint="") = q!(c, f, fJac, nrm, imsol, init, p, τstop; preprint=preprint)
+q!(p::Para{Float64}; preprint=" ") = q!(c, f, fJac, nrm, init, p, τstop; preprint=preprint)
+q!(p::Para{Dual{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, εsol, init, p, τstop; preprint=preprint)
+q!(p::Para{Hyper{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, J, hsol, init, p, τstop; preprint=preprint)
+q!(p::Para{Complex{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, imsol, init, p, τstop; preprint=preprint)
 
 """
     print_cost(cval; preprint)
@@ -98,7 +98,7 @@ q!(p::Para{Complex{Float64}}; preprint="") = q!(c, f, fJac, nrm, imsol, init, p,
 Prints the cost as a root mean square (RMS) error in percent.
 (Will also print the imaginary or dual part if any.)
 """
-function print_cost(cval; preprint="")
+function print_cost(cval; preprint=" ")
     if preprint ≠ ""
         print(preprint)
         printRMS(cval)
@@ -116,7 +116,7 @@ printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(re
 Full cost `c(sol(λ), λ)` at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-q!(λ::Vector; preprint="") = q!(λ2p(λ); preprint=preprint)
+q!(λ::Vector; preprint=" ") = q!(λ2p(λ); preprint=preprint)
 
 """
     Dq!(λ; preprint)
@@ -124,13 +124,13 @@ q!(λ::Vector; preprint="") = q!(λ2p(λ); preprint=preprint)
 Evaluates the Gradient of the full cost at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-function Dq!(λ::Vector{Float64}; preprint="")
+function Dq!(λ::Vector{Float64}; preprint=" ")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, J, init, λ, τstop; preprint=preprint)
 end
-function Dq!(ελ::Vector{Dual{Float64}}; preprint="")
+function Dq!(ελ::Vector{Dual{Float64}}; preprint=" ")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, εJ, εsol, init, ελ, τstop; preprint=preprint)
 end
-function Dq!(imλ::Vector{Complex{Float64}}; preprint="")
+function Dq!(imλ::Vector{Complex{Float64}}; preprint=" ")
     return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, imJ, imsol, init, imλ, τstop; preprint=preprint)
 end
 
@@ -140,7 +140,7 @@ end
 Evaluates the Hessian of the full cost at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-D2q!(λ::Vector{Float64}; preprint="") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
+D2q!(λ::Vector{Float64}; preprint=" ") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
 
 """
     gradient_q!(λ; preprint)
