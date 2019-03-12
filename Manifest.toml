@@ -173,9 +173,9 @@ version = "0.16.4"
 
 [[DualMatrixTools]]
 deps = ["DualNumbers", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "e9b027b9fab1adddda6a1d517c9d74fe529ceffd"
+git-tree-sha1 = "e0a12faf8bd7aa3e77439839bdb0cbec6f1601a5"
 uuid = "31f4e45d-be81-5be7-b2dd-bc577b4f7be8"
-version = "1.2.1"
+version = "1.2.3"
 
 [[DualNumbers]]
 deps = ["Calculus", "LinearAlgebra", "NaNMath", "SpecialFunctions", "Test"]
@@ -267,9 +267,9 @@ version = "0.7.1"
 
 [[HyperDualMatrixTools]]
 deps = ["HyperDualNumbers", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "8edeebac3f9c8b38278d14d17fd4045434357893"
+git-tree-sha1 = "516b3bdab80f1625a9e426f9099c4518e5231687"
 uuid = "04d39a18-1502-5db8-a704-9ca743349cef"
-version = "1.0.1"
+version = "2.0.1"
 
 [[HyperDualNumbers]]
 deps = ["Calculus", "Compat", "LinearAlgebra", "NaNMath", "SpecialFunctions", "Test"]
@@ -497,9 +497,9 @@ uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[Ratios]]
 deps = ["Compat"]
-git-tree-sha1 = "fd159bead0a24e6270fd0573a340312bd4645cc2"
+git-tree-sha1 = "cdbbe0f350581296f3a2e3e7a91b214121934407"
 uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
-version = "0.3.0"
+version = "0.3.1"
 
 [[Reactive]]
 deps = ["DataStructures", "Distributed", "Test"]
@@ -649,9 +649,9 @@ version = "1.1.3"
 
 [[WeakRefStrings]]
 deps = ["Missings", "Random", "Test"]
-git-tree-sha1 = "cf70c71939e621a3fac4156a8bfb3c80d745794a"
+git-tree-sha1 = "960639a12ffd223ee463e93392aeb260fa325566"
 uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
-version = "0.5.7"
+version = "0.5.8"
 
 [[WinRPM]]
 deps = ["BinDeps", "Compat", "HTTPClient", "LibExpat", "Libdl", "Libz", "URIParser"]
