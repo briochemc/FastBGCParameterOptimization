@@ -145,9 +145,9 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqDiffTools]]
 deps = ["LinearAlgebra", "Test"]
-git-tree-sha1 = "4b21dd83c341412a0607334ac64bb5593a4bd583"
+git-tree-sha1 = "30f82c63cb9d293513b360572e283c19577fcf82"
 uuid = "01453d9d-ee7c-5054-8395-0335cb756afa"
-version = "0.8.0"
+version = "0.8.1"
 
 [[DiffResults]]
 deps = ["Compat", "StaticArrays"]
@@ -616,7 +616,7 @@ version = "0.9.1"
 
 [[TransportMatrixTools]]
 deps = ["DualMatrixTools", "DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "HyperDualMatrixTools", "HyperDualNumbers", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-git-tree-sha1 = "1eb0b430f744eed9243956e2300d4343ecdeaf6d"
+git-tree-sha1 = "e9fd815d27a317b50c5fd7960eda364da2dc63da"
 repo-rev = "master"
 repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
