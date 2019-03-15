@@ -135,6 +135,20 @@ function Dq!(imλ::Vector{Complex{Float64}}; preprint=" ")
 end
 
 """
+    Dq!(λ; preprint)
+
+Evaluates the HYPERSMART Gradient of the full cost at `λ`.
+"""
+HSDq!(λ::Vector{Float64}; preprint=" ") = Dq!(c, f, fJac, nrm, λ2p, Dλ2p, HSbuf, J, hsol, init, λ, τstop; preprint=preprint)
+
+"""
+    Dq!(λ; preprint)
+
+Evaluates the HYPERSMART Gradient of the full cost at `λ`.
+"""
+HSD2q!(λ::Vector{Float64}; preprint=" ") = D2q!(c, f, fJac, nrm, λ2p, Dλ2p, D2λ2p, HSbuf, J, hsol, init, λ, τstop; preprint=preprint)
+
+"""
     D2q!(λ; preprint)
 
 Evaluates the Hessian of the full cost at `λ`.
@@ -215,53 +229,121 @@ Evaluates the Hessian of the full cost at `λ` using HyperDualNumbers.
 AD2q!(λ) = HyperDualNumbersHessian(q!, λ)
 AD2Sq!(λ) = HyperDualNumbersSymmetricHessian(q!, λ)
 
+"""
+    Dq!(storage, λ)
+
+Analytical gradient
+"""
 function Dq!(storage, λ)
     storage[1:npopt] .= vec(Dq!(λ))
 end
+
+"""
+    D2q!(storage, λ)
+
+FLASH Hessian
+"""
 function D2q!(storage, λ)
     storage[1:npopt, 1:npopt] .= D2q!(λ)
 end
 
+"""
+    CSDq!(storage, λ)
+
+Complex-step method gradient
+"""
 function CSDq!(storage, λ)
     storage[1:npopt] .= vec(CSDq!(λ))
 end
+
+"""
+    FDq!(storage, λ)
+
+Finite-difference method gradient
+"""
 function FDq!(storage, λ)
     storage[1:npopt] .= vec(FDq!(λ))
 end
+
+"""
+    ADq!(storage, λ)
+
+Dual-step method gradient
+"""
 function ADq!(storage, λ)
     storage[1:npopt] .= vec(ADq!(λ))
 end
-function bADq!(storage, λ, buffer, last_λ)
-    storage[1:npopt] .= vec(HyperDualNumbersBufferedgradient!(q!, buffer, last_λ, λ))
+
+"""
+    HSDq!(storage, λ)
+
+HYPERSMART method gradient
+"""
+function HSDq!(storage, λ)
+    storage[1:npopt] .= vec(HSDq!(λ))
 end
 
+"""
+    CSDDq!(storage, λ)
+
+Complex-step method Hessian
+"""
 function CSDDq!(storage, λ)
     storage[1:npopt, 1:npopt] .= CSDDq!(λ)
 end
+
+"""
+    FD2q!(storage, λ)
+
+Finite-difference method Hessian (2nd order)
+"""
 function FD2q!(storage, λ)
     storage[1:npopt, 1:npopt] .= FD2q!(λ)
 end
+
+"""
+    FDDq!(storage, λ)
+
+Finite-difference method Hessian (1st order from analytical gradient)
+"""
 function FDDq!(storage, λ)
     storage[1:npopt, 1:npopt] .= FDDq!(λ)
 end
+
+"""
+    AD2q!(storage, λ)
+
+Hyperdual-step method Hessian
+"""
 function AD2q!(storage, λ)
     storage[1:npopt, 1:npopt] .= AD2q!(λ)
 end
+
+"""
+    AD2Sq!(storage, λ)
+
+Symmetric Hyperdual-step method Hessian
+"""
 function AD2Sq!(storage, λ)
     storage[1:npopt, 1:npopt] .= AD2Sq!(λ)
 end
+
+"""
+    ADDq!(storage, λ)
+
+Dual-step method Hessian (from the analytical gradient)
+"""
 function ADDq!(storage, λ)
     storage[1:npopt, 1:npopt] .= ADDq!(λ)
 end
-function bAD2Sq!(storage, λ, buffer, last_λ)
-    storage[1:npopt, 1:npopt] .= HyperDualNumbersBufferedHessian!(q!, buffer, last_λ, λ)
+
+"""
+    ADDq!(storage, λ)
+
+HYPERSMART method Hessian
+"""
+function HSD2q!(storage, λ)
+    storage[1:npopt, 1:npopt] .= HSD2q!(λ)
 end
 
-buffer = zeros(Hyper256, npopt) # Preallocate an appropriate buffer
-last_λ = zeros(Float64, npopt)
-dq = TwiceDifferentiable(
-    λ -> q!(λ),
-    (stor, λ) -> bADq!(stor, λ, buffer, last_λ),
-    (stor, λ) -> bAD2Sq!(stor, λ, buffer, last_λ),
-    last_λ .- 1.0 # really not sure why this is needed
-)
+

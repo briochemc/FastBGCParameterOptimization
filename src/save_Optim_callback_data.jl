@@ -3,13 +3,13 @@
 
 # List of functions to be benchmarked
 list_methods = [
-    ("FLASH"     , :q!,  :Dq!,   :D2q!)
-    ("FiniteDiff", :q!,  :Dq!,  :FDDq!)
-    ("Dual"      , :q!,  :Dq!,  :ADDq!)
-    ("Complex"   , :q!,  :Dq!, :CSDDq!)
-    ("HyperDual" , :q!, :ADq!,  :AD2q!)
-    ("sHyperDual", :q!, :ADq!, :AD2Sq!)
-    ("bHyperDual", :dq,  :no!,    :no!)
+    ("FD1"        , :q!,   :Dq!,  :FDDq!)
+    ("CSD"        , :q!,   :Dq!, :CSDDq!)
+    ("DUAL"       , :q!,   :Dq!,  :ADDq!)
+    ("FLASH"      , :q!,   :Dq!,   :D2q!)
+    ("HYPER"      , :q!,  :ADq!,  :AD2q!)
+    ("HYPERSMART" , :q!, :HSDq!, :HSD2q!)
+    ("FD2"        , :q!,  :FDq!,  :FD2q!)
 ]
 
 function print_time_and_q(λ)
@@ -31,7 +31,7 @@ function print_full_state(x)
 end
 
 # Set the options for the NewtonTrustRegion optimizer
-opt = Optim.Options(store_trace = false, show_trace = false, extended_trace = false, callback=print_full_state)
+opt = Optim.Options(store_trace = false, show_trace = false, extended_trace = false, callback=print_full_state, g_calls_limit=15)
 
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
@@ -42,11 +42,7 @@ for (method_name, q, Dq, D2q) in list_methods
     init.x, init.p = 1x₀, 3p₀
     J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
     println("│    ", time())
-    if method_name == "bHyperDual"
-        eval( :( results = optimize($q, $λ₀, NewtonTrustRegion(), $opt)) )
-    else
-        eval( :( results = optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) )
-    end
+    eval( :( results = optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) )
     println("└────────────────────────")
     # Save output
     jld_file = joinpath(path_to_package_root, "data", "Optim_callback_data" * method_name * str_out * ".jld2")

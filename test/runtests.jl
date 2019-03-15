@@ -4,11 +4,11 @@ include("../src/load_packages.jl")
 
 # Setup OCIM1.1 or toy model (comment/uncomment to use the one you need for now)
 
-include("../src/build_6BoxModel_circulation.jl")
-Circulation = SixBoxModel
+#include("../src/build_6BoxModel_circulation.jl")
+#Circulation = SixBoxModel
 
-#include("../src/OCIM1.jl")
-#Circulation = OCIM1
+include("../src/OCIM1.jl")
+Circulation = OCIM1
 
 using .Circulation: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
 

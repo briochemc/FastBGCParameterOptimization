@@ -28,39 +28,42 @@ end
 
 
 
-@testset "Check Derivatives of cost functions" begin
-    @testset "Check `Dq!`" begin
-        @testset "Against Calculus.gradient (large rtol)" begin
+@testset "Check Derivatives of objective" begin
+    @testset "gradient" begin
+        @testset "Analytical VS Calculus.gradient (large rtol)" begin
             @test isapprox(gradient_q!(λ₀), Dq!(λ₀), rtol=1e-3)
         end
-        @testset "Against Calculus.jacobian (large rtol)" begin
+        @testset "Analytical VS Calculus.jacobian (large rtol)" begin
             @test isapprox(FDq!(λ₀), Dq!(λ₀), rtol=1e-3)
         end
-        @testset "Against complex-step gradient (mine)" begin
+        @testset "Analytical VS complex-step gradient (mine)" begin
             @test isapprox(CSDq!(λ₀), Dq!(λ₀))
         end
-        @testset "Against DualNumbers gradient (mine)" begin
+        @testset "Analytical VS DualNumbers gradient (mine)" begin
             @test isapprox(ADq!(λ₀), Dq!(λ₀))
         end
-        @testset "Against DualNumbers gradient (mine)" begin
-            @test isapprox(dq.g(λ₀), Dq!(λ₀))
+        @testset "Analytical VS HyperDualNumbers gradient (mine)" begin
+            @test isapprox(HSDq!(λ₀), Dq!(λ₀))
         end
     end
     @testset "Check `D2q!`" begin
-        @testset "Against Calculus.jacobian (large rtol)" begin
+        @testset "FLASH VS Calculus.jacobian (large rtol)" begin
             @test isapprox(FDDq!(λ₀), D2q!(λ₀), rtol=1e-3)
         end
-        @testset "Against Calculus.hessian (large rtol)" begin
+        @testset "FLASH VS Calculus.hessian (large rtol)" begin
             @test isapprox(FD2q!(λ₀), D2q!(λ₀), rtol=1e-3)
         end
-        @testset "Against complex-step jacobian (mine)" begin
+        @testset "FLASH VS CSD" begin
             @test isapprox(CSDDq!(λ₀), D2q!(λ₀))
         end
-        @testset "Against DualNumbers jacobian (mine)" begin
+        @testset "FLASH VS DUAL" begin
             @test isapprox(ADDq!(λ₀), D2q!(λ₀))
         end
-        @testset "Against HyperDualNumbers Hessian (mine)" begin
+        @testset "FLASH VS HYPER" begin
             @test isapprox(AD2q!(λ₀), D2q!(λ₀))
+        end
+        @testset "FLASH VS HYPERSMART" begin
+            @test isapprox(HSD2q!(λ₀), D2q!(λ₀))
         end
     end
 end
