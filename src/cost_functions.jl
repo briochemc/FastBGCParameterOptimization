@@ -84,7 +84,7 @@ end
 """
     q!(p; preprint)
 
-Full cost `c(sol(p), p)` at `p`.
+Objective `c(sol(p), p)` at `p`.
 `f(x, p) = 0` will be solved for a solution `sol` if required.
 """
 q!(p::Para{Float64}; preprint=" ") = q!(c, f, fJac, nrm, init, p, τstop; preprint=preprint)
@@ -114,7 +114,7 @@ printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(re
 """
     q!(λ; preprint)
 
-Full cost `c(sol(λ), λ)` at `λ`.
+Objective `c(sol(λ), λ)` at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
 q!(λ::Vector; preprint=" ") = q!(λ2p(λ); preprint=preprint)
@@ -123,7 +123,7 @@ HSq!(λ::Vector; preprint=" ") = HSq!(λ2p(λ); preprint=preprint)
 """
     Dq!(λ; preprint)
 
-Evaluates the Gradient of the full cost at `λ`.
+Evaluates the Gradient of the objective at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
 function Dq!(λ::Vector{Float64}; preprint=" ")
@@ -139,21 +139,21 @@ end
 """
     Dq!(λ; preprint)
 
-Evaluates the HYPERSMART Gradient of the full cost at `λ`.
+Evaluates the HYPERSMART Gradient of the objective at `λ`.
 """
 HSDq!(λ::Vector{Float64}; preprint=" ") = Dq!(c, f, fJac, nrm, λ2p, Dλ2p, HSbuf, J, hsol, init, λ, τstop; preprint=preprint)
 
 """
     Dq!(λ; preprint)
 
-Evaluates the HYPERSMART Gradient of the full cost at `λ`.
+Evaluates the HYPERSMART Hessian of the objective at `λ`.
 """
 HSD2q!(λ::Vector{Float64}; preprint=" ") = D2q!(c, f, fJac, nrm, λ2p, Dλ2p, D2λ2p, HSbuf, J, hsol, init, λ, τstop; preprint=preprint)
 
 """
     D2q!(λ; preprint)
 
-Evaluates the Hessian of the full cost at `λ`.
+Evaluates the Hessian of the objective at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
 D2q!(λ::Vector{Float64}; preprint=" ") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
@@ -161,7 +161,7 @@ D2q!(λ::Vector{Float64}; preprint=" ") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2
 """
     gradient_q!(λ; preprint)
 
-Evaluates the gradient of the full cost at `λ` using the `Calculus` package.
+Evaluates the gradient of the objective at `λ` using the `Calculus` package.
 (Warning: could be slow and inacurrate!)
 """
 gradient_q!(λ::Vector{Float64}) = Calculus.gradient(q!, λ)'
@@ -169,7 +169,7 @@ gradient_q!(λ::Vector{Float64}) = Calculus.gradient(q!, λ)'
 """
     FDq!(λ; preprint)
 
-Evaluates the gradient of the full cost at `λ` using the `Calculus` package.
+Evaluates the gradient of the objective at `λ` using the `Calculus` package.
 (Warning: could be slow and inacurrate!)
 """
 FDq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> [q!(λ)], λ, :central)
@@ -177,7 +177,7 @@ FDq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> [q!(λ)], λ, :central)
 """
     FD2q!(λ; preprint)
 
-Evaluates the Hessian of the full cost at `λ` using the `Calculus` package.
+Evaluates the Hessian of the objective at `λ` using the `Calculus` package.
 (Warning: could be slow and inacurrate!)
 """
 FD2q!(λ::Vector{Float64}) = Calculus.hessian(q!, λ)
@@ -185,7 +185,7 @@ FD2q!(λ::Vector{Float64}) = Calculus.hessian(q!, λ)
 """
     FDDq!(λ; preprint)
 
-Evaluates the Hessian of the full cost at `λ` using the `Calculus` package.
+Evaluates the Hessian of the objective at `λ` using the `Calculus` package.
 The difference with `hessian_q` is that it uses my fast `Dq!` and calculates its jacobian.
 (Warning: could be slow and inacurrate!)
 """
@@ -194,7 +194,7 @@ FDDq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> vec(Dq!(λ)), λ, :central)
 """
     CSDq!(λ)
 
-Evaluates the gradient of the full cost at `λ` using the complex-step method.
+Evaluates the gradient of the objective at `λ` using the complex-step method.
 (Warning: could be slow!)
 """
 CSDq!(λ) = ComplexStepGradient(q!, λ)'
@@ -202,7 +202,7 @@ CSDq!(λ) = ComplexStepGradient(q!, λ)'
 """
     CSDDq!(λ)
 
-Evaluates the Hessian of the full cost at `λ` using the complex-step method.
+Evaluates the Hessian of the objective at `λ` using the complex-step method.
 Uses the analytical `Dq!`.
 (Warning: could be slow!)
 """
@@ -211,14 +211,14 @@ CSDDq!(λ) = ComplexStepJacobian(Dq!, λ)
 """
     ADq!(λ)
 
-Evaluates the gradient of the full cost at `λ` using DualNumbers.
+Evaluates the gradient of the objective at `λ` using DualNumbers.
 """
 ADq!(λ) = DualNumbersGradient(q!, λ)'
 
 """
     ADDq!(λ)
 
-Evaluates the Hessian of the full cost at `λ` using DualNumbers.
+Evaluates the Hessian of the objective at `λ` using DualNumbers.
 Uses the analytical `Dq!`.
 """
 ADDq!(λ) = DualNumbersJacobian(Dq!, λ)
@@ -226,7 +226,7 @@ ADDq!(λ) = DualNumbersJacobian(Dq!, λ)
 """
 AD2q!(λ)
 
-Evaluates the Hessian of the full cost at `λ` using HyperDualNumbers.
+Evaluates the Hessian of the objective at `λ` using HyperDualNumbers.
 """
 AD2q!(λ) = HyperDualNumbersHessian(q!, λ)
 AD2Sq!(λ) = HyperDualNumbersSymmetricHessian(q!, λ)
