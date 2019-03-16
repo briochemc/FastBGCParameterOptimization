@@ -89,7 +89,8 @@ Full cost `c(sol(p), p)` at `p`.
 """
 q!(p::Para{Float64}; preprint=" ") = q!(c, f, fJac, nrm, init, p, τstop; preprint=preprint)
 q!(p::Para{Dual{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, εsol, init, p, τstop; preprint=preprint)
-q!(p::Para{Hyper{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, J, hsol, init, p, τstop; preprint=preprint)
+HSq!(p::Para{Hyper{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, J, hsol, init, p, τstop; preprint=preprint)
+q!(p::Para{Hyper{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, hsol, init, p, τstop; preprint=preprint)
 q!(p::Para{Complex{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, imsol, init, p, τstop; preprint=preprint)
 
 """
@@ -117,6 +118,7 @@ Full cost `c(sol(λ), λ)` at `λ`.
 `f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
 q!(λ::Vector; preprint=" ") = q!(λ2p(λ); preprint=preprint)
+HSq!(λ::Vector; preprint=" ") = HSq!(λ2p(λ); preprint=preprint)
 
 """
     Dq!(λ; preprint)
