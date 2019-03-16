@@ -5,17 +5,17 @@ const to = TimerOutput()
 
 # timed version for all functions called in Optim
 qt!(λ)        = @timeit to "f"   q!(λ)
-Dqt!(s, λ)    = @timeit to "∇f"  Dq!(s, λ)
-ADqt!(s, λ)   = @timeit to "∇f"  ADq!(s, λ)
-FDqt!(s, λ)   = @timeit to "∇f"  FDq!(s, λ)
-HSDqt!(s, λ)  = @timeit to "∇f"  HSDq!(s, λ)
-D2qt!(s, λ)   = @timeit to "∇²f" D2q!(s, λ)
-ADDqt!(s, λ)  = @timeit to "∇²f" ADDq!(s, λ)
-AD2qt!(s, λ)  = @timeit to "∇²f" AD2q!(s, λ)
-HSD2qt!(s, λ) = @timeit to "∇²f" HSD2q!(s, λ)
-CSDDqt!(s, λ) = @timeit to "∇²f" CSDDq!(s, λ)
-FDDqt!(s, λ)  = @timeit to "∇²f" FDDq!(s, λ)
-FD2qt!(s, λ)  = @timeit to "∇²f" FD2q!(s, λ)
+Dqt!(s, λ)    = @timeit to "∇f"  Dq!(s, λ)     #\
+ADqt!(s, λ)   = @timeit to "∇f"  ADq!(s, λ)    # │
+FDqt!(s, λ)   = @timeit to "∇f"  FDq!(s, λ)    # ├─ gradients
+HSDqt!(s, λ)  = @timeit to "∇f"  HSDq!(s, λ)   #/
+D2qt!(s, λ)   = @timeit to "∇²f" D2q!(s, λ)    #\
+ADDqt!(s, λ)  = @timeit to "∇²f" ADDq!(s, λ)   # │
+AD2qt!(s, λ)  = @timeit to "∇²f" AD2q!(s, λ)   # │
+HSD2qt!(s, λ) = @timeit to "∇²f" HSD2q!(s, λ)  # ├─ Hessians
+CSDDqt!(s, λ) = @timeit to "∇²f" CSDDq!(s, λ)  # │
+FDDqt!(s, λ)  = @timeit to "∇²f" FDDq!(s, λ)   # │
+FD2qt!(s, λ)  = @timeit to "∇²f" FD2q!(s, λ)   #/
 
 # Dictionary to hold the results
 # Load it if it exists, otherwise creat a new one
