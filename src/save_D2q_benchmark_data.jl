@@ -9,25 +9,23 @@ suite = BenchmarkGroup()
 # List of functions to be benchmarked
 list_functions = [
     :q!
-    :Dq!
-    :D2q!
-    :CSDDq!
-    :FDDq!
-    :ADDq!
-    :AD2q!
-    :ADq!
-    :AD2Sq!
+    :Dq!    #\
+    :HSDq!  # │
+    :ADq!   # ├─ gradients
+    :FDq!   #/
+    :D2q!   #\
+    :HSD2q! # │
+    :CSDDq! # │
+    :FDDq!  # ├─ Hessians
+    :ADDq!  # │
+    :AD2q!  # │
+    :FD2q!  #/
 ]
-
-
-
-
 
 # Create a BenchmarkGroup for each function
 for fun in list_functions
     suite[string(fun)] = BenchmarkGroup()
 end
-
 
 myseed = rand(1:10000)
 
@@ -35,7 +33,7 @@ myseed = rand(1:10000)
 for fun in list_functions # for each function
     #suite[string(fun)] = @benchmarkable $fun(λᵣ) setup=(λᵣ = copy(λ₀ .* (1 .+ randn(npopt)/10)))seconds=18000
     #suite[string(fun)] = @benchmarkable $fun(λᵣ) seconds=18000 samples=2 setup=(λᵣ = copy(λ₀ .* (1 .+ randn(npopt)/10)))
-    suite[string(fun)] = @benchmarkable $fun(λ₀ .+ randn(npopt)/10) seconds=18000 samples=1 evals=40 setup=(Random.seed!(myseed))
+    suite[string(fun)] = @benchmarkable $fun(λ₀ .+ randn(npopt)/10) seconds=18000 samples=1 evals=10 setup=(Random.seed!(myseed))
 end
 
 # Run each function once for precompiling before benchmark

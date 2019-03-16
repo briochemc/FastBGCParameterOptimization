@@ -4,15 +4,18 @@ using TimerOutputs
 const to = TimerOutput()
 
 # timed version for all functions called in Optim
-qt!(λ)        = @timeit to "q"   q!(λ)
-Dqt!(s, λ)    = @timeit to "Dq"  Dq!(s, λ)
-ADqt!(s, λ)   = @timeit to "Dq"  ADq!(s, λ)
-D2qt!(s, λ)   = @timeit to "D2q" D2q!(s, λ)
-ADDqt!(s, λ)  = @timeit to "D2q" ADDq!(s, λ)
-AD2qt!(s, λ)  = @timeit to "D2q" AD2q!(s, λ)
-AD2Sqt!(s, λ) = @timeit to "D2q" AD2Sq!(s, λ)
-CSDDqt!(s, λ) = @timeit to "D2q" CSDDq!(s, λ)
-FDDqt!(s, λ)  = @timeit to "D2q" FDDq!(s, λ)
+qt!(λ)        = @timeit to "f"   q!(λ)
+Dqt!(s, λ)    = @timeit to "∇f"  Dq!(s, λ)
+ADqt!(s, λ)   = @timeit to "∇f"  ADq!(s, λ)
+FDqt!(s, λ)   = @timeit to "∇f"  FDq!(s, λ)
+HSDqt!(s, λ)  = @timeit to "∇f"  HSDq!(s, λ)
+D2qt!(s, λ)   = @timeit to "∇²f" D2q!(s, λ)
+ADDqt!(s, λ)  = @timeit to "∇²f" ADDq!(s, λ)
+AD2qt!(s, λ)  = @timeit to "∇²f" AD2q!(s, λ)
+HSD2qt!(s, λ) = @timeit to "∇²f" HSD2q!(s, λ)
+CSDDqt!(s, λ) = @timeit to "∇²f" CSDDq!(s, λ)
+FDDqt!(s, λ)  = @timeit to "∇²f" FDDq!(s, λ)
+FD2qt!(s, λ)  = @timeit to "∇²f" FD2q!(s, λ)
 
 # Dictionary to hold the results
 # Load it if it exists, otherwise creat a new one
@@ -23,11 +26,13 @@ methods_TimerOutputs_data = Dict()
 # make it into short code by listing the methods differently and
 # interpolating them using the $ sign
 list_timed_methods = [
-    ("FLASH"     , :qt!,  :Dqt!,   :D2qt!)
-    ("FiniteDiff", :qt!,  :Dqt!,  :FDDqt!)
-    ("Dual"      , :qt!,  :Dqt!,  :ADDqt!)
-    ("Complex"   , :qt!,  :Dqt!, :CSDDqt!)
-    ("HyperDual" , :qt!, :ADqt!,  :AD2qt!)
+    ("FD1"        , :qt!,   :Dqt!,  :FDDqt!)
+    ("CSD"        , :qt!,   :Dqt!, :CSDDqt!)
+    ("DUAL"       , :qt!,   :Dqt!,  :ADDqt!)
+    ("FLASH"      , :qt!,   :Dqt!,   :D2qt!)
+    ("HYPER"      , :qt!,  :ADqt!,  :AD2qt!)
+    ("HYPERSMART" , :qt!, :HSDqt!, :HSD2qt!)
+    ("FD2"        , :qt!,  :FDqt!,  :FD2qt!)
 ]
 
 myruns = ["Compiling run", "Precompiled run"]
