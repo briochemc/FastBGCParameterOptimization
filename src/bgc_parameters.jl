@@ -128,11 +128,11 @@ p2λ(p::Para) = log.(optvec(p)) - μobs
 
 
 """
-    Dp2λ(p::Para)
+    ∇p2λ(p::Para)
 
 Returns the gradient of `λ` with respect to `p`.
 """
-Dp2λ(p::Para) = optvec(p).^(-1)
+∇p2λ(p::Para) = optvec(p).^(-1)
 
 function optPara(v::Vector{U}) where U
     if U == eltype(p₀)
@@ -152,18 +152,18 @@ See `p2λ`.
 λ2p(λ) = optPara(exp.(λ .+ μobs))
 
 """
-    Dλ2p(λ)
+    ∇λ2p(λ)
 
 Returns the gradient of `p` with respect to `λ`.
 """
-Dλ2p(λ) = exp.(λ .+ μobs)
+∇λ2p(λ) = exp.(λ .+ μobs)
 
 """
-    D2λ2p(λ)
+    ∇²λ2p(λ)
 
 Returns the Hessian of `p` with respect to `λ`.
 """
-D2λ2p(λ) = exp.(λ .+ μobs)
+∇²λ2p(λ) = exp.(λ .+ μobs)
 
 """
     show(io::IO, p::Para)

@@ -1,8 +1,6 @@
-# Cost functions
-
+# Cost functions∇
 # Must import the functions to which I add methods
-import TransportMatrixTools.q!, TransportMatrixTools.Dq!, TransportMatrixTools.D2q!
-
+import TransportMatrixTools.f̂!, TransportMatrixTools.∇f̂!, TransportMatrixTools.∇²f̂!
 """
     nrm(x)
 
@@ -32,66 +30,66 @@ function nrm(x::Vector{Hyper{U}}) where U
 end
 
 """
-    c(x)
+    f(x)
 
 Returns the cost of state `x`.
 """
-function c(x) # with respect to x
+function f(x) # with respect to x
     DIN, _ = unpackx(x)
     return vnorm²(DIN - DINobs) / vnorm²(DINobs)
 end
 
 """
-    Dc(x)
+    ∇ₓf(x)
 
 Returns the gradient of cost of `x` (at `x`).
 """
-function Dc(x)
+function ∇ₓf(x)
     DIN, _ = unpackx(x)
     kron([1 0], Dvnorm²(DIN - DINobs) / vnorm²(DINobs))
 end
 
 c_noweight(p::Para) = 0.5 * p2λ(p)' * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
 c_noweight(p::Para{Complex{Float64}}) = 0.5 * transpose(p2λ(p)) * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
-Dc_noweight(p::Para) = (Dp2λ(p) .* σ²obs.^-1 .* p2λ(p))'
-Dc_noweight(p::Para{Complex{Float64}}) = transpose(Dp2λ(p) .* σ²obs.^-1 .* p2λ(p))
+Dc_noweight(p::Para) = (∇p2λ(p) .* σ²obs.^-1 .* p2λ(p))'
+Dc_noweight(p::Para{Complex{Float64}}) = transpose(∇p2λ(p) .* σ²obs.^-1 .* p2λ(p))
 
 """
-    c(p)
+    f(p)
 
 Returns the cost of parameters `p`.
 """
-c(p::Para) = p.ω * c_noweight(p)
+f(p::Para) = p.ω * c_noweight(p)
 
 """
-    Dc(p)
+    ∇ₚf(p)
 
 Returns the gradient of cost of parameters `p` (at `p`).
 """
-Dc(p::Para) = p.ω * Dc_noweight(p)
+∇ₚf(p::Para) = p.ω * Dc_noweight(p)
 
 """
-    c(x, p)
+    f(x, p)
 
 Returns the cost of state `x` plus the cost of parameters `p`.
 The costs are added to be used in a Bayesian framework eventually.
 (And also because it is simpler.)
 """
-function c(x, p::Para) # with respect to both x and p
-    return c(x) + c(p)
+function f(x, p::Para) # with respect to both x and p
+    return f(x) + f(p)
 end
 
 """
-    q!(p; preprint)
+    f̂!(p; preprint)
 
-Objective `c(sol(p), p)` at `p`.
-`f(x, p) = 0` will be solved for a solution `sol` if required.
+Objective `f(sol(p), p)` at `p`.
+`F(x, p) = 0` will be solved for a solution `sol` if required.
 """
-q!(p::Para{Float64}; preprint=" ") = q!(c, f, fJac, nrm, init, p, τstop; preprint=preprint)
-q!(p::Para{Dual{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, εsol, init, p, τstop; preprint=preprint)
-HSq!(p::Para{Hyper{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, J, hsol, init, p, τstop; preprint=preprint)
-q!(p::Para{Hyper{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, hsol, init, p, τstop; preprint=preprint)
-q!(p::Para{Complex{Float64}}; preprint=" ") = q!(c, f, fJac, nrm, imsol, init, p, τstop; preprint=preprint)
+f̂!(p::Para{Float64}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, init, p, τstop; preprint=preprint)
+f̂!(p::Para{Dual{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, εsol, init, p, τstop; preprint=preprint)
+HSf̂!(p::Para{Hyper{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, J, hsol, init, p, τstop; preprint=preprint)
+f̂!(p::Para{Hyper{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, hsol, init, p, τstop; preprint=preprint)
+f̂!(p::Para{Complex{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, imsol, init, p, τstop; preprint=preprint)
 
 """
     print_cost(cval; preprint)
@@ -106,246 +104,236 @@ function print_cost(cval; preprint=" ")
     end
     return nothing
 end
-printRMS(cval) = @printf("RMS = %.2f%%\n", 100 * sqrt(cval / c(0*x₀)))
-printRMS(cval::Dual) = @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(DualNumbers.realpart(cval) / c(0*x₀)), dualpart(cval))
-printRMS(cval::Hyper) = @printf("RMS = %.2f%% (ε₁:%.2g, ε₂:%.2g, ε₁ε₂:%.2g)\n", 100 * sqrt(HyperDualNumbers.realpart(cval) / c(0*x₀)), ε₁part(cval), ε₂part(cval), ε₁ε₂part(cval))
-printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(real(cval) / c(0*x₀)), imag(cval))
+printRMS(cval) = @printf("RMS = %.2f%%\n", 100 * sqrt(cval / f(0*x₀)))
+printRMS(cval::Dual) = @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(DualNumbers.realpart(cval) / f(0*x₀)), dualpart(cval))
+printRMS(cval::Hyper) = @printf("RMS = %.2f%% (ε₁:%.2g, ε₂:%.2g, ε₁ε₂:%.2g)\n", 100 * sqrt(HyperDualNumbers.realpart(cval) / f(0*x₀)), ε₁part(cval), ε₂part(cval), ε₁ε₂part(cval))
+printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(real(cval) / f(0*x₀)), imag(cval))
 
 """
-    q!(λ; preprint)
+    f̂!(λ; preprint)
 
-Objective `c(sol(λ), λ)` at `λ`.
-`f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
+Objective `f(sol(λ), λ)` at `λ`.
+`F(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-q!(λ::Vector; preprint=" ") = q!(λ2p(λ); preprint=preprint)
-HSq!(λ::Vector; preprint=" ") = HSq!(λ2p(λ); preprint=preprint)
+f̂!(λ::Vector; preprint=" ") = f̂!(λ2p(λ); preprint=preprint)
+HSf̂!(λ::Vector; preprint=" ") = HSf̂!(λ2p(λ); preprint=preprint)
 
 """
-    Dq!(λ; preprint)
+    ∇f̂!(λ; preprint)
 
 Evaluates the Gradient of the objective at `λ`.
-`f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
+`F(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-function Dq!(λ::Vector{Float64}; preprint=" ")
-    return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, J, init, λ, τstop; preprint=preprint)
+function ∇f̂!(λ::Vector{Float64}; preprint=" ")
+    return ∇f̂!(∇ₓf, ∇ₚf, F, ∇ₓF, ∇ₚF, nrm, λ2p, ∇λ2p, J, init, λ, τstop; preprint=preprint)
 end
-function Dq!(ελ::Vector{Dual{Float64}}; preprint=" ")
-    return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, εJ, εsol, init, ελ, τstop; preprint=preprint)
+function ∇f̂!(ελ::Vector{Dual{Float64}}; preprint=" ")
+    return ∇f̂!(∇ₓf, ∇ₚf, F, ∇ₓF, ∇ₚF, nrm, λ2p, ∇λ2p, εJ, εsol, init, ελ, τstop; preprint=preprint)
 end
-function Dq!(imλ::Vector{Complex{Float64}}; preprint=" ")
-    return Dq!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, imJ, imsol, init, imλ, τstop; preprint=preprint)
+function ∇f̂!(imλ::Vector{Complex{Float64}}; preprint=" ")
+    return ∇f̂!(∇ₓf, ∇ₚf, F, ∇ₓF, ∇ₚF, nrm, λ2p, ∇λ2p, imJ, imsol, init, imλ, τstop; preprint=preprint)
 end
 
 """
-    Dq!(λ; preprint)
+    HS∇f̂!(λ; preprint)
 
 Evaluates the HYPERSMART Gradient of the objective at `λ`.
 """
-HSDq!(λ::Vector{Float64}; preprint=" ") = Dq!(c, f, fJac, nrm, λ2p, Dλ2p, HSbuf, J, hsol, init, λ, τstop; preprint=preprint)
+HS∇f̂!(λ::Vector{Float64}; preprint=" ") = ∇f̂!(f, F, ∇ₓF, nrm, λ2p, ∇λ2p, HSbuf, J, hsol, init, λ, τstop; preprint=preprint)
 
 """
-    Dq!(λ; preprint)
+    HS∇²f̂!(λ; preprint)
 
 Evaluates the HYPERSMART Hessian of the objective at `λ`.
 """
-HSD2q!(λ::Vector{Float64}; preprint=" ") = D2q!(c, f, fJac, nrm, λ2p, Dλ2p, D2λ2p, HSbuf, J, hsol, init, λ, τstop; preprint=preprint)
+HS∇²f̂!(λ::Vector{Float64}; preprint=" ") = ∇²f̂!(f, F, ∇ₓF, nrm, λ2p, ∇λ2p, ∇²λ2p, HSbuf, J, hsol, init, λ, τstop; preprint=preprint)
 
 """
-    D2q!(λ; preprint)
+    ∇²f̂!(λ; preprint)
 
 Evaluates the Hessian of the objective at `λ`.
-`f(x, p(λ)) = 0` will be solved for a solution `sol` if required.
+`F(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-D2q!(λ::Vector{Float64}; preprint=" ") = D2q!(Dc, f, fJac, Dpf, nrm, λ2p, Dλ2p, D2λ2p, J, init, λ, τstop; preprint=preprint)
+∇²f̂!(λ::Vector{Float64}; preprint=" ") = ∇²f̂!(∇ₓf, ∇ₚf, F, ∇ₓF, ∇ₚF, nrm, λ2p, ∇λ2p, ∇²λ2p, J, init, λ, τstop; preprint=preprint)
 
 """
-    gradient_q!(λ; preprint)
-
-Evaluates the gradient of the objective at `λ` using the `Calculus` package.
-(Warning: could be slow and inacurrate!)
-"""
-gradient_q!(λ::Vector{Float64}) = Calculus.gradient(q!, λ)'
-
-"""
-    FDq!(λ; preprint)
+    gradient_f̂!(λ; preprint)
 
 Evaluates the gradient of the objective at `λ` using the `Calculus` package.
 (Warning: could be slow and inacurrate!)
 """
-FDq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> [q!(λ)], λ, :central)
+gradient_f̂!(λ::Vector{Float64}) = Calculus.gradient(f̂!, λ)'
 
 """
-    FD2q!(λ; preprint)
+    FDf̂!(λ; preprint)
+
+Evaluates the gradient of the objective at `λ` using the `Calculus` package.
+(Warning: could be slow and inacurrate!)
+"""
+FDf̂!(λ::Vector{Float64}) = Calculus.jacobian(λ -> [f̂!(λ)], λ, :central)
+
+"""
+    FD²f̂!(λ; preprint)
 
 Evaluates the Hessian of the objective at `λ` using the `Calculus` package.
 (Warning: could be slow and inacurrate!)
 """
-FD2q!(λ::Vector{Float64}) = Calculus.hessian(q!, λ)
+FD²f̂!(λ::Vector{Float64}) = Calculus.hessian(f̂!, λ)
 
 """
-    FDDq!(λ; preprint)
+    FD∇f̂!(λ; preprint)
 
 Evaluates the Hessian of the objective at `λ` using the `Calculus` package.
-The difference with `hessian_q` is that it uses my fast `Dq!` and calculates its jacobian.
+The difference with `hessian_q` is that it uses my fast `∇f̂!` and calculates its jacobian.
 (Warning: could be slow and inacurrate!)
 """
-FDDq!(λ::Vector{Float64}) = Calculus.jacobian(λ -> vec(Dq!(λ)), λ, :central)
+FD∇f̂!(λ::Vector{Float64}) = Calculus.jacobian(λ -> vec(∇f̂!(λ)), λ, :central)
 
 """
-    CSDq!(λ)
+    CSDf̂!(λ)
 
 Evaluates the gradient of the objective at `λ` using the complex-step method.
 (Warning: could be slow!)
 """
-CSDq!(λ) = ComplexStepGradient(q!, λ)'
+CSDf̂!(λ) = ComplexStepGradient(f̂!, λ)'
 
 """
-    CSDDq!(λ)
+    CSD∇f̂!(λ)
 
 Evaluates the Hessian of the objective at `λ` using the complex-step method.
-Uses the analytical `Dq!`.
+Uses the analytical `∇f̂!`.
 (Warning: could be slow!)
 """
-CSDDq!(λ) = ComplexStepJacobian(Dq!, λ)
+CSD∇f̂!(λ) = ComplexStepJacobian(∇f̂!, λ)
 
 """
-    ADq!(λ)
+    ADf̂!(λ)
 
 Evaluates the gradient of the objective at `λ` using DualNumbers.
 """
-ADq!(λ) = DualNumbersGradient(q!, λ)'
+ADf̂!(λ) = DualNumbersGradient(f̂!, λ)'
 
 """
-    ADDq!(λ)
+    AD∇f̂!(λ)
 
 Evaluates the Hessian of the objective at `λ` using DualNumbers.
-Uses the analytical `Dq!`.
+Uses the analytical `∇f̂!`.
 """
-ADDq!(λ) = DualNumbersJacobian(Dq!, λ)
+AD∇f̂!(λ) = DualNumbersJacobian(∇f̂!, λ)
 
 """
-AD2q!(λ)
+AD²f̂!(λ)
 
 Evaluates the Hessian of the objective at `λ` using HyperDualNumbers.
 """
-AD2q!(λ) = HyperDualNumbersHessian(q!, λ)
-AD2Sq!(λ) = HyperDualNumbersSymmetricHessian(q!, λ)
+AD²f̂!(λ) = HyperDualNumbersHessian(f̂!, λ)
 
 """
-    Dq!(storage, λ)
+    ∇f̂!(storage, λ)
 
 Analytical gradient
 """
-function Dq!(storage, λ)
-    storage[1:npopt] .= vec(Dq!(λ))
+function ∇f̂!(storage, λ)
+    storage[1:npopt] .= vec(∇f̂!(λ))
 end
 
 """
-    D2q!(storage, λ)
+    ∇²f̂!(storage, λ)
 
 FLASH Hessian
 """
-function D2q!(storage, λ)
-    storage[1:npopt, 1:npopt] .= D2q!(λ)
+function ∇²f̂!(storage, λ)
+    storage[1:npopt, 1:npopt] .= ∇²f̂!(λ)
 end
 
 """
-    CSDq!(storage, λ)
+    CSDf̂!(storage, λ)
 
 Complex-step method gradient
 """
-function CSDq!(storage, λ)
-    storage[1:npopt] .= vec(CSDq!(λ))
+function CSDf̂!(storage, λ)
+    storage[1:npopt] .= vec(CSDf̂!(λ))
 end
 
 """
-    FDq!(storage, λ)
+    FDf̂!(storage, λ)
 
 Finite-difference method gradient
 """
-function FDq!(storage, λ)
-    storage[1:npopt] .= vec(FDq!(λ))
+function FDf̂!(storage, λ)
+    storage[1:npopt] .= vec(FDf̂!(λ))
 end
 
 """
-    ADq!(storage, λ)
+    ADf̂!(storage, λ)
 
 Dual-step method gradient
 """
-function ADq!(storage, λ)
-    storage[1:npopt] .= vec(ADq!(λ))
+function ADf̂!(storage, λ)
+    storage[1:npopt] .= vec(ADf̂!(λ))
 end
 
 """
-    HSDq!(storage, λ)
+    HS∇f̂!(storage, λ)
 
 HYPERSMART method gradient
 """
-function HSDq!(storage, λ)
-    storage[1:npopt] .= vec(HSDq!(λ))
+function HS∇f̂!(storage, λ)
+    storage[1:npopt] .= vec(HS∇f̂!(λ))
 end
 
 """
-    CSDDq!(storage, λ)
+    CSD∇f̂!(storage, λ)
 
 Complex-step method Hessian
 """
-function CSDDq!(storage, λ)
-    storage[1:npopt, 1:npopt] .= CSDDq!(λ)
+function CSD∇f̂!(storage, λ)
+    storage[1:npopt, 1:npopt] .= CSD∇f̂!(λ)
 end
 
 """
-    FD2q!(storage, λ)
+    FD²f̂!(storage, λ)
 
 Finite-difference method Hessian (2nd order)
 """
-function FD2q!(storage, λ)
-    storage[1:npopt, 1:npopt] .= FD2q!(λ)
+function FD²f̂!(storage, λ)
+    storage[1:npopt, 1:npopt] .= FD²f̂!(λ)
 end
 
 """
-    FDDq!(storage, λ)
+    FD∇f̂!(storage, λ)
 
 Finite-difference method Hessian (1st order from analytical gradient)
 """
-function FDDq!(storage, λ)
-    storage[1:npopt, 1:npopt] .= FDDq!(λ)
+function FD∇f̂!(storage, λ)
+    storage[1:npopt, 1:npopt] .= FD∇f̂!(λ)
 end
 
 """
-    AD2q!(storage, λ)
+    AD²f̂!(storage, λ)
 
 Hyperdual-step method Hessian
 """
-function AD2q!(storage, λ)
-    storage[1:npopt, 1:npopt] .= AD2q!(λ)
+function AD²f̂!(storage, λ)
+    storage[1:npopt, 1:npopt] .= AD²f̂!(λ)
 end
 
 """
-    AD2Sq!(storage, λ)
-
-Symmetric Hyperdual-step method Hessian
-"""
-function AD2Sq!(storage, λ)
-    storage[1:npopt, 1:npopt] .= AD2Sq!(λ)
-end
-
-"""
-    ADDq!(storage, λ)
+    AD∇f̂!(storage, λ)
 
 Dual-step method Hessian (from the analytical gradient)
 """
-function ADDq!(storage, λ)
-    storage[1:npopt, 1:npopt] .= ADDq!(λ)
+function AD∇f̂!(storage, λ)
+    storage[1:npopt, 1:npopt] .= AD∇f̂!(λ)
 end
 
 """
-    ADDq!(storage, λ)
+    HS∇²f̂!(storage, λ)
 
 HYPERSMART method Hessian
 """
-function HSD2q!(storage, λ)
-    storage[1:npopt, 1:npopt] .= HSD2q!(λ)
+function HS∇²f̂!(storage, λ)
+    storage[1:npopt, 1:npopt] .= HS∇²f̂!(λ)
 end
 
 

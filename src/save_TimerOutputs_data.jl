@@ -4,18 +4,18 @@ using TimerOutputs
 const to = TimerOutput()
 
 # timed version for all functions called in Optim
-qt!(λ)        = @timeit to "f"   q!(λ)
-Dqt!(s, λ)    = @timeit to "∇f"  Dq!(s, λ)     #\
-ADqt!(s, λ)   = @timeit to "∇f"  ADq!(s, λ)    # │
-FDqt!(s, λ)   = @timeit to "∇f"  FDq!(s, λ)    # ├─ gradients
-HSDqt!(s, λ)  = @timeit to "∇f"  HSDq!(s, λ)   #/
-D2qt!(s, λ)   = @timeit to "∇²f" D2q!(s, λ)    #\
-ADDqt!(s, λ)  = @timeit to "∇²f" ADDq!(s, λ)   # │
-AD2qt!(s, λ)  = @timeit to "∇²f" AD2q!(s, λ)   # │
-HSD2qt!(s, λ) = @timeit to "∇²f" HSD2q!(s, λ)  # ├─ Hessians
-CSDDqt!(s, λ) = @timeit to "∇²f" CSDDq!(s, λ)  # │
-FDDqt!(s, λ)  = @timeit to "∇²f" FDDq!(s, λ)   # │
-FD2qt!(s, λ)  = @timeit to "∇²f" FD2q!(s, λ)   #/
+f̂t!(λ)        = @timeit to "f"   f̂!(λ)
+∇f̂t!(s, λ)    = @timeit to "∇f"  ∇f̂!(s, λ)     #\
+ADf̂t!(s, λ)   = @timeit to "∇f"  ADf̂!(s, λ)    # │
+FDf̂t!(s, λ)   = @timeit to "∇f"  FDf̂!(s, λ)    # ├─ gradients
+HS∇f̂t!(s, λ)  = @timeit to "∇f"  HS∇f̂!(s, λ)   #/
+∇²f̂t!(s, λ)   = @timeit to "∇²f" ∇²f̂!(s, λ)    #\
+AD∇f̂t!(s, λ)  = @timeit to "∇²f" AD∇f̂!(s, λ)   # │
+AD²f̂t!(s, λ)  = @timeit to "∇²f" AD²f̂!(s, λ)   # │
+HS∇²f̂t!(s, λ) = @timeit to "∇²f" HS∇²f̂!(s, λ)  # ├─ Hessians
+CSD∇f̂t!(s, λ) = @timeit to "∇²f" CSD∇f̂!(s, λ)  # │
+FD∇f̂t!(s, λ)  = @timeit to "∇²f" FD∇f̂!(s, λ)   # │
+FD²f̂t!(s, λ)  = @timeit to "∇²f" FD²f̂!(s, λ)   #/
 
 # Dictionary to hold the results
 # Load it if it exists, otherwise creat a new one
@@ -26,13 +26,13 @@ methods_TimerOutputs_data = Dict()
 # make it into short code by listing the methods differently and
 # interpolating them using the $ sign
 list_timed_methods = [
-    ("FD1"        , :qt!,   :Dqt!,  :FDDqt!)
-    ("CSD"        , :qt!,   :Dqt!, :CSDDqt!)
-    ("DUAL"       , :qt!,   :Dqt!,  :ADDqt!)
-    ("FLASH"      , :qt!,   :Dqt!,   :D2qt!)
-    ("HYPER"      , :qt!,  :ADqt!,  :AD2qt!)
-    ("HYPERSMART" , :qt!, :HSDqt!, :HSD2qt!)
-    ("FD2"        , :qt!,  :FDqt!,  :FD2qt!)
+    ("FD1"        , :f̂t!,   :∇f̂t!,  :FD∇f̂t!)
+    ("CSD"        , :f̂t!,   :∇f̂t!, :CSD∇f̂t!)
+    ("DUAL"       , :f̂t!,   :∇f̂t!,  :AD∇f̂t!)
+    ("FLASH"      , :f̂t!,   :∇f̂t!,   :∇²f̂t!)
+    ("HYPER"      , :f̂t!,  :ADf̂t!,  :AD²f̂t!)
+    ("HYPERSMART" , :f̂t!, :HS∇f̂t!, :HS∇²f̂t!)
+    ("FD2"        , :f̂t!,  :FDf̂t!,  :FD²f̂t!)
 ]
 
 myruns = ["Compiling run", "Precompiled run"]
@@ -57,13 +57,13 @@ function print_mytimer!(d::Dict, f::String, t::TimerOutput)
 end
 
 for (i, myrun) in enumerate(myruns)
-    for (method_name, q, Dq, D2q) in list_timed_methods
+    for (method_name, f̂, ∇f̂, ∇²f̂) in list_timed_methods
         println("\n\n\n------------------------\n") # print what you are doing
         println(myrun * ": " * method_name * " (with TimerOutputs)")
         println("\n------------------------\n\n\n")
 
         init.x, init.p = 1x₀, 3p₀ # Reset initial x and p
-        J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀ # and J
+        J.fac, J.p = factorize(∇ₓF(x₀, 3p₀)), 3p₀ # and J
 
         # Open the file to print TimerOutputs
         file_name = joinpath(path_to_package_root, "data", "TimerOutputs_" * method_name * myruns2[i] * str_out * ".txt")
@@ -71,7 +71,7 @@ for (i, myrun) in enumerate(myruns)
 
         # Run the timed optimization!
         reset_timer!(to) # Reset timer
-        @timeit to "Trust Region" eval(:(res = optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)))
+        @timeit to "Trust Region" eval(:(res = optimize($f̂, $∇f̂, $∇²f̂, $λ₀, NewtonTrustRegion(), $opt)))
 
         # Print the TimerOutput
         print_timer(io, to)
