@@ -10,14 +10,18 @@ jld_file = joinpath(path_to_package_root, "data", "BenchmarkTools_data" * str_ou
 # Reorder keys to plot in my order
 #     key       fgh       method
 mykeys = [
-    ("q!"    , "f"  , "f"         ),
-    ("Dq!"   , "∇f" , "∇f"        ),
-    ("ADq!"  , "∇f" , "Dual"      ),
-    ("D2q!"  , "∇²f", "FLASH"     ),
-    ("ADDq!" , "∇²f", "DUAL"      ),
-    ("CSDDq!", "∇²f", "COMPLEX"   ),
-    ("FDDq!" , "∇²f", "FINITEDIFF"),
-    ("AD2q!" , "∇²f", "HYPERDUAL" )
+    ("q!"    , "f"  , "Analytical f"  ),
+    ("Dq!"   , "∇f" , "Analytical ∇f" ), #\
+    ("HSDq!" , "∇f" , "HYPERSMART ∇f" ), # │
+    ("ADq!"  , "∇f" , "HYPER ∇f"      ), # ├─ gradients
+    ("FDq!"  , "∇f" , "FD2 ∇f"        ), #/
+    ("D2q!"  , "∇²f", "FLASH"         ), #\
+    ("HSD2q!", "∇²f", "HYPERSMART ∇²f"), # │
+    ("ADDq!" , "∇²f", "DUAL"          ), # │
+    ("CSDDq!", "∇²f", "CSD"           ), # │
+    ("FDDq!" , "∇²f", "FD1"           ), # ├─ Hessians
+    ("AD2q!" , "∇²f", "HYPER ∇²f"     ), # │
+    ("FD2q!" , "∇²f", "FD2 ∇²f"       )  #/
 ]
 
 #sorting = [
@@ -53,7 +57,6 @@ function results_to_df(results, mykeys)
 end
 
 df = results_to_df(results, mykeys)
-
 
 p = df |> @vlplot(
     encoding={
