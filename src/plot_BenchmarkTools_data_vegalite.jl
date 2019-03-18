@@ -48,7 +48,7 @@ function results_to_df(results, mykeys)
             Dict(
                 :method => m,
                 :fgh => f,
-                :time => round(results[k].times[] * 1e-9),
+                :time => round(results[k].times[] * 1e-8)/10,
                 :allocs => results[k].allocs[] * 2^-27
             )
         )
@@ -62,7 +62,7 @@ p = df |> @vlplot(
     encoding={
         x={:time, title="Computation time (seconds)"},
         y={:method, sort=true},
-        color={:fgh, title="", scale={scheme="set2"}},
+        color={:fgh, title="", scale={scheme="set2"}, legend={orient="top-right"}},
         text={:time},
     },
     resolve={
