@@ -17,9 +17,10 @@ str_out = "_default"
 jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * "_katana" * ".jld2")
 @load jld_file timers
 
-translate_for_legend = Dict("q"=>"objective", "Dq"=>"gradient", "D2q"=>"Hessian")
+translate_for_legend = Dict("f"=>"objective", "∇f"=>"gradient", "∇²f"=>"Hessian")
 
 # Reshape data into a DataFrame
+list_methods = ["FLASH", "DUAL", "FD1", "CSD", "HYPERSMART", "HYPER", "FD2"]
 function timer_to_DataFrame(timers::Dict)
     df = DataFrame(
         method = Array{String}(undef, 0),
@@ -28,33 +29,38 @@ function timer_to_DataFrame(timers::Dict)
         allocs = Array{Float64}(undef, 0),
         ncalls = Array{Int64}(undef, 0)
     )
-    for k in keys(timers)
-        if ~occursin("compiling", string(k))
-            t = timers[k]
-            for k2 in ["q", "Dq", "D2q"]
-                push!(
-                    df,
-                    Dict(
-                        :method => string(k),
-                        :fgh => translate_for_legend[k2],
-                        :time => t[k2]["time"] * 1e-9,
-                        :allocs => t[k2]["allocs"] * 2^-30,
-                        :ncalls => t[k2]["ncalls"]
-                    )
+    for k in list_methods
+        t = timers[k]
+        for k2 in ["f", "∇f", "∇²f"]
+            push!(
+                df,
+                Dict(
+                    :method => string(k),
+                    :fgh => translate_for_legend[k2],
+                    :time => t[k2]["time"] * 1e-9,
+                    :allocs => t[k2]["allocs"] * 2^-30,
+                    :ncalls => t[k2]["ncalls"]
                 )
-            end
+            )
         end
     end
     return df
 end
 df = timer_to_DataFrame(timers)
 
+
+
 ptime = df |> @vlplot(
-    :bar,
+    width=300,
+    height=250,
+    mark={
+        :bar,
+        clip=true
+    },
     x={"sum(time)", title="Computation time (seconds)"},
-    y={:method, sort=["FLASH", "Dual", "FiniteDiff", "Complex", "HyperDual"]},
-    color={:fgh, title="", scale={scheme="set2"}, sort=["q", "dq", "d²q"]},
-    order={field=:method, sort=["q", "dq", "d²q"]}
+    y={:method, sort=list_methods},
+    color={:fgh, title="", scale={scheme="set2"}, sort=["f", "∇f", "∇²f"], legend={orient="top-right"}},
+    order={field=:method, sort=["f", "∇f", "∇²f"]}
 )
 
 # print to PDF
