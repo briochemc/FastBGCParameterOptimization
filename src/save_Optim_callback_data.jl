@@ -31,22 +31,27 @@ function print_full_state(x)
 end
 
 # Set the options for the NewtonTrustRegion optimizer
-opt = Optim.Options(store_trace = false, show_trace = false, extended_trace = false, callback=print_full_state, g_calls_limit=15)
+opt = Optim.Options(store_trace = false, show_trace = false, extended_trace = false, callback=print_full_state)
+
+myruns = ["Compiling run", "Precompiled run"]
+myruns2 = ["_compiling_run", ""]
 
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
 
-for (method_name, q, Dq, D2q) in list_methods
-    println("\n┌────────────────────────")
-    println("│ Optimizing using method " * method_name * ", and printing time and q :\n│")
-    init.x, init.p = 1x₀, 3p₀
-    J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
-    println("│    ", time())
-    eval( :( results = optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) )
-    println("└────────────────────────")
-    # Save output
-    jld_file = joinpath(path_to_package_root, "data", "Optim_callback_data" * method_name * str_out * ".jld2")
-    @save jld_file results list_methods
+for (i, myrun) in enumerate(myruns)
+    for (method_name, q, Dq, D2q) in list_methods
+        println("\n┌────────────────────────")
+        println("│ Optimizing using method " * method_name * ", for " * myrun * "\n│")
+        init.x, init.p = 1x₀, 3p₀
+        J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
+        println("│    ", time())
+        eval( :( results = optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) )
+        println("└────────────────────────")
+        # Save output
+        jld_file = joinpath(path_to_package_root, "data", "Optim_callback_data" * method_name * myruns2[i] * str_out * ".jld2")
+        @save jld_file results list_methods
+    end
 end
 
 

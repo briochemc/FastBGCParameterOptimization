@@ -1,5 +1,5 @@
 # Set the options for the NewtonTrustRegion optimizer
-opt = Optim.Options(store_trace = true, extended_trace = true)
+opt = Optim.Options(store_trace = false, show_trace = false, extended_trace = false)
 using TimerOutputs
 const to = TimerOutput()
 
