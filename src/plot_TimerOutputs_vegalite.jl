@@ -20,8 +20,11 @@ jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out 
 translate_for_legend = Dict("f"=>"objective", "∇f"=>"gradient", "∇²f"=>"Hessian")
 
 # Reshape data into a DataFrame
-list_methods = ["FLASH", "DUAL", "FD1", "CSD", "HYPERSMART", "HYPER", "FD2"]
-function timer_to_DataFrame(timers::Dict)
+list_methods1 = ["F-zero", "DUAL", "FD1", "CSD", "F1"]
+list_methodsold1 = ["FLASH", "DUAL", "FD1", "CSD", "HYPERSMART"]
+list_methods2 = ["F-zero", "F1", "HYPER", "FD2"]
+list_methodsold2 = ["FLASH", "HYPERSMART", "HYPER", "FD2"]
+function timer_to_DataFrame(timers::Dict, l, lold)
     df = DataFrame(
         method = Array{String}(undef, 0),
         fgh = Array{String}(undef, 0),
@@ -29,14 +32,14 @@ function timer_to_DataFrame(timers::Dict)
         allocs = Array{Float64}(undef, 0),
         ncalls = Array{Int64}(undef, 0)
     )
-    for k in list_methods
+    for (ik, k) in enumerate(lold)
         t = timers[k]
         for k2 in ["f", "∇f", "∇²f"]
             push!(
                 df,
                 Dict(
-                    :method => string(k),
-                    :fgh => translate_for_legend[k2],
+                    :method => l[ik],
+                    :fgh => k2,
                     :time => t[k2]["time"] * 1e-9,
                     :allocs => t[k2]["allocs"] * 2^-30,
                     :ncalls => t[k2]["ncalls"]
@@ -46,22 +49,41 @@ function timer_to_DataFrame(timers::Dict)
     end
     return df
 end
-df = timer_to_DataFrame(timers)
+
+df1 = timer_to_DataFrame(timers, list_methods1, list_methodsold1)
+df2 = timer_to_DataFrame(timers, list_methods2, list_methodsold2)
 
 
 
-ptime = df |> @vlplot(
+ptime1 = df1 |> @vlplot(
     width=300,
-    height=250,
+    height=125,
+    title={text="(a)", anchor="start"},
     mark={
         :bar,
-        clip=true
     },
-    x={"sum(time)", title="Computation time (seconds)"},
-    y={:method, sort=list_methods},
-    color={:fgh, title="", scale={scheme="set2"}, sort=["f", "∇f", "∇²f"], legend={orient="top-right"}},
+    x={"sum(time)", title="Computation time (seconds)", scale={domain=[0,3500]}},
+    y={:method, sort=list_methods1},
+    color={:fgh, title="", scale={scheme="set2"}, legend={orient="top-right", sort=["f", "∇f", "∇²f"]}},
     order={field=:method, sort=["f", "∇f", "∇²f"]}
 )
+
+ptime2 = df2 |> @vlplot(
+    width=300,
+    height=100,
+    title={text="(b)", anchor="start"},
+    mark={
+        :bar,
+    },
+    x={"sum(time)", title="Computation time (seconds)"},
+    y={:method, sort=list_methods2},
+    color={:fgh, title="", scale={scheme="set2"}, legend={orient="top-right", sort=["f", "∇f", "∇²f"]}},
+    order={field=:method, sort="count"}
+)
+
+ptime = [ptime1; ptime2]
+
+display(ptime)
 
 # print to PDF
 pdf_file_time = joinpath(path_to_package_root, "fig", "TimerOutputs_time.pdf")

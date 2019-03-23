@@ -15,11 +15,11 @@ mykeys = [
     ("HSDq!" , "∇f" , "F1 ∇f"         ), # │
     ("ADq!"  , "∇f" , "HYPER ∇f"      ), # ├─ gradients
     ("FDq!"  , "∇f" , "FD2 ∇f"        ), #/
-    ("D2q!"  , "∇²f", "F-zero"        ), #\
+    ("D2q!"  , "∇²f", "F-zero ∇²f"    ), #\
     ("HSD2q!", "∇²f", "F1 ∇²f"        ), # │
-    ("ADDq!" , "∇²f", "DUAL"          ), # │
-    ("CSDDq!", "∇²f", "CSD"           ), # │
-    ("FDDq!" , "∇²f", "FD1"           ), # ├─ Hessians
+    ("ADDq!" , "∇²f", "DUAL ∇²f"      ), # │
+    ("CSDDq!", "∇²f", "CSD ∇²f"       ), # │
+    ("FDDq!" , "∇²f", "FD1 ∇²f"       ), # ├─ Hessians
     ("AD2q!" , "∇²f", "HYPER ∇²f"     ), # │
     ("FD2q!" , "∇²f", "FD2 ∇²f"       )  #/
 ]
@@ -35,30 +35,52 @@ mykeys = [
 #    "HYPERDUAL"
 #]
 
-function results_to_df(results, mykeys)
+function results_to_df(results, mykeys, m_list)
     df = DataFrame(
         method = Array{String}(undef, 0),
         fgh = Array{String}(undef, 0),
         time = Array{Float64}(undef, 0),
         allocs = Array{Float64}(undef, 0)
     )
-    for (k, f, m) in mykeys
-        df = push!(
-            df,
-            Dict(
-                :method => m,
-                :fgh => f,
-                :time => round(results[k].times[] * 1e-8)/10,
-                :allocs => results[k].allocs[] * 2^-27
+    for (k, f, m) in mykeys 
+        if m ∈ m_list
+            df = push!(
+                df,
+                Dict(
+                    :method => m,
+                    :fgh => f,
+                    :time => round(results[k].times[] * 1e-9),
+                    :allocs => results[k].allocs[] * 2^-27
+                )
             )
-        )
+        end
     end
     return df
 end
 
-df = results_to_df(results, mykeys)
+m_list1 = [
+    "Analytical f"
+    "Analytical ∇f"
+    "F1 ∇f"
+    "HYPER ∇f"
+    "FD2 ∇f"
+    "F-zero ∇²f"
+    "F1 ∇²f"
+    "DUAL ∇²f"
+    "CSD ∇²f"
+    "FD1 ∇²f"
+]
+m_list2 = [
+    "F-zero ∇²f"
+    "F1 ∇²f"
+    "HYPER ∇²f"
+    "FD2 ∇²f"
+]
+df1 = results_to_df(results, mykeys, m_list1)
+df2 = results_to_df(results, mykeys, m_list2)
 
-p = df |> @vlplot(
+p1 = df1 |> @vlplot(
+    title={text="(a)", anchor="start"},
     encoding={
         x={:time, title="Computation time (seconds)"},
         y={:method, sort=true},
@@ -71,7 +93,7 @@ p = df |> @vlplot(
         }
     }
 ) +
-@vlplot(:bar) + 
+@vlplot(:bar) +
 @vlplot(
     mark={
         :text,
@@ -80,6 +102,32 @@ p = df |> @vlplot(
         dx=5
     }
 )
+
+p2 = df2 |> @vlplot(
+    title={text="(b)", anchor="start"},
+    encoding={
+        x={:time, title="Computation time (seconds)", scale={domain=[0,2500]}},
+        y={:method, sort=true},
+        color={:fgh, title="", scale={scheme="set2"}, legend={orient="top-right"}},
+        text={:time},
+    },
+    resolve={
+        scale={
+            y ="shared"
+        }
+    }
+) +
+@vlplot(:bar) +
+@vlplot(
+    mark={
+        :text,
+        align=:left,
+        baseline=:middle,
+        dx=5
+    }
+)
+
+p = [p1; p2]
 
 display(p)
 
