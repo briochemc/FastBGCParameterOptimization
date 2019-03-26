@@ -90,27 +90,27 @@ pdf_file_time = joinpath(path_to_package_root, "fig", "TimerOutputs_time.pdf")
 save(pdf_file_time, ptime)
 
 
-pmem = df |> @vlplot(
-    :bar,
-    x={"sum(allocs)", title="Memory allocations (GiB)"},
-    y=:method,
-    color={:fgh, title=""}
-)
-
-# print to PDF
-pdf_file_mem = joinpath(path_to_package_root, "fig", "TimerOutputs_mem.pdf")
-save(pdf_file_mem, pmem)
-
-pncalls = df |> @vlplot(
-    :bar,
-    x={"sum(ncalls)", title="Number of calls"},
-    y=:method,
-    color={:fgh, title=""}
-)
-
-# print to PDF
-pdf_file_ncalls = joinpath(path_to_package_root, "fig", "TimerOutputs_ncalls.pdf")
-save(pdf_file_ncalls, pncalls)
+#pmem = df |> @vlplot(
+#    :bar,
+#    x={"sum(allocs)", title="Memory allocations (GiB)"},
+#    y=:method,
+#    color={:fgh, title=""}
+#)
+#
+## print to PDF
+#pdf_file_mem = joinpath(path_to_package_root, "fig", "TimerOutputs_mem.pdf")
+#save(pdf_file_mem, pmem)
+#
+#pncalls = df |> @vlplot(
+#    :bar,
+#    x={"sum(ncalls)", title="Number of calls"},
+#    y=:method,
+#    color={:fgh, title=""}
+#)
+#
+## print to PDF
+#pdf_file_ncalls = joinpath(path_to_package_root, "fig", "TimerOutputs_ncalls.pdf")
+#save(pdf_file_ncalls, pncalls)
 
 #savefig(p, "fig/TimerOutputs_data_test.pdf")
 #
