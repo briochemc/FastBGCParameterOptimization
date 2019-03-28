@@ -43,6 +43,6 @@ Currently set at 1 million years.
 const τstop = 1e6 * 365e6 * spd
 
 # Preallocate real, dual, complex, and hyperdual states (and Jacobians)
-init, J, εsol, εJ, imsol, imJ, hsol, HSbuf = preallocateNewTypes(Para, fJac, x₀, p₀)
+init, J, εsol, εJ, imsol, imJ, hsol, HSbuf = preallocateNewTypes(Para, ∇ₓF, x₀, p₀)
 
 

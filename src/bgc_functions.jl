@@ -1,4 +1,3 @@
-
 # Geological restoring
 function geores(DIN, p::Para)
     τg = p.τg
@@ -55,7 +54,7 @@ function ∂remineralization_∂κ(POM, p::Para)
     return POM
 end
 
-# Indices for DIN and POM (needed for Rate of change f(x,p))
+# Indices for DIN and POM (needed for Rate of change F(x,p))
 const iDIN = 1:nwet
 const iPOM = iDIN .+ nwet
 function unpackx(x)
@@ -70,7 +69,7 @@ function unpackx(x::Array{<:Number,2})
     return DIN, POM
 end
 
-# PFD transport (needed for Rate of change f(x,p))
+# PFD transport (needed for Rate of change F(x,p))
 const S1 = buildPFD(ones(nwet), DIV, Iabove)
 const Sz = buildPFD(ztop, DIV, Iabove)
 function S(p::Para)
@@ -78,8 +77,8 @@ function S(p::Para)
     return w₀ * S1 + w′ * Sz
 end
 
-# Rate of change f(x,p)
-function f(x::Vector{Tx}, p::Para{Tp}) where {Tx, Tp}
+# Rate of change F(x,p)
+function F(x::Vector{Tx}, p::Para{Tp}) where {Tx, Tp}
     DIN, POM = unpackx(x)
     u = uptake(DIN, p)
     r = remineralization(POM, p)
@@ -89,7 +88,7 @@ function f(x::Vector{Tx}, p::Para{Tp}) where {Tx, Tp}
     return foo
 end
 # For numJac
-function f(x::Array{<:Number,2}, p::Para)
+function F(x::Array{<:Number,2}, p::Para)
     DIN, POM = unpackx(x)
     u = uptake(DIN, p)
     r = remineralization(POM, p)
@@ -100,7 +99,7 @@ function f(x::Array{<:Number,2}, p::Para)
 end
 
 # Jacobian of f with respect to x
-function fJac(x, p::Para)
+function ∇ₓF(x, p::Para)
     DIN, POM = unpackx(x)
     uJac = uptakeJac(DIN, p)
     rJac = remineralizationJac(POM, p)
@@ -111,22 +110,22 @@ function fJac(x, p::Para)
 end
 
 """
-    Dpf(x, p::Para)
+    ∇ₚF(x, p::Para)
 
 Evaluates the jacobian of `f` with respect to `p`.
-Concatenates `Dpf(x, p::Para, s::Symbol)` for all optimizable parameter symbols `s`.
+Concatenates `∇ₚF(x, p::Para, s::Symbol)` for all optimizable parameter symbols `s`.
 """
-Dpf(x, p::Para) = hcat((Dpf(x, p, popt) for popt in optimizable_parameters)...)
+∇ₚF(x, p::Para) = hcat((∇ₚF(x, p, popt) for popt in optimizable_parameters)...)
 
 """
-    Dpf(x, p::Para, s::Symbol)
+    ∇ₚF(x, p::Para, s::Symbol)
 
 Evaluates the derivative of `f` with respect to `p.s` where `s` is the name of the parameter (of type `Symbol`).
 
 You should fill this function with all the first derivatives of f with respoect to each parameter.
 Called without the symbol `s`, this function will loop through all the optimizable parameters and create the corresponding Jacobian matrix.
 """
-function Dpf(x, p::Para, s::Symbol)
+function ∇ₚF(x, p::Para, s::Symbol)
     DIN, POM = unpackx(x)
     foo = zeros(promote_type(eltype(x), eltype(p)), 2nwet)
     if s == :umax

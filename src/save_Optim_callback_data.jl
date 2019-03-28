@@ -3,17 +3,17 @@
 
 # List of functions to be benchmarked
 list_methods = [
-    ("FD1"        , :q!,   :Dq!,  :FDDq!)
-    ("CSD"        , :q!,   :Dq!, :CSDDq!)
-    ("DUAL"       , :q!,   :Dq!,  :ADDq!)
-    ("FLASH"      , :q!,   :Dq!,   :D2q!)
-    ("HYPER"      , :q!,  :ADq!,  :AD2q!)
-    ("HYPERSMART" , :q!, :HSDq!, :HSD2q!)
-    ("FD2"        , :q!,  :FDq!,  :FD2q!)
+    ("FD1"        , :f̂!,   :∇f̂!,  :FD∇f̂!)
+    ("CSD"        , :f̂!,   :∇f̂!, :CSD∇f̂!)
+    ("DUAL"       , :f̂!,   :∇f̂!,  :AD∇f̂!)
+    ("FLASH"      , :f̂!,   :∇f̂!,   :∇²f̂!)
+    ("HYPER"      , :f̂!,  :ADf̂!,  :AD²f̂!)
+    ("HYPERSMART" , :f̂!, :HS∇f̂!, :HS∇²f̂!)
+    ("FD2"        , :f̂!,  :FDf̂!,  :FD²f̂!)
 ]
 
 function print_time_and_q(λ)
-    println("   ", time(), q!(λ))
+    println("   ", time(), f̂!(λ))
     return false
 end
 
@@ -24,8 +24,8 @@ end
 
 
 function print_full_state(x)
-    x.iteration == 0 ? println("│    time                   iteration      q(λ)           |Dq(λ)|") : nothing
-    @printf "│    %15.20g" time()
+    x.iteration == 0 ? println("│    time                   iteration      f̂(λ)           |∇f̂(λ)|") : nothing
+    @printf "│    %20.16e" time()
     print(x)
     return false
 end
@@ -40,13 +40,13 @@ using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
 
 for (i, myrun) in enumerate(myruns)
-    for (method_name, q, Dq, D2q) in list_methods
+    for (method_name, f̂, ∇f̂, ∇²f̂) in list_methods
         println("\n┌────────────────────────")
         println("│ Optimizing using method " * method_name * ", for " * myrun * "\n│")
         init.x, init.p = 1x₀, 3p₀
-        J.fac, J.p = factorize(fJac(x₀, 3p₀)), 3p₀
+        J.fac, J.p = factorize(∇ₓF(x₀, 3p₀)), 3p₀
         println("│    ", time())
-        eval( :( results = optimize($q, $Dq, $D2q, $λ₀, NewtonTrustRegion(), $opt)) )
+        eval( :( results = optimize($f̂, $∇f̂, $∇²f̂, $λ₀, NewtonTrustRegion(), $opt)) )
         println("└────────────────────────")
         # Save output
         jld_file = joinpath(path_to_package_root, "data", "Optim_callback_data" * method_name * myruns2[i] * str_out * ".jld2")

@@ -616,9 +616,7 @@ version = "0.9.2"
 
 [[TransportMatrixTools]]
 deps = ["DualMatrixTools", "DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "HyperDualMatrixTools", "HyperDualNumbers", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-git-tree-sha1 = "7836f0ec05b92e301170a3d45921d314964411e5"
-repo-rev = "master"
-repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
+path = "/Users/benoitpasquier/.julia/dev/TransportMatrixTools"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
 version = "0.1.2"
 
