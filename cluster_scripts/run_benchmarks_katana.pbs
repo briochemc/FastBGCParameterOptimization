@@ -19,5 +19,5 @@ cd $HOME/Projects/FastBGCParameterOptimization
 DATADEPS_ALWAYS_ACCEPT = true
 
 # Run it!
-julia src/run_benchmark.jl
+julia src/run_benchmarks.jl
 
