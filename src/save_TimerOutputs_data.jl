@@ -4,18 +4,20 @@ using TimerOutputs
 const to = TimerOutput()
 
 # timed version for all functions called in Optim
-f̂t!(λ)        = @timeit to "f"   f̂!(λ)
-∇f̂t!(s, λ)    = @timeit to "∇f"  ∇f̂!(s, λ)     #\
-ADf̂t!(s, λ)   = @timeit to "∇f"  ADf̂!(s, λ)    # │
-FDf̂t!(s, λ)   = @timeit to "∇f"  FDf̂!(s, λ)    # ├─ gradients
-HS∇f̂t!(s, λ)  = @timeit to "∇f"  HS∇f̂!(s, λ)   #/
-∇²f̂t!(s, λ)   = @timeit to "∇²f" ∇²f̂!(s, λ)    #\
-AD∇f̂t!(s, λ)  = @timeit to "∇²f" AD∇f̂!(s, λ)   # │
-AD²f̂t!(s, λ)  = @timeit to "∇²f" AD²f̂!(s, λ)   # │
-HS∇²f̂t!(s, λ) = @timeit to "∇²f" HS∇²f̂!(s, λ)  # ├─ Hessians
-CSD∇f̂t!(s, λ) = @timeit to "∇²f" CSD∇f̂!(s, λ)  # │
-FD∇f̂t!(s, λ)  = @timeit to "∇²f" FD∇f̂!(s, λ)   # │
-FD²f̂t!(s, λ)  = @timeit to "∇²f" FD²f̂!(s, λ)   #/
+f̂t!(λ)           = @timeit to "f"   f̂!(λ)
+∇f̂t!(s, λ)       = @timeit to "∇f"  ∇f̂!(s, λ)       #┐
+OF1_∇f̂t!(s, λ)   = @timeit to "∇f"  OF1_∇f̂!(s, λ)   #│
+F1_∇f̂t!(s, λ)    = @timeit to "∇f"  F1_∇f̂!(s, λ)    #│
+HYPER_∇f̂t!(s, λ) = @timeit to "∇f"  HYPER_∇f̂!(s, λ) #├─ gradients
+FD2_∇f̂t!(s, λ)   = @timeit to "∇f"  FD2_∇f̂!(s, λ)   #┘
+OF1_∇²f̂t!(s, λ)  = @timeit to "∇²f" OF1_∇²f̂!(s, λ)   #┐
+F0_∇²f̂t!(s, λ)   = @timeit to "∇²f" F0_∇²f̂!(s, λ)    #│
+F1_∇²f̂t!(s, λ)   = @timeit to "∇²f" F1_∇²f̂!(s, λ)    #├─ Hessians
+DUAL_∇²f̂t!(s, λ) = @timeit to "∇²f" DUAL_∇²f̂!(s, λ)  #│
+CSD_∇²f̂t!(s, λ)  = @timeit to "∇²f" CSD_∇²f̂!(s, λ)   #│
+FD1_∇²f̂t!(s, λ)  = @timeit to "∇²f" FD1_∇²f̂!(s, λ)   #│
+HYPER_∇²f̂t!(s, λ)= @timeit to "∇²f" HYPER_∇²f̂!(s, λ) #│
+FD2_∇²f̂t!(s, λ)  = @timeit to "∇²f" FD2_∇²f̂!(s, λ)   #┘
 
 # Dictionary to hold the results
 # Load it if it exists, otherwise creat a new one
@@ -26,13 +28,14 @@ methods_TimerOutputs_data = Dict()
 # make it into short code by listing the methods differently and
 # interpolating them using the $ sign
 list_timed_methods = [
-    ("FD1"        , :f̂t!,   :∇f̂t!,  :FD∇f̂t!)
-    ("CSD"        , :f̂t!,   :∇f̂t!, :CSD∇f̂t!)
-    ("DUAL"       , :f̂t!,   :∇f̂t!,  :AD∇f̂t!)
-    ("FLASH"      , :f̂t!,   :∇f̂t!,   :∇²f̂t!)
-    ("HYPER"      , :f̂t!,  :ADf̂t!,  :AD²f̂t!)
-    ("HYPERSMART" , :f̂t!, :HS∇f̂t!, :HS∇²f̂t!)
-    ("FD2"        , :f̂t!,  :FDf̂t!,  :FD²f̂t!)
+    ("OF1"   , :f̂t!,   :OF1_∇f̂t!,   :OF1_∇²f̂t!)
+    ("F0"    , :f̂t!,       :∇f̂t!,    :F0_∇²f̂t!)
+    ("F1"    , :f̂t!,       :∇f̂t!,    :F1_∇²f̂t!)
+    ("DUAL"  , :f̂t!,       :∇f̂t!,  :DUAL_∇²f̂t!)
+    ("CSD"   , :f̂t!,       :∇f̂t!,   :CSD_∇²f̂t!)
+    ("FD1"   , :f̂t!,       :∇f̂t!,   :FD1_∇²f̂t!)
+    ("HYPER" , :f̂t!, :HYPER_∇f̂t!, :HYPER_∇²f̂t!)
+    ("FD2"   , :f̂t!,   :FD2_∇f̂t!,   :FD2_∇²f̂t!)
 ]
 
 myruns = ["Compiling run", "Precompiled run"]

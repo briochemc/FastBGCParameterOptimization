@@ -9,18 +9,21 @@ suite = BenchmarkGroup()
 # List of functions to be benchmarked
 list_functions = [
     :f̂!
-    :∇f̂!    #\
-    :HS∇f̂!  # │
-    :ADf̂!   # ├─ gradients
-    :FDf̂!   #/
-    :∇²f̂!   #\
-    :HS∇²f̂! # │
-    :CSD∇f̂! # │
-    :FD∇f̂!  # ├─ Hessians
-    :AD∇f̂!  # │
-    :AD²f̂!  # │
-    :FD²f̂!  #/
+    :∇f̂!       #┐
+    :OF1_∇f̂!   #│
+    :F1_∇f̂!    #│
+    :HYPER_∇f̂! #├─ gradients
+    :FD2_∇f̂!   #┘
+    :OF1_∇²f̂!   #┐
+    :F0_∇²f̂!    #│
+    :F1_∇²f̂!    #├─ Hessians
+    :DUAL_∇²f̂!  #│
+    :CSD_∇²f̂!   #│
+    :FD1_∇²f̂!   #│
+    :HYPER_∇²f̂! #│
+    :FD2_∇²f̂!   #┘
 ]
+
 
 # Create a BenchmarkGroup for each function
 for fun in list_functions

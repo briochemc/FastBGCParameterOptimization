@@ -3,13 +3,14 @@
 
 # List of functions to be benchmarked
 list_methods = [
-    ("FD1"        , :f̂!,   :∇f̂!,  :FD∇f̂!)
-    ("CSD"        , :f̂!,   :∇f̂!, :CSD∇f̂!)
-    ("DUAL"       , :f̂!,   :∇f̂!,  :AD∇f̂!)
-    ("FLASH"      , :f̂!,   :∇f̂!,   :∇²f̂!)
-    ("HYPER"      , :f̂!,  :ADf̂!,  :AD²f̂!)
-    ("HYPERSMART" , :f̂!, :HS∇f̂!, :HS∇²f̂!)
-    ("FD2"        , :f̂!,  :FDf̂!,  :FD²f̂!)
+    ("OF1"   , :f̂!,   :OF1_∇f̂!,   :OF1_∇²f̂!)
+    ("F0"    , :f̂!,       :∇f̂!,    :F0_∇²f̂!)
+    ("F1"    , :f̂!,       :∇f̂!,    :F1_∇²f̂!)
+    ("DUAL"  , :f̂!,       :∇f̂!,  :DUAL_∇²f̂!)
+    ("CSD"   , :f̂!,       :∇f̂!,   :CSD_∇²f̂!)
+    ("FD1"   , :f̂!,       :∇f̂!,   :FD1_∇²f̂!)
+    ("HYPER" , :f̂!, :HYPER_∇f̂!, :HYPER_∇²f̂!)
+    ("FD2"   , :f̂!,   :FD2_∇f̂!,   :FD2_∇²f̂!)
 ]
 
 function print_time_and_q(λ)
