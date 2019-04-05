@@ -10,18 +10,20 @@ jld_file = joinpath(path_to_package_root, "data", "BenchmarkTools_data" * str_ou
 # Reorder keys to plot in my order
 #     key       fgh       method
 mykeys = [
-    ("q!"    , "f"  , "Analytical f"  ),
-    ("Dq!"   , "∇f" , "Analytical ∇f" ), #\
-    ("HSDq!" , "∇f" , "F1 ∇f"         ), # │
-    ("ADq!"  , "∇f" , "HYPER ∇f"      ), # ├─ gradients
-    ("FDq!"  , "∇f" , "FD2 ∇f"        ), #/
-    ("D2q!"  , "∇²f", "F-zero ∇²f"    ), #\
-    ("HSD2q!", "∇²f", "F1 ∇²f"        ), # │
-    ("ADDq!" , "∇²f", "DUAL ∇²f"      ), # │
-    ("CSDDq!", "∇²f", "CSD ∇²f"       ), # │
-    ("FDDq!" , "∇²f", "FD1 ∇²f"       ), # ├─ Hessians
-    ("AD2q!" , "∇²f", "HYPER ∇²f"     ), # │
-    ("FD2q!" , "∇²f", "FD2 ∇²f"       )  #/
+    ("f̂!"        , "f"  , "Analytical f" ),
+    ("∇f̂!"       , "∇f" , "Analytical ∇f"), #┐
+    ("OF1_∇f̂!"   , "∇f" , "F-1 ∇f"       ), #│
+    ("F1_∇f̂!"    , "∇f" , "old F-1 ∇f"   ), #│
+    ("HYPER_∇f̂!" , "∇f" , "HYPER ∇f"     ), #├─ gradients
+    ("FD2_∇f̂!"   , "∇f" , "FD2 ∇f"       ), #┘
+    ("OF1_∇²f̂!"  , "∇²f", "F-1 ∇²f"      ), #┐
+    ("F1_∇²f̂!"   , "∇²f", "old F-1 ∇²f"  ), #│
+    ("F0_∇²f̂!"   , "∇²f", "old F-0 ∇²f"  ), #│
+    ("DUAL_∇²f̂!" , "∇²f", "DUAL ∇²f"     ), #│
+    ("CSD_∇²f̂!"  , "∇²f", "CSD ∇²f"      ), #│
+    ("FD1_∇²f̂!"  , "∇²f", "FD1 ∇²f"      ), #├─ Hessians
+    ("HYPER_∇²f̂!", "∇²f", "HYPER ∇²f"    ), #│
+    ("FD2_∇²f̂!"  , "∇²f", "FD2 ∇²f"      )  #┘
 ]
 
 #sorting = [
@@ -49,7 +51,7 @@ function results_to_df(results, mykeys, m_list)
                 Dict(
                     :method => m,
                     :fgh => f,
-                    :time => round(results[k].times[] * 1e-9),
+                    :time => myround(results[k].times[] * 1e-9),
                     :allocs => results[k].allocs[] * 2^-27
                 )
             )
@@ -58,21 +60,24 @@ function results_to_df(results, mykeys, m_list)
     return df
 end
 
+myround(x) = x ≥ 100 ? round(x) : round(x*10) / 10
+
 m_list1 = [
     "Analytical f"
     "Analytical ∇f"
-    "F1 ∇f"
+    "F-1 ∇f"
+#    "old F-1 ∇f"
     "HYPER ∇f"
     "FD2 ∇f"
-    "F-zero ∇²f"
-    "F1 ∇²f"
+    "F-1 ∇²f"
+#    "old F-1 ∇²f"
+#    "old F-0 ∇²f"
     "DUAL ∇²f"
     "CSD ∇²f"
     "FD1 ∇²f"
 ]
 m_list2 = [
-    "F-zero ∇²f"
-    "F1 ∇²f"
+    "F-1 ∇²f"
     "HYPER ∇²f"
     "FD2 ∇²f"
 ]

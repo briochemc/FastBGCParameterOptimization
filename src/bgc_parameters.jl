@@ -116,6 +116,7 @@ Base.isapprox(p₁::Para, p₂::Para) = isapprox(vec(p₁), vec(p₂))
 
 # Convert p to λ and vice versa, needed by TransportMatrixTools!
 optvec(p::Para) = flatten(Vector, p)
+Base.:+(p::Para, v::Vector) = p + Flatten.reconstruct(Para((zeros(eltype(v), np))...), v)
 
 """
     p2λ(p::Para)

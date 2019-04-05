@@ -85,11 +85,11 @@ end
 Objective `f(s(p), p)` at `p`.
 `F(x, p) = 0` will be solved for a solution `s(p)` if required.
 """
-f̂!(p::Para{Float64}; preprint="") = f̂!(f, F, ∇ₓF, nrm, init, p, τstop; preprint=preprint)
-f̂!(p::Para{Dual{Float64}}; preprint="") = f̂!(f, F, ∇ₓF, nrm, εsol, init, p, τstop; preprint=preprint)
-F1_f̂!(p::Para{Hyper{Float64}}; preprint="") = f̂!(f, F, ∇ₓF, nrm, J, hsol, init, p, τstop; preprint=preprint)
-f̂!(p::Para{Hyper{Float64}}; preprint="") = f̂!(f, F, ∇ₓF, nrm, hsol, init, p, τstop; preprint=preprint)
-f̂!(p::Para{Complex{Float64}}; preprint="") = f̂!(f, F, ∇ₓF, nrm, imsol, init, p, τstop; preprint=preprint)
+f̂!(p::Para{Float64}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, init, p, τstop; preprint=preprint)
+f̂!(p::Para{Dual{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, εsol, init, p, τstop; preprint=preprint)
+F1_f̂!(p::Para{Hyper{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, J, hsol, init, p, τstop; preprint=preprint)
+f̂!(p::Para{Hyper{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, hsol, init, p, τstop; preprint=preprint)
+f̂!(p::Para{Complex{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, imsol, init, p, τstop; preprint=preprint)
 
 """
     print_cost(cval; preprint)
@@ -97,7 +97,7 @@ f̂!(p::Para{Complex{Float64}}; preprint="") = f̂!(f, F, ∇ₓF, nrm, imsol, i
 Prints the cost as a root mean square (RMS) error in percent.
 (Will also print the imaginary or dual part if any.)
 """
-function print_cost(cval; preprint="")
+function print_cost(cval; preprint=" ")
     if preprint ≠ ""
         print(preprint)
         printRMS(cval)
@@ -115,21 +115,21 @@ printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(re
 Objective `f(sol(λ), λ)` at `λ`.
 `F(x, p(λ)) = 0` will be solved for a solution `sol` if required.
 """
-f̂!(λ::Vector; preprint="") = f̂!(λ2p(λ); preprint=preprint)
-F1_f̂!(λ::Vector; preprint="") = F1f̂!(λ2p(λ); preprint=preprint)
+f̂!(λ::Vector; preprint=" ") = f̂!(λ2p(λ); preprint=preprint)
+F1_f̂!(λ::Vector; preprint=" ") = F1f̂!(λ2p(λ); preprint=preprint)
 
 """
     ∇f̂!(λ; preprint)
 
 Analytical gradient of the objective at `λ`.
 """
-function ∇f̂!(λ::Vector{Float64}; preprint="")
+function ∇f̂!(λ::Vector{Float64}; preprint=" ")
     return ∇f̂!(∇ₓf, ∇ₚf, F, ∇ₓF, ∇ₚF, nrm, λ2p, ∇λ2p, J, init, λ, τstop; preprint=preprint)
 end
-function ∇f̂!(ελ::Vector{Dual{Float64}}; preprint="")
+function ∇f̂!(ελ::Vector{Dual{Float64}}; preprint=" ")
     return ∇f̂!(∇ₓf, ∇ₚf, F, ∇ₓF, ∇ₚF, nrm, λ2p, ∇λ2p, εJ, εsol, init, ελ, τstop; preprint=preprint)
 end
-function ∇f̂!(imλ::Vector{Complex{Float64}}; preprint="")
+function ∇f̂!(imλ::Vector{Complex{Float64}}; preprint=" ")
     return ∇f̂!(∇ₓf, ∇ₚf, F, ∇ₓF, ∇ₚF, nrm, λ2p, ∇λ2p, imJ, imsol, init, imλ, τstop; preprint=preprint)
 end
 
@@ -138,7 +138,7 @@ end
 
 F0-method Hessian of the objective at `λ`.
 """
-F0_∇²f̂!(λ::Vector{Float64}; preprint="") = ∇²f̂!(∇ₓf, ∇ₚf, F, ∇ₓF, ∇ₚF, nrm, λ2p, ∇λ2p, ∇²λ2p, J, init, λ, τstop; preprint=preprint)
+F0_∇²f̂!(λ::Vector{Float64}; preprint=" ") = ∇²f̂!(∇ₓf, ∇ₚf, F, ∇ₓF, ∇ₚF, nrm, λ2p, ∇λ2p, ∇²λ2p, J, init, λ, τstop; preprint=preprint)
 
 
 
@@ -147,14 +147,14 @@ F0_∇²f̂!(λ::Vector{Float64}; preprint="") = ∇²f̂!(∇ₓf, ∇ₚf, F, 
 
 F1-method gradient of the objective at `λ`.
 """
-F1_∇f̂!(λ::Vector{Float64}; preprint="") = ∇f̂!(f, F, ∇ₓF, nrm, λ2p, ∇λ2p, F1buf, J, hsol, init, λ, τstop; preprint=preprint)
+F1_∇f̂!(λ::Vector{Float64}; preprint=" ") = ∇f̂!(f, F, ∇ₓF, nrm, λ2p, ∇λ2p, F1buf, J, hsol, init, λ, τstop; preprint=preprint)
 
 """
     F1_∇²f̂!(λ; preprint)
 
 F1-method Hessian of the objective at `λ`.
 """
-F1_∇²f̂!(λ::Vector{Float64}; preprint="") = ∇²f̂!(f, F, ∇ₓF, nrm, λ2p, ∇λ2p, ∇²λ2p, F1buf, J, hsol, init, λ, τstop; preprint=preprint)
+F1_∇²f̂!(λ::Vector{Float64}; preprint=" ") = ∇²f̂!(f, F, ∇ₓF, nrm, λ2p, ∇λ2p, ∇²λ2p, F1buf, J, hsol, init, λ, τstop; preprint=preprint)
 
 
 """
@@ -162,14 +162,14 @@ F1_∇²f̂!(λ::Vector{Float64}; preprint="") = ∇²f̂!(f, F, ∇ₓF, nrm, �
 
 OF1-method gradient of the objective at `λ`.
 """
-OF1_∇f̂!(λ::Vector{Float64}; preprint="") = ∇f̂!(f, F, ∇ₓf, ∇ₓF, nrm, λ2p, ∇λ2p, ∇sbuf, J, init, λ, τstop; preprint=preprint)
+OF1_∇f̂!(λ::Vector{Float64}; preprint=" ") = ∇f̂!(f, F, ∇ₓf, ∇ₓF, nrm, λ2p, ∇λ2p, ∇sbuf, J, init, λ, τstop; preprint=preprint)
 
 """
     OF1_∇²f̂!(λ; preprint)
 
 OF1-method Hessian of the objective at `λ`.
 """
-OF1_∇²f̂!(λ::Vector{Float64}; preprint="") = ∇²f̂!(f, F, ∇ₓf, ∇ₓF, nrm, λ2p, ∇λ2p, ∇²λ2p, ∇sbuf, J, init, λ, τstop; preprint=preprint)
+OF1_∇²f̂!(λ::Vector{Float64}; preprint=" ") = ∇²f̂!(f, F, ∇ₓf, ∇ₓF, nrm, λ2p, ∇λ2p, ∇²λ2p, ∇sbuf, J, init, λ, τstop; preprint=preprint)
 
 """
     gradient_f̂!(λ; preprint)

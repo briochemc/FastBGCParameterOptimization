@@ -20,11 +20,18 @@ jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out 
 translate_for_legend = Dict("f"=>"objective", "∇f"=>"gradient", "∇²f"=>"Hessian")
 
 # Reshape data into a DataFrame
-list_methods1 = ["F-zero", "DUAL", "FD1", "CSD", "F1"]
-list_methodsold1 = ["FLASH", "DUAL", "FD1", "CSD", "HYPERSMART"]
-list_methods2 = ["F-zero", "F1", "HYPER", "FD2"]
-list_methodsold2 = ["FLASH", "HYPERSMART", "HYPER", "FD2"]
-function timer_to_DataFrame(timers::Dict, l, lold)
+list_methods1 = ["F-1", "old F-0", "old F-1", "DUAL", "FD1", "CSD"]
+list_methods2 = ["F-1", "old F-0", "old F-1", "HYPER", "FD2"]
+list_methods1_old = ["OF1", "F0", "F1", "DUAL", "FD1", "CSD"]
+list_methods2_old = ["OF1", "F0", "F1", "HYPER", "FD2"]
+# Without old methods
+list_methods1 = ["F-1", "DUAL", "FD1", "CSD"]
+list_methods2 = ["F-1", "HYPER", "FD2"]
+list_methods1_old = ["OF1", "DUAL", "FD1", "CSD"]
+list_methods2_old = ["OF1", "HYPER", "FD2"]
+
+
+function timer_to_DataFrame(timers::Dict, l, l_old)
     df = DataFrame(
         method = Array{String}(undef, 0),
         fgh = Array{String}(undef, 0),
@@ -32,7 +39,7 @@ function timer_to_DataFrame(timers::Dict, l, lold)
         allocs = Array{Float64}(undef, 0),
         ncalls = Array{Int64}(undef, 0)
     )
-    for (ik, k) in enumerate(lold)
+    for (ik, k) in enumerate(l_old)
         t = timers[k]
         for k2 in ["f", "∇f", "∇²f"]
             push!(
@@ -50,14 +57,14 @@ function timer_to_DataFrame(timers::Dict, l, lold)
     return df
 end
 
-df1 = timer_to_DataFrame(timers, list_methods1, list_methodsold1)
-df2 = timer_to_DataFrame(timers, list_methods2, list_methodsold2)
+df1 = timer_to_DataFrame(timers, list_methods1, list_methods1_old)
+df2 = timer_to_DataFrame(timers, list_methods2, list_methods2_old)
 
 
 
 ptime1 = df1 |> @vlplot(
     width=300,
-    height=125,
+    height=100,
     title={text="(a)", anchor="start"},
     mark={
         :bar,
@@ -70,7 +77,7 @@ ptime1 = df1 |> @vlplot(
 
 ptime2 = df2 |> @vlplot(
     width=300,
-    height=100,
+    height=75,
     title={text="(b)", anchor="start"},
     mark={
         :bar,
