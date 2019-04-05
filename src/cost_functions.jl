@@ -1,6 +1,7 @@
 # Cost functions∇
 # Must import the functions to which I add methods
 import TransportMatrixTools.f̂!, TransportMatrixTools.∇f̂!, TransportMatrixTools.∇²f̂!
+import FormulaOneMethod.f̂, FormulaOneMethod.∇f̂, FormulaOneMethod.∇²f̂
 """
     nrm(x)
 
@@ -48,6 +49,7 @@ function ∇ₓf(x)
     DIN, _ = unpackx(x)
     kron([1 0], Dvnorm²(DIN - DINobs) / vnorm²(DINobs))
 end
+∇ₓf(x, p) = ∇ₓf(x) # for generic form
 
 c_noweight(p::Para) = 0.5 * p2λ(p)' * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
 c_noweight(p::Para{Complex{Float64}}) = 0.5 * transpose(p2λ(p)) * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
@@ -67,6 +69,7 @@ f(p::Para) = p.ω * c_noweight(p)
 Returns the gradient of cost of parameters `p` (at `p`).
 """
 ∇ₚf(p::Para) = p.ω * Dc_noweight(p)
+∇ₚf(x, p) = ∇ₚ(p) # for generic form
 
 """
     f(x, p)
@@ -90,6 +93,25 @@ f̂!(p::Para{Dual{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, εsol, ini
 F1_f̂!(p::Para{Hyper{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, J, hsol, init, p, τstop; preprint=preprint)
 f̂!(p::Para{Hyper{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, hsol, init, p, τstop; preprint=preprint)
 f̂!(p::Para{Complex{Float64}}; preprint=" ") = f̂!(f, F, ∇ₓF, nrm, imsol, init, p, τstop; preprint=preprint)
+
+"""
+    f̂
+
+objective, gradient, and Hessian for new refactored F-1 method.
+"""
+f̂(p::Para{Float64}; preprint=" ") = f̂(f, F, ∇ₓf, ∇ₓF, newF1buf, p, CTKAlg(), nrm=nrm, preprint=" ")
+∇f̂(p::Para{Float64}; preprint=" ") = ∇f̂(f, F, ∇ₓf, ∇ₓF, newF1buf, p, CTKAlg(), nrm=nrm, preprint=" ")
+∇²f̂(p::Para{Float64}; preprint=" ") = ∇²f̂(f, F, ∇ₓf, ∇ₓF, newF1buf, p, CTKAlg(), nrm=nrm, preprint=" ")
+∇f̂(λ::Vector{Float64}; preprint=" ") = ∇f̂(λ2p(λ), preprint=preprint) * diagm(0 => ∇λ2p(λ))
+function ∇²f̂(λ::Vector{Float64}; preprint=" ")
+    ∇p = diagm(0 => ∇λ2p(λ)) # for variable change
+    ∇²p = diagm(0 => ∇²λ2p(λ)) # for variable change
+    H = ∇²f̂(λ2p(λ), preprint=preprint)
+    G = vec(∇f̂(λ2p(λ), preprint=preprint))
+    return ∇p * H * ∇p + diagm(0 => G) * ∇²p
+end
+
+
 
 """
     print_cost(cval; preprint)
@@ -117,6 +139,7 @@ Objective `f(sol(λ), λ)` at `λ`.
 """
 f̂!(λ::Vector; preprint=" ") = f̂!(λ2p(λ); preprint=preprint)
 F1_f̂!(λ::Vector; preprint=" ") = F1f̂!(λ2p(λ); preprint=preprint)
+f̂(λ::Vector; preprint=" ") = f̂(λ2p(λ); preprint=preprint)
 
 """
     ∇f̂!(λ; preprint)
@@ -267,11 +290,11 @@ gradient_methods = [
 ]
 
 for m in Hessian_methods
-    @eval $m(s, λ) = s[1:npopt, 1:npopt] .= $m(λ)
+    @eval $m(s, λ) = s[1:m, 1:m] .= $m(λ)
 end
 
 for m in gradient_methods
-    @eval $m(s, λ) = s[1:npopt] .= vec($m(λ))
+    @eval $m(s, λ) = s[1:m] .= vec($m(λ))
 end
 
 #"""
@@ -280,7 +303,7 @@ end
 #Analytical gradient
 #"""
 #function ∇f̂!(storage, λ)
-#    storage[1:npopt] .= vec(∇f̂!(λ))
+#    storage[1:m] .= vec(∇f̂!(λ))
 #end
 #
 #"""
@@ -289,7 +312,7 @@ end
 #F0 Hessian
 #"""
 #function F0_∇²f̂!(storage, λ)
-#    storage[1:npopt, 1:npopt] .= F0_∇²f̂!(λ)
+#    storage[1:m, 1:m] .= F0_∇²f̂!(λ)
 #end
 #
 #"""
@@ -298,7 +321,7 @@ end
 #CSD Hessian
 #"""
 #function CSD_∇²f̂!(storage, λ)
-#    storage[1:npopt, 1:npopt] .= CSD_∇²f̂!(λ)
+#    storage[1:m, 1:m] .= CSD_∇²f̂!(λ)
 #end
 #
 #"""
@@ -307,7 +330,7 @@ end
 #DUAL Hessian
 #"""
 #function DUAL_∇²f̂!(storage, λ)
-#    storage[1:npopt, 1:npopt] .= DUAL_∇²f̂!(λ)
+#    storage[1:m, 1:m] .= DUAL_∇²f̂!(λ)
 #end
 #
 #"""
@@ -316,7 +339,7 @@ end
 #FD1 Hessian
 #"""
 #function FD1_∇²f̂!(storage, λ)
-#    storage[1:npopt, 1:npopt] .= FD1_∇²f̂!(λ)
+#    storage[1:m, 1:m] .= FD1_∇²f̂!(λ)
 #end
 #
 #"""
@@ -325,7 +348,7 @@ end
 #F1 gradient
 #"""
 #function F1_∇f̂!(storage, λ)
-#    storage[1:npopt] .= vec(F1_∇f̂!(λ))
+#    storage[1:m] .= vec(F1_∇f̂!(λ))
 #end
 #
 #"""
@@ -334,7 +357,7 @@ end
 #F1 Hessian
 #"""
 #function F1_∇²f̂!(storage, λ)
-#    storage[1:npopt, 1:npopt] .= F1_∇²f̂!(λ)
+#    storage[1:m, 1:m] .= F1_∇²f̂!(λ)
 #end
 #
 #"""
@@ -343,7 +366,7 @@ end
 #FD2 gradient
 #"""
 #function FD2_∇f̂!(storage, λ)
-#    storage[1:npopt] .= vec(FD2_∇f̂!(λ))
+#    storage[1:m] .= vec(FD2_∇f̂!(λ))
 #end
 #
 #"""
@@ -352,7 +375,7 @@ end
 #FD2 Hessian
 #"""
 #function FD2_∇²f̂!(storage, λ)
-#    storage[1:npopt, 1:npopt] .= FD2_∇²f̂!(λ)
+#    storage[1:m, 1:m] .= FD2_∇²f̂!(λ)
 #end
 #
 #"""
@@ -361,7 +384,7 @@ end
 #HYPER gradient
 #"""
 #function HYPER_∇f̂!(storage, λ)
-#    storage[1:npopt] .= vec(HYPER_∇f̂!(λ))
+#    storage[1:m] .= vec(HYPER_∇f̂!(λ))
 #end
 #
 #"""
@@ -370,6 +393,6 @@ end
 #HYPER Hessian
 #"""
 #function HYPER_∇²f̂!(storage, λ)
-#    storage[1:npopt, 1:npopt] .= HYPER_∇²f̂!(λ)
+#    storage[1:m, 1:m] .= HYPER_∇²f̂!(λ)
 #end
 #

@@ -42,3 +42,6 @@ using BenchmarkTools
 
 # For counting number of factorizations
 using Cassette
+
+# FormulaOne method
+using FormulaOneMethod

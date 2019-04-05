@@ -35,6 +35,13 @@ Constant state used to start with.
 const x₀ = [DINobs; DINobs / 10] * 1.1
 
 """
+    n :: Int
+
+Constant state used to start with.
+"""
+const n = length(x₀)
+
+"""
     τstop
 
 Constant value for the solver stopping criteria.
@@ -45,4 +52,8 @@ const τstop = 1e6 * 365e6 * spd
 # Preallocate real, dual, complex, and hyperdual states (and Jacobians)
 init, J, εsol, εJ, imsol, imJ, hsol, F1buf, ∇sbuf = preallocateNewTypes(Para, ∇ₓF, x₀, p₀)
 
+# Preallocate special buffer for F-1 method
+println("Initializing FormulaOne Buffer...")
+newF1buf = initialize_buffer(f, F, ∇ₓf, ∇ₓF, x₀, p₀, CTKAlg(), nrm=nrm, preprint=" ")
 
+println("Constants are set up.")

@@ -67,11 +67,11 @@ Uses the `Flatten.jl` package.
 const optimizable_parameters = fieldnameflatten(Para())
 
 """
-    npopt
+    m
 
 Number of optimizable parameters (constant).
 """
-const npopt = length(optimizable_parameters)
+const m = length(optimizable_parameters)
 
 """
     np
