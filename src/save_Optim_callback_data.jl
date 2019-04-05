@@ -3,6 +3,7 @@
 
 # List of functions to be benchmarked
 list_methods = [
+    ("newOF1",  :f̂,        :∇f̂,        :∇²f̂)
     ("OF1"   , :f̂!,   :OF1_∇f̂!,   :OF1_∇²f̂!)
     ("F0"    , :f̂!,       :∇f̂!,    :F0_∇²f̂!)
     ("F1"    , :f̂!,       :∇f̂!,    :F1_∇²f̂!)
@@ -41,13 +42,13 @@ using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
 
 for (i, myrun) in enumerate(myruns)
-    for (method_name, f̂, ∇f̂, ∇²f̂) in list_methods
+    for (method_name, objective, gradient, hessian) in list_methods
         println("\n┌────────────────────────")
         println("│ Optimizing using method " * method_name * ", for " * myrun * "\n│")
         init.x, init.p = 1x₀, 3p₀
         J.fac, J.p = factorize(∇ₓF(x₀, 3p₀)), 3p₀
         println("│    ", time())
-        eval( :( results = optimize($f̂, $∇f̂, $∇²f̂, $λ₀, NewtonTrustRegion(), $opt)) )
+        eval( :( results = optimize($objective, $gradient, $hessian, $λ₀, NewtonTrustRegion(), $opt)) )
         println("└────────────────────────")
         # Save output
         jld_file = joinpath(path_to_package_root, "data", "Optim_callback_data" * method_name * myruns2[i] * str_out * ".jld2")

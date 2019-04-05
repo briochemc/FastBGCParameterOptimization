@@ -10,11 +10,13 @@ suite = BenchmarkGroup()
 list_functions = [
     :f̂!
     :∇f̂!       #┐
+    :∇f̂        #│
     :OF1_∇f̂!   #│
     :F1_∇f̂!    #│
     :HYPER_∇f̂! #├─ gradients
     :FD2_∇f̂!   #┘
     :OF1_∇²f̂!   #┐
+    :∇²f̂        #│
     :F0_∇²f̂!    #│
     :F1_∇²f̂!    #├─ Hessians
     :DUAL_∇²f̂!  #│

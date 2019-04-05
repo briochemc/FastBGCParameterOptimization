@@ -5,12 +5,15 @@ const to = TimerOutput()
 
 # timed version for all functions called in Optim
 f̂t!(λ)           = @timeit to "f"   f̂!(λ)
+f̂t(λ)            = @timeit to "f"   f̂(λ)
 ∇f̂t!(s, λ)       = @timeit to "∇f"  ∇f̂!(s, λ)       #┐
+∇f̂t(s, λ)        = @timeit to "∇f"  ∇f̂(s, λ)        #│
 OF1_∇f̂t!(s, λ)   = @timeit to "∇f"  OF1_∇f̂!(s, λ)   #│
 F1_∇f̂t!(s, λ)    = @timeit to "∇f"  F1_∇f̂!(s, λ)    #│
 HYPER_∇f̂t!(s, λ) = @timeit to "∇f"  HYPER_∇f̂!(s, λ) #├─ gradients
 FD2_∇f̂t!(s, λ)   = @timeit to "∇f"  FD2_∇f̂!(s, λ)   #┘
 OF1_∇²f̂t!(s, λ)  = @timeit to "∇²f" OF1_∇²f̂!(s, λ)   #┐
+∇²f̂t(s, λ)       = @timeit to "∇²f" ∇²f̂(s, λ)        #│
 F0_∇²f̂t!(s, λ)   = @timeit to "∇²f" F0_∇²f̂!(s, λ)    #│
 F1_∇²f̂t!(s, λ)   = @timeit to "∇²f" F1_∇²f̂!(s, λ)    #├─ Hessians
 DUAL_∇²f̂t!(s, λ) = @timeit to "∇²f" DUAL_∇²f̂!(s, λ)  #│
@@ -28,6 +31,7 @@ methods_TimerOutputs_data = Dict()
 # make it into short code by listing the methods differently and
 # interpolating them using the $ sign
 list_timed_methods = [
+    ("newF1" ,  :f̂t,       :∇f̂t!,        :∇²f̂t)
     ("OF1"   , :f̂t!,   :OF1_∇f̂t!,   :OF1_∇²f̂t!)
     ("F0"    , :f̂t!,       :∇f̂t!,    :F0_∇²f̂t!)
     ("F1"    , :f̂t!,       :∇f̂t!,    :F1_∇²f̂t!)
@@ -60,7 +64,7 @@ function print_mytimer!(d::Dict, f::String, t::TimerOutput)
 end
 
 for (i, myrun) in enumerate(myruns)
-    for (method_name, f̂, ∇f̂, ∇²f̂) in list_timed_methods
+    for (method_name, objective, gradient, hessian) in list_timed_methods
         println("\n\n\n------------------------\n") # print what you are doing
         println(myrun * ": " * method_name * " (with TimerOutputs)")
         println("\n------------------------\n\n\n")
@@ -74,7 +78,7 @@ for (i, myrun) in enumerate(myruns)
 
         # Run the timed optimization!
         reset_timer!(to) # Reset timer
-        @timeit to "Trust Region" eval(:(res = optimize($f̂, $∇f̂, $∇²f̂, $λ₀, NewtonTrustRegion(), $opt)))
+        @timeit to "Trust Region" eval(:(res = optimize($objective, $gradient, $hessian, $λ₀, NewtonTrustRegion(), $opt)))
 
         # Print the TimerOutput
         print_timer(io, to)
