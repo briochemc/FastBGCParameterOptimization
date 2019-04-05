@@ -270,6 +270,7 @@ HYPER_∇²f̂!(λ) = HyperDualNumbersHessian(f̂!, λ)
 # TODO shorten this all in an expression loop
 
 Hessian_methods = [
+    :∇²f̂,
     :OF1_∇²f̂!,
     :F1_∇²f̂!,
     :F0_∇²f̂!,
@@ -281,6 +282,7 @@ Hessian_methods = [
 ]
 
 gradient_methods = [
+    :∇f̂,
     :∇f̂!,
     :OF1_∇f̂!,
     :F1_∇f̂!,

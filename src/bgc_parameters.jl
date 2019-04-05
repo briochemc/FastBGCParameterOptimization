@@ -108,7 +108,6 @@ HyperDualNumbers.realpart(p::Para{Hyper{Float64}}) = Para(HyperDualNumbers.realp
 
 # Overload +, -, and * for parameters
 Base.:+(p₁::Para, p₂::Para) = Para(vec(p₁) .+ vec(p₂))
-Base.:-(p₁::Para, p₂::Para) = Para(vec(p₁) .- vec(p₂))
 Base.:*(p₁::Para, p₂::Para) = Para(vec(p₁) .* vec(p₂))
 Base.:*(s::Number, p::Para) = Para(s .* vec(p))
 Base.:*(p::Para, s::Number) = Para(s .* vec(p))
@@ -117,6 +116,10 @@ Base.isapprox(p₁::Para, p₂::Para) = isapprox(vec(p₁), vec(p₂))
 # Convert p to λ and vice versa, needed by TransportMatrixTools!
 optvec(p::Para) = flatten(Vector, p)
 Base.:+(p::Para, v::Vector) = p + Flatten.reconstruct(Para((zeros(eltype(v), np))...), v)
+
+# For shifting initial state by ∇s*∇p when p is updated
+Base.:-(p₁::Para, p₂::Para) = Flatten.reconstruct(p₁, optvec(p₁) .- optvec(p₂))
+Base.:*(∇s::Array, p::Para) = ∇s * optvec(p)
 
 """
     p2λ(p::Para)
