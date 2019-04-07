@@ -55,5 +55,9 @@ init, J, εsol, εJ, imsol, imJ, hsol, F1buf, ∇sbuf = preallocateNewTypes(Para
 # Preallocate special buffer for F-1 method
 println("Initializing FormulaOne Buffer...")
 newF1buf = initialize_buffer(f, F, ∇ₓf, ∇ₓF, x₀, p₀, CTKAlg(), nrm=nrm, preprint=" ")
+newF1buf.s = 1x₀ # (`1x₀` is equivalent to `copy(x₀)` I think)
+# TODO maybe change from initialize_buffer to simply calling the Buffer constructor
+# so that this method does not start with an advantage?
+# TODO refactor all the methods out of here
 
 println("Constants are set up.")

@@ -71,6 +71,7 @@ for (i, myrun) in enumerate(myruns)
 
         init.x, init.p = 1x₀, 3p₀ # Reset initial x and p
         J.fac, J.p = factorize(∇ₓF(x₀, 3p₀)), 3p₀ # and J
+        newF1buf.s, newF1buf.p = 1x₀, 3p₀
 
         # Open the file to print TimerOutputs
         file_name = joinpath(path_to_package_root, "data", "TimerOutputs_" * method_name * myruns2[i] * str_out * ".txt")

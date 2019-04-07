@@ -47,6 +47,7 @@ for (i, myrun) in enumerate(myruns)
         println("│ Optimizing using method " * method_name * ", for " * myrun * "\n│")
         init.x, init.p = 1x₀, 3p₀
         J.fac, J.p = factorize(∇ₓF(x₀, 3p₀)), 3p₀
+        newF1buf.s, newF1buf.p = 1x₀, 3p₀
         println("│    ", time())
         eval( :( results = optimize($objective, $gradient, $hessian, $λ₀, NewtonTrustRegion(), $opt)) )
         println("└────────────────────────")

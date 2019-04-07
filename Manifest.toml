@@ -59,9 +59,9 @@ version = "0.4.1"
 
 [[Cassette]]
 deps = ["InteractiveUtils", "LinearAlgebra", "Test"]
-git-tree-sha1 = "1d00c35118babf85c4a9a72c3d3550d498b64a03"
+git-tree-sha1 = "5536cf95a81ff784f4d1eca2df39bb2629a7ee59"
 uuid = "7057c7e9-c182-5462-911a-8362d720325c"
-version = "0.2.2"
+version = "0.2.3"
 
 [[CategoricalArrays]]
 deps = ["Compat", "Future", "Missings", "Printf", "Reexport", "Requires"]
@@ -209,9 +209,9 @@ version = "0.0.3"
 
 [[FileIO]]
 deps = ["Pkg", "Random", "Test"]
-git-tree-sha1 = "c94b0787956629036fb2b20fccde9e52b89d079a"
+git-tree-sha1 = "da32159d4a2e526338506685e280e39ed2f18961"
 uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
-version = "1.0.5"
+version = "1.0.6"
 
 [[FixedPointNumbers]]
 deps = ["Test"]
@@ -233,11 +233,11 @@ version = "0.3.5"
 
 [[FormulaOneMethod]]
 deps = ["DiffEqBase", "DualNumbers", "HyperDualNumbers", "LinearAlgebra"]
-git-tree-sha1 = "c9e0d64ce5c1c13fad7fa2b8d37bd544af06cc8d"
+git-tree-sha1 = "294f4956cd68319eee9d644cd9634a58157bf5a8"
 repo-rev = "master"
 repo-url = "https://github.com/briochemc/FormulaOneMethod.jl.git"
 uuid = "f243976a-5756-11e9-2994-eb72b43b8255"
-version = "0.2.0"
+version = "0.2.1"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "InteractiveUtils", "LinearAlgebra", "NaNMath", "Random", "SparseArrays", "SpecialFunctions", "StaticArrays", "Test"]
