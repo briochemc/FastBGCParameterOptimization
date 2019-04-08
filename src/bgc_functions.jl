@@ -115,7 +115,7 @@ end
 Evaluates the jacobian of `f` with respect to `p`.
 Concatenates `∇ₚF(x, p::Para, s::Symbol)` for all optimizable parameter symbols `s`.
 """
-∇ₚF(x, p::Para) = hcat((∇ₚF(x, p, popt) for popt in optimizable_parameters)...)
+∇ₚF(x, p::Para) = hcat((∇ₚF(x, p, s) for s in fieldnameflatten(p))...)
 
 """
     ∇ₚF(x, p::Para, s::Symbol)

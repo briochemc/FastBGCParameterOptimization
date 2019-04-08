@@ -1,6 +1,14 @@
 # Biogeochemistry parameters
+module Parameters
 
-# BGC parameters
+# Packages for parameters
+using FieldDefaults, Flatten, FieldMetadata, Unitful, Distributions
+import FieldDefaults: get_default
+import FieldMetadata: @units, units, @prior, prior, @description, description
+import Flatten: flattenable
+
+import TransportMatrixTools: AbstractPara
+
 # Define some metadata
 @metadata printunits nothing
 @metadata description ""
@@ -8,6 +16,8 @@
 # Define the year unit (not in Unitful)
 @unit(yr, "yr", Year, 365.0u"d", true)
 Unitful.register(@__MODULE__)
+
+const spd = 24*60*60
 """
     Para{U} <: AbstractPara{U}
 
@@ -42,19 +52,7 @@ Gives the `LogNormal` distribution that has a mean `m` and standard deviation `s
 (I use the standard deviation rather than the variance to avoid unit-conversion confusion.)
 """
 LN(m, s) = LogNormal(μ_LogNormal(m, s), σ_LogNormal(m, s))
-
-"""
-    μ_LogNormal(m, s)
-
-Gives the mean, `μ`, of the log of the lognormal distribution with mean `m` and standard deviation `s`.
-"""
 μ_LogNormal(m, s) = log(m / sqrt(1 + (s / m)^2))
-
-"""
-    σ_LogNormal(m, s)
-
-Gives the standard deviation, `σ`, of the log of the lognormal distribution with mean `m` standard deviation `s`.
-"""
 σ_LogNormal(m, s) = sqrt(log(1 + (s / m)^2))
 
 
@@ -71,20 +69,15 @@ const optimizable_parameters = fieldnameflatten(Para())
 
 Number of optimizable parameters (constant).
 """
-const m = length(optimizable_parameters)
+const m = length(fieldnameflatten(Para()))
 
 """
-    np
+    m_all
 
 Number of parameters including non-optimizable ones (constant).
 """
-const np = length(fieldnames(typeof(Para())))
+const m_all = length(fieldnames(typeof(Para())))
 
-"""
-    eltype(::Para{U})
-
-Returns the element type of the parameters.
-"""
 Base.eltype(::Para{U}) where U = U
 
 """
@@ -95,31 +88,56 @@ Returns the number of optimizable parameters of `p`.
 Base.length(p::Para) = length(fieldnameflatten(p))
 
 # Defining an iterator for the parameters to be able to `collect` it into a vector
-Base.iterate(p::Para, i=1) = i > np ? nothing : (getfield(p, i), i + 1)
+Base.iterate(p::Para, i=1) = i > m_all ? nothing : (getfield(p, i), i + 1)
 
 # Convert p to a vector and vice versa
 Base.vec(p::Para) = collect((p...,))
 Para(v::Vector) = Para(v...)
+Base.copy(p::Para) = Para(vec(p)...)
 
 # read non-real part (for update of init)
+using DualNumbers, HyperDualNumbers
 DualNumbers.realpart(p::Para{Dual{Float64}}) = Para(DualNumbers.realpart.(vec(p)))
 Base.real(p::Para{Complex{Float64}}) = Para(real.(vec(p)))
 HyperDualNumbers.realpart(p::Para{Hyper{Float64}}) = Para(HyperDualNumbers.realpart.(vec(p)))
 
-# Overload +, -, and * for parameters
+# Overloads for parameters
 Base.:+(p₁::Para, p₂::Para) = Para(vec(p₁) .+ vec(p₂))
 Base.:*(p₁::Para, p₂::Para) = Para(vec(p₁) .* vec(p₂))
 Base.:*(s::Number, p::Para) = Para(s .* vec(p))
 Base.:*(p::Para, s::Number) = Para(s .* vec(p))
 Base.isapprox(p₁::Para, p₂::Para) = isapprox(vec(p₁), vec(p₂))
+Base.:(==)(p₁::Para, p₂::Para) = vec(p₁) == vec(p₂)
 
 # Convert p to λ and vice versa, needed by TransportMatrixTools!
 optvec(p::Para) = flatten(Vector, p)
-Base.:+(p::Para, v::Vector) = p + Flatten.reconstruct(Para((zeros(eltype(v), np))...), v)
+Base.:+(p::Para, v::Vector) = p + Flatten.reconstruct(Para((zeros(eltype(v), m_all))...), v)
 
 # For shifting initial state by ∇s*∇p when p is updated
 Base.:-(p₁::Para, p₂::Para) = Flatten.reconstruct(p₁, optvec(p₁) .- optvec(p₂))
 Base.:*(∇s::Array, p::Para) = ∇s * optvec(p)
+
+"""
+    p₀
+
+The (constant) default values of non-optimized parameters.
+"""
+const p₀ = Para(ω = 1e-4)
+str_out = "_default"
+
+"""
+    μobs
+
+The (constant) mean of the log of the observed parameters (the μ of the lognormal prior).
+"""
+const μobs = [meanlogx.(metaflatten(p₀, prior))...]
+
+"""
+    σ²obs
+
+The (constant) variance of the log of the observed parameters (the σ² of the lognormal prior).
+"""
+const σ²obs = [varlogx.(metaflatten(p₀, prior))...]
 
 """
     p2λ(p::Para)
@@ -129,14 +147,11 @@ Returns the `λ` that corresponds to `p`.
 E.g., conditions like being positive can be imposed using `exp`, etc.
 """
 p2λ(p::Para) = log.(optvec(p)) - μobs
-
-
-"""
-    ∇p2λ(p::Para)
-
-Returns the gradient of `λ` with respect to `p`.
-"""
+const λ₀ = p2λ(p₀)
 ∇p2λ(p::Para) = optvec(p).^(-1)
+λ2p(λ) = optPara(exp.(λ + μobs))
+∇λ2p(λ) = exp.(λ + μobs)
+∇²λ2p(λ) = exp.(λ + μobs)
 
 function optPara(v::Vector{U}) where U
     if U == eltype(p₀)
@@ -147,55 +162,24 @@ function optPara(v::Vector{U}) where U
     end
 end
 
-"""
-    λ2p(λ)
-
-Returns the `p` that corresponds to `λ`.
-See `p2λ`.
-"""
-λ2p(λ) = optPara(exp.(λ .+ μobs))
-
-"""
-    ∇λ2p(λ)
-
-Returns the gradient of `p` with respect to `λ`.
-"""
-∇λ2p(λ) = exp.(λ .+ μobs)
-
-"""
-    ∇²λ2p(λ)
-
-Returns the Hessian of `p` with respect to `λ`.
-"""
-∇²λ2p(λ) = exp.(λ .+ μobs)
-
-"""
-    show(io::IO, p::Para)
-
-shows the parameters after applying the base unit and converting to printing unit.
-
-`show(p)` will show all the parameters.
-
-`show(IOContext(stdout, :compact => true), p)` will only show the optimizable parameters.
-"""
-function Base.show(io::IO, p::Para; preprint="")
-    println(preprint * "Parameter values:")
-    compact = get(io, :compact, false)
+using Printf
+import Base: show
+function Base.show(io::IO, p::Para)
+    println(typeof(p))
     for f in fieldnames(typeof(p))
-        if printunits(p, f) == 1
-            val = getfield(p, f)
+        v = getfield(p, f)
+        punit = printunits(p, f)
+        if punit == 1
+            val = v
         else
-            val = uconvert(printunits(p, f), getfield(p, f) * units(p, f))
+            val = uconvert(punit, v * units(p, f))
         end
-        (~compact || flattenable(p, f)) && println(preprint * "│ $f = $val")
+        @printf io "%6s = %8.2e %s\n" f val punit
     end
 end
+Base.show(io::IO, mime::MIME, p::Para) = Base.show(io, p)
 
-"""
-    print_LaTeX_table(p::Para)
 
-prints a LaTeX table of the parameters applying the printing unit.
-"""
 function print_LaTeX_table(p::Para)
     println("Latex table for the parameters:")
     println("\\begin{table*}[t]")
@@ -229,12 +213,7 @@ end
 
 latexify(optimized::Bool) = optimized ? "yes" : "no"
 
-"""
-    latexify(val)
 
-Returns the LaTeX string for the value `val` to be used in the LaTeX table of parameters.
-See also: [`print_LaTeX_table`](@ref)
-"""
 function latexify(val)
     str = @sprintf("%.2g", val)
     str = replace(str, r"e\+0+(?<exp>\d+)" => s" \\times 10^{\g<exp>}")
@@ -260,3 +239,6 @@ end
 #     end
 # end
 
+export Para
+
+end

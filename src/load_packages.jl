@@ -28,11 +28,6 @@ using JLD2
 # Optimization package
 using Optim
 
-# Packages for parameters
-using FieldDefaults, Flatten, FieldMetadata, Unitful, Distributions
-import FieldDefaults: get_default
-import FieldMetadata: @units, units, @prior, prior, @description, description
-import Flatten: flattenable
 
 # Package to load and grid WOA data
 using WorldOceanAtlasTools
@@ -40,8 +35,3 @@ using WorldOceanAtlasTools
 # Benchmarking
 using BenchmarkTools
 
-# For counting number of factorizations
-using Cassette
-
-# FormulaOne method
-using FormulaOneMethod

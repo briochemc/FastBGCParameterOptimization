@@ -146,7 +146,7 @@ const DINobsmean = vmean(DINobs)
 # Required for bgc functions
 const maskEup = z .< 120 # Euphotic zone definition (Different from OCIM1.1!)
 
-export T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
+#export T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
 
 end
 

@@ -53,9 +53,9 @@ version = "0.5.6"
 
 [[Calculus]]
 deps = ["Compat"]
-git-tree-sha1 = "f60954495a7afcee4136f78d1d60350abd37a409"
+path = "/Users/benoitpasquier/.julia/dev/Calculus"
 uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
-version = "0.4.1"
+version = "0.4.1+"
 
 [[Cassette]]
 deps = ["InteractiveUtils", "LinearAlgebra", "Test"]
@@ -220,8 +220,10 @@ uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.5.3"
 
 [[Flatten]]
-deps = ["FieldMetadata", "Requires", "Test"]
-git-tree-sha1 = "96aafff350d4da168256e1224d88ecfcfae65bd5"
+deps = ["FieldMetadata", "Requires"]
+git-tree-sha1 = "4fd73f76ae2ef0d89666d8c98d0797016debaf8b"
+repo-rev = "master"
+repo-url = "https://github.com/rafaqz/Flatten.jl.git"
 uuid = "4c728ea3-d9ee-5c9a-9642-b6f7d7dc04fa"
 version = "0.1.0"
 
@@ -233,9 +235,7 @@ version = "0.3.5"
 
 [[FormulaOneMethod]]
 deps = ["DiffEqBase", "DualNumbers", "HyperDualNumbers", "LinearAlgebra"]
-git-tree-sha1 = "294f4956cd68319eee9d644cd9634a58157bf5a8"
-repo-rev = "master"
-repo-url = "https://github.com/briochemc/FormulaOneMethod.jl.git"
+path = "/Users/benoitpasquier/.julia/dev/FormulaOneMethod"
 uuid = "f243976a-5756-11e9-2994-eb72b43b8255"
 version = "0.2.1"
 
@@ -630,9 +630,7 @@ version = "0.9.3"
 
 [[TransportMatrixTools]]
 deps = ["DiffEqBase", "DualMatrixTools", "DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "HyperDualMatrixTools", "HyperDualNumbers", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-git-tree-sha1 = "b6123752c1d9185d37620cd80c8c099439c2076a"
-repo-rev = "master"
-repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
+path = "/Users/benoitpasquier/.julia/dev/TransportMatrixTools"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
 version = "0.2.0"
 
