@@ -109,6 +109,7 @@ function ∇ₓF(x, p::Para)
     return foo
 end
 
+using Flatten
 """
     ∇ₚF(x, p::Para)
 

@@ -1,3 +1,8 @@
+
+#=============================================
+    Constants
+=============================================#
+
 """
     x₀ :: Vector{Float64}
 
@@ -20,8 +25,9 @@ Currently set at 1 million years.
 """
 const τstop = 1e6 * 365e6 * spd
 
-# Preallocate real, dual, complex, and hyperdual states (and Jacobians)
-# init, J, εsol, εJ, imsol, imJ, hsol, F1buf, ∇sbuf = preallocateNewTypes(Para, ∇ₓF, x₀, p₀)
+#=============================================
+    Preallocate buffers for each method
+=============================================#
 
 # Preallocate special buffer for F-1 method
 println("  Initializing...")
@@ -29,10 +35,11 @@ F1buf = F1.initialize_buffer(x₀, p₀)
 println("    F1 buffer")
 
 # TODO refactor all the methods out of here
-for m in list_methods[2:4] # All methods but F1
+list_methods = [:F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
+for m in list_methods[2:end] # All methods but F1
     mSol = Symbol(string(m) * "Sol")
     @eval $mSol = $m.Solution(copy(x₀))
     println("    $m steady-state solution")
 end
 
-println("Constants are set up.")
+println("Constants and buffers are set up.")

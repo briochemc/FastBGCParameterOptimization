@@ -19,10 +19,15 @@ end
 for ∇ᵏf̂ in list_∇ᵏf̂[2:3]
     m_∇ᵏf̂ = Symbol("F1_" * string(∇ᵏf̂))
     @eval  $m_∇ᵏf̂(p::Para; preprint=" ") = F1.$∇ᵏf̂(f, F, ∇ₓf, ∇ₓF, F1buf, p, CTKAlg(), nrm=nrm, preprint=preprint)
-    for m in list_methods[2:end] # All methods except F1
+    for m in list_methods[2:4] # DUAL, CSD, and FD1
         msol = Symbol(string(m) * "Sol")
         m_∇ᵏf̂ = Symbol(string(m) * "_" * string(∇ᵏf̂))
         @eval $m_∇ᵏf̂(p::Para; preprint=" ") = $m.$∇ᵏf̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, $msol, p, CTKAlg(), nrm=nrm, preprint=preprint)
+    end
+    for m in list_methods[5:6] # HYPER and FD2
+        msol = Symbol(string(m) * "Sol")
+        m_∇ᵏf̂ = Symbol(string(m) * "_" * string(∇ᵏf̂))
+        @eval $m_∇ᵏf̂(p::Para; preprint=" ") = $m.$∇ᵏf̂(f, F, ∇ₓF, $msol, p, CTKAlg(), nrm=nrm, preprint=preprint)
     end
 end
 

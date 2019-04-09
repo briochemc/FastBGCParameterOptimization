@@ -1,51 +1,32 @@
 # Set the options for the NewtonTrustRegion optimizer
 opt = Optim.Options(store_trace = false, show_trace = false, extended_trace = false)
+
+# Initialize TimerOutput
 using TimerOutputs
 const to = TimerOutput()
 
-# timed version for all functions called in Optim
-f̂t!(λ)           = @timeit to "f"   f̂!(λ)
-f̂t(λ)            = @timeit to "f"   f̂(λ)
-∇f̂t!(s, λ)       = @timeit to "∇f"  ∇f̂!(s, λ)       #┐
-∇f̂t(s, λ)        = @timeit to "∇f"  ∇f̂(s, λ)        #│
-OF1_∇f̂t!(s, λ)   = @timeit to "∇f"  OF1_∇f̂!(s, λ)   #│
-F1_∇f̂t!(s, λ)    = @timeit to "∇f"  F1_∇f̂!(s, λ)    #│
-HYPER_∇f̂t!(s, λ) = @timeit to "∇f"  HYPER_∇f̂!(s, λ) #├─ gradients
-FD2_∇f̂t!(s, λ)   = @timeit to "∇f"  FD2_∇f̂!(s, λ)   #┘
-OF1_∇²f̂t!(s, λ)  = @timeit to "∇²f" OF1_∇²f̂!(s, λ)   #┐
-∇²f̂t(s, λ)       = @timeit to "∇²f" ∇²f̂(s, λ)        #│
-F0_∇²f̂t!(s, λ)   = @timeit to "∇²f" F0_∇²f̂!(s, λ)    #│
-F1_∇²f̂t!(s, λ)   = @timeit to "∇²f" F1_∇²f̂!(s, λ)    #├─ Hessians
-DUAL_∇²f̂t!(s, λ) = @timeit to "∇²f" DUAL_∇²f̂!(s, λ)  #│
-CSD_∇²f̂t!(s, λ)  = @timeit to "∇²f" CSD_∇²f̂!(s, λ)   #│
-FD1_∇²f̂t!(s, λ)  = @timeit to "∇²f" FD1_∇²f̂!(s, λ)   #│
-HYPER_∇²f̂t!(s, λ)= @timeit to "∇²f" HYPER_∇²f̂!(s, λ) #│
-FD2_∇²f̂t!(s, λ)  = @timeit to "∇²f" FD2_∇²f̂!(s, λ)   #┘
+# Time all the functions
+list_∇ᵏf̂ = [:f̂, :∇f̂, :∇²f̂]
+list_methods = [:F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
+for m in list_methods, ∇ᵏf̂ in list_∇ᵏf̂
+    label = string(m) * "_" * string(∇ᵏf̂)
+    m_∇ᵏf̂ = Symbol(label)
+    m_∇ᵏf̂t = Symbol(label * "t")
+    if ∇ᵏf̂ == :f̂
+        @eval $m_∇ᵏf̂t(λ) = @timeit to $label $m_∇ᵏf̂(λ)
+    else
+        @eval $m_∇ᵏf̂t(s, λ) = @timeit to $label $m_∇ᵏf̂(s, λ)
+    end
+end
 
-# Dictionary to hold the results
-# Load it if it exists, otherwise creat a new one
+# path to root of directory for loading and saving
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
-file_name = joinpath(path_to_package_root, "data", "TimerOutputs")
-methods_TimerOutputs_data = Dict()
 
-# make it into short code by listing the methods differently and
-# interpolating them using the $ sign
-list_timed_methods = [
-    ("newF1" ,  :f̂t,       :∇f̂t!,        :∇²f̂t)
-    ("OF1"   , :f̂t!,   :OF1_∇f̂t!,   :OF1_∇²f̂t!)
-    ("F0"    , :f̂t!,       :∇f̂t!,    :F0_∇²f̂t!)
-    ("F1"    , :f̂t!,       :∇f̂t!,    :F1_∇²f̂t!)
-    ("DUAL"  , :f̂t!,       :∇f̂t!,  :DUAL_∇²f̂t!)
-    ("CSD"   , :f̂t!,       :∇f̂t!,   :CSD_∇²f̂t!)
-    ("FD1"   , :f̂t!,       :∇f̂t!,   :FD1_∇²f̂t!)
-    ("HYPER" , :f̂t!, :HYPER_∇f̂t!, :HYPER_∇²f̂t!)
-    ("FD2"   , :f̂t!,   :FD2_∇f̂t!,   :FD2_∇²f̂t!)
-]
-
+# Two runs, 1st run to precompile
 myruns = ["Compiling run", "Precompiled run"]
 myruns2 = ["_compiling_run", ""]
 
-# TimerDict
+# timers as a Dict to hold all timer data
 timers = Dict()
 function print_mytimer!(d::Dict, f::String, t::TimerOutput)
     d2 = Dict() # sub dictionary to fill with the timer data
@@ -63,42 +44,48 @@ function print_mytimer!(d::Dict, f::String, t::TimerOutput)
     push!(d, f => d2)
 end
 
-for (i, myrun) in enumerate(myruns)
-    for (method_name, objective, gradient, hessian) in list_timed_methods
-        println("\n\n\n------------------------\n") # print what you are doing
-        println(myrun * ": " * method_name * " (with TimerOutputs)")
-        println("\n------------------------\n\n\n")
+# Run the optimizations
+for (i, myrun) in enumerate(myruns), m in list_methods
+    println("\n\n------------------------\n") # print what you are doing
+    println(myrun * ": " * string(m) * " (with TimerOutputs)")
+    println("\n------------------------\n\n")
 
-        init.x, init.p = 1x₀, 3p₀ # Reset initial x and p
-        J.fac, J.p = factorize(∇ₓF(x₀, 3p₀)), 3p₀ # and J
-        newF1buf.s, newF1buf.p = 1x₀, 3p₀
+    # Ensure the starting point is the same for everyone
+    if m == :F1
+        F1buf = F1.initialize_buffer(x₀, p₀)
+    else
+        mSol = Symbol(string(m) * "Sol")
+        @eval $mSol = $m.Solution(copy(x₀))
+    end
 
-        # Open the file to print TimerOutputs
-        file_name = joinpath(path_to_package_root, "data", "TimerOutputs_" * method_name * myruns2[i] * str_out * ".txt")
-        io = open(file_name, "w")
+    # File path to print TimerOutputs to specific method and run
+    file_name = joinpath(path_to_package_root, "data", "TimerOutputs_" * string(m) * myruns2[i] * str_out * ".txt")
 
-        # Run the timed optimization!
-        reset_timer!(to) # Reset timer
-        @timeit to "Trust Region" eval(:(res = optimize($objective, $gradient, $hessian, $λ₀, NewtonTrustRegion(), $opt)))
+    # objective, gradient, and Hessian symbols
+    m_f̂t = Symbol(string(m) * "_f̂t")
+    m_∇f̂t = Symbol(string(m) * "_∇f̂t")
+    m_∇²f̂t = Symbol(string(m) * "_∇²f̂t")
 
+    # Open file, run the optimization, and write to file
+    io = open(file_name, "w")
+        # Reset timer
+        reset_timer!(to) 
+        # Run the timed optimization
+        @timeit to "Trust Region" eval(:(res = optimize($m_f̂t, $m_∇f̂t, $m_∇²f̂t, $λ₀, NewtonTrustRegion(), $opt)))
         # Print the TimerOutput
         print_timer(io, to)
-        print(io, method_name * "\n" * read(io, String))
+        print(io, string(m) * "\n" * read(io, String))
+    close(io)
 
-        # Close the file
-        close(io)
-
-        # Save into Dict
-        print_mytimer!(timers, method_name * myruns2[i], to)
-
-    end
+    # Save into Dict
+    print_mytimer!(timers, string(m) * myruns2[i], to)
 end
 
 # Save the results in a Julia data file
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
 jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * ".jld2")
-@save jld_file timers list_timed_methods
+@save jld_file timers list_methods
 
 
 

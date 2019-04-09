@@ -35,7 +35,7 @@ Each parameter in `p` comes with a bunch of metadata for each field `f`:
 - `default(p, f)` gives the default value (type `U`)
 Modify this part of the code if you need new/different parameters!
 """
-@latexSymbol @description @flattenable @prior @printunits @units @default_kw struct Para{U} <: AbstractPara{U}
+@latexSymbol @description @flattenable @prior @printunits @units @default_kw mutable struct Para{U} <: AbstractPara{U}
     umax::U |  1e-3 / spd | u"mmol/m^3/s" | u"mmol/m^3/d" | LN(1e-3 / spd, 1e-3 / spd) | true  | "Maximum uptake rate (Michaelis-Menten)"      | "\\mathbf{u}_\\mathrm{max}"
     ku  ::U |        1e-1 | u"mmol/m^3"   | u"mmol/m^3"   | LN(1e-1, 0.5e-1)           | true  | "Half-saturation constant (Michaelis-Menten)" | "k_\\mathbf{u}"
     w₀  ::U |     1 / spd | u"m/s"        | u"m/d"        | LN(1 / spd, 0.5 / spd)     | true  | "Sinking velocity at surface"                 | "w_0"
@@ -108,6 +108,9 @@ Base.:*(s::Number, p::Para) = Para(s .* vec(p))
 Base.:*(p::Para, s::Number) = Para(s .* vec(p))
 Base.isapprox(p₁::Para, p₂::Para) = isapprox(vec(p₁), vec(p₂))
 Base.:(==)(p₁::Para, p₂::Para) = vec(p₁) == vec(p₂)
+strerror = "No! Can't access the parameters at this index!"
+Base.getindex(p::Para, i::Int) = i < 1 || i > m ? error(strerror) : getfield(p, i)
+Base.setindex!(p::Para, v, i) = i < 1 || i > m ? error(strerror) : setfield!(p::Para, i, v)
 
 # Convert p to λ and vice versa, needed by TransportMatrixTools!
 optvec(p::Para) = flatten(Vector, p)
@@ -162,6 +165,10 @@ function optPara(v::Vector{U}) where U
     end
 end
 
+#=============================================
+    Functions for printing
+=============================================#
+
 using Printf
 import Base: show
 function Base.show(io::IO, p::Para)
@@ -170,15 +177,29 @@ function Base.show(io::IO, p::Para)
         v = getfield(p, f)
         punit = printunits(p, f)
         if punit == 1
-            val = v
+            val, ppunit = v, ""
         else
-            val = uconvert(punit, v * units(p, f))
+            val, ppunit = ustrip(uconvert(punit, v * units(p, f))), unicodify(punit)
         end
-        @printf io "%6s = %8.2e %s\n" f val punit
+        @printf io "%6s = %8.2e %s\n" f val ppunit
     end
 end
-Base.show(io::IO, mime::MIME, p::Para) = Base.show(io, p)
+Base.show(io::IO, ::MIME"text/plain", p::Para) = Base.show(io, p)
 
+function unicodify(U::Unitful.Units)
+    str = string(U)
+    str = replace(str, r"\^-1" => s"⁻¹")
+    str = replace(str, r"\^-2" => s"⁻²")
+    str = replace(str, r"\^-3" => s"⁻³")
+    str = replace(str, r"\^1" => s"¹")
+    str = replace(str, r"\^2" => s"²")
+    str = replace(str, r"\^3" => s"³")
+    return str
+end
+
+#=============================================
+    Functions for printing to LaTeX table TODO
+=============================================#
 
 function print_LaTeX_table(p::Para)
     println("Latex table for the parameters:")
@@ -213,7 +234,6 @@ end
 
 latexify(optimized::Bool) = optimized ? "yes" : "no"
 
-
 function latexify(val)
     str = @sprintf("%.2g", val)
     str = replace(str, r"e\+0+(?<exp>\d+)" => s" \\times 10^{\g<exp>}")
@@ -239,6 +259,5 @@ end
 #     end
 # end
 
-export Para
 
 end

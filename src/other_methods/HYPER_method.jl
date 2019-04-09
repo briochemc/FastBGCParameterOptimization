@@ -1,6 +1,7 @@
-module DUAL
+module HYPER
 
 using LinearAlgebra, DiffEqBase
+using HyperDualNumbers, HyperDualMatrixTools
 using DualNumbers, DualMatrixTools
 
 mutable struct Solution
@@ -21,24 +22,29 @@ function f̂(f, F, ∇ₓF, sol, p, alg; options...) # objective
     return f(s,p)
 end
 
-# Analytical Jacobian formula (transpose of Eq.(?))
-∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p) = ∇ₚf(s,p) - (∇ₚF(s,p)' * (∇ₓF(s,p)' \ ∇ₓf(s,p)'))'
-
-function ∇f̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...)
-    update_Solution!(F, ∇ₓF, sol, p, alg; options...)
-    s = sol.s.u
-    return ∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p)
-end
-
-function ∇²f̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...) # Hessian
+function ∇f̂(f, F, ∇ₓF, sol, p, alg; options...)
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s, m = sol.s.u, length(p)
-    out = zeros(m,m)       # preallocate
+    out = zeros(1,m)       # preallocate
     for j in 1:m
         pⱼ = p + ε * e(j,m)           # Dual p
         prob = SteadyStateProblem(F, ∇ₓF, s, pⱼ) # define problem
         sⱼ = solve(prob, alg; options...).u # update s (inner solver)
-        out[j,:] .= vec(𝔇(∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sⱼ, pⱼ))) # Dual of Eq.(?)
+        out[j] = 𝔇(f(sⱼ, pⱼ)) # Dual pass
+    end
+    return out
+end
+
+function ∇²f̂(f, F, ∇ₓF, sol, p, alg; options...) # Hessian
+    update_Solution!(F, ∇ₓF, sol, p, alg; options...)
+    s, m = sol.s.u, length(p)
+    out = zeros(m,m)       # preallocate
+    for j in 1:m, k in j:m
+        pⱼₖ = p + ε₁ * e(j,m) + ε₂ * e(k,m)     # Hyperdual p
+        prob = SteadyStateProblem(F, ∇ₓF, s, pⱼₖ) # define problem
+        sⱼₖ = solve(prob, alg; options...).u # update s (inner solver)
+        out[j,k] = ℌ(f(sⱼₖ, pⱼₖ)) # HyperDual pass
+        j ≠ k ? out[k,j] = out[j,k] : nothing
     end
     return out
 end
@@ -46,5 +52,6 @@ end
 # Helper functions
 e(j, m) = [i == j for i in 1:m]      # j-th basis vector
 𝔇(x) = DualNumbers.dualpart.(x)      # dual part
+ℌ(x) = HyperDualNumbers.ε₁ε₂part.(x)      # dual part
 
 end # module

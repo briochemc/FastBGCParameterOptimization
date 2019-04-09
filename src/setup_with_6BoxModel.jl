@@ -11,7 +11,7 @@ using .Circulation: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm�
 
 # load biogeochmistry parameters
 include("bgc_parameters.jl")
-using .Parameters: Para, p₀, λ₀, p2λ, ∇p2λ, ∇²λ2p, ∇λ2p, λ2p
+using .Parameters: Para, p₀, λ₀, p2λ, ∇p2λ, ∇²λ2p, ∇λ2p, λ2p, σ²obs, getindex, m, str_out
 
 # load biogeochmistry functions
 include("bgc_functions.jl")

@@ -1,5 +1,4 @@
-# Cost functions∇
-# Must import the functions to which I add methods
+# Cost functions
 """
     nrm(x)
 

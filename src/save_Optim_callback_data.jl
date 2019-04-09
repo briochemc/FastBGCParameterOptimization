@@ -2,17 +2,8 @@
 
 
 # List of functions to be benchmarked
-list_methods = [
-    ("newOF1",  :f̂,        :∇f̂,        :∇²f̂)
-    ("OF1"   , :f̂!,   :OF1_∇f̂!,   :OF1_∇²f̂!)
-    ("F0"    , :f̂!,       :∇f̂!,    :F0_∇²f̂!)
-    ("F1"    , :f̂!,       :∇f̂!,    :F1_∇²f̂!)
-    ("DUAL"  , :f̂!,       :∇f̂!,  :DUAL_∇²f̂!)
-    ("CSD"   , :f̂!,       :∇f̂!,   :CSD_∇²f̂!)
-    ("FD1"   , :f̂!,       :∇f̂!,   :FD1_∇²f̂!)
-    ("HYPER" , :f̂!, :HYPER_∇f̂!, :HYPER_∇²f̂!)
-    ("FD2"   , :f̂!,   :FD2_∇f̂!,   :FD2_∇²f̂!)
-]
+list_∇ᵏf̂ = [:f̂, :∇f̂, :∇²f̂]
+list_methods = [:F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
 
 function print_time_and_q(λ)
     println("   ", time(), f̂!(λ))
@@ -41,20 +32,29 @@ myruns2 = ["_compiling_run", ""]
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
 
-for (i, myrun) in enumerate(myruns)
-    for (method_name, objective, gradient, hessian) in list_methods
-        println("\n┌────────────────────────")
-        println("│ Optimizing using method " * method_name * ", for " * myrun * "\n│")
-        init.x, init.p = 1x₀, 3p₀
-        J.fac, J.p = factorize(∇ₓF(x₀, 3p₀)), 3p₀
-        newF1buf.s, newF1buf.p = 1x₀, 3p₀
-        println("│    ", time())
-        eval( :( results = optimize($objective, $gradient, $hessian, $λ₀, NewtonTrustRegion(), $opt)) )
-        println("└────────────────────────")
-        # Save output
-        jld_file = joinpath(path_to_package_root, "data", "Optim_callback_data" * method_name * myruns2[i] * str_out * ".jld2")
-        @save jld_file results list_methods
+for (i, myrun) in enumerate(myruns), m in list_methods
+
+    # objective, gradient, and Hessian symbols
+    m_f̂t = Symbol(string(m) * "_f̂t")
+    m_∇f̂t = Symbol(string(m) * "_∇f̂t")
+    m_∇²f̂t = Symbol(string(m) * "_∇²f̂t")
+
+    # Ensure the starting point is the same for everyone
+    if m == :F1
+        F1buf = F1.initialize_buffer(x₀, p₀)
+    else
+        mSol = Symbol(string(m) * "Sol")
+        @eval $mSol = $m.Solution(copy(x₀))
     end
+
+    println("\n┌────────────────────────")
+    println("│ Optimizing using method " * string(m) * ", for " * myrun * "\n│")
+    println("│    ", time())
+    eval( :( results = optimize($m_f̂t, $m_∇f̂t, $m_∇²f̂t, $λ₀, NewtonTrustRegion(), $opt)) )
+    println("└────────────────────────")
+    # Save output
+    jld_file = joinpath(path_to_package_root, "data", "Optim_callback_data" * string(m) * myruns2[i] * str_out * ".jld2")
+    @save jld_file results list_methods
 end
 
 
