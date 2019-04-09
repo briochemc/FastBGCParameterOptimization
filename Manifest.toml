@@ -53,7 +53,9 @@ version = "0.5.6"
 
 [[Calculus]]
 deps = ["Compat"]
-path = "/Users/benoitpasquier/.julia/dev/Calculus"
+git-tree-sha1 = "e17b72b086646baf83696f4578d8386e45d0e6e3"
+repo-rev = "master"
+repo-url = "https://github.com/briochemc/Calculus.jl.git"
 uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 version = "0.4.1+"
 
@@ -235,9 +237,11 @@ version = "0.3.5"
 
 [[FormulaOneMethod]]
 deps = ["DiffEqBase", "DualNumbers", "HyperDualNumbers", "LinearAlgebra"]
-path = "/Users/benoitpasquier/.julia/dev/FormulaOneMethod"
+git-tree-sha1 = "f3d821f821bd22a4ccfdbd93eb51af785cd6b181"
+repo-rev = "master"
+repo-url = "https://github.com/briochemc/FormulaOneMethod.jl.git"
 uuid = "f243976a-5756-11e9-2994-eb72b43b8255"
-version = "0.2.1"
+version = "0.3.0"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "InteractiveUtils", "LinearAlgebra", "NaNMath", "Random", "SparseArrays", "SpecialFunctions", "StaticArrays", "Test"]
@@ -630,9 +634,11 @@ version = "0.9.3"
 
 [[TransportMatrixTools]]
 deps = ["DiffEqBase", "DualMatrixTools", "DualNumbers", "FieldDefaults", "FieldMetadata", "Flatten", "HyperDualMatrixTools", "HyperDualNumbers", "LinearAlgebra", "Printf", "SparseArrays", "SuiteSparse", "Test", "Unitful"]
-path = "/Users/benoitpasquier/.julia/dev/TransportMatrixTools"
+git-tree-sha1 = "5ec3c7cc02b77360d60274b4f65bdb495e9033da"
+repo-rev = "master"
+repo-url = "https://github.com/briochemc/TransportMatrixTools.jl.git"
 uuid = "3487739c-c12e-11e8-1d55-2958ce19ee2a"
-version = "0.2.0"
+version = "0.3.0"
 
 [[TreeViews]]
 deps = ["Test"]
