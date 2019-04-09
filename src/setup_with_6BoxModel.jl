@@ -2,7 +2,6 @@
 include("load_packages.jl")
 
 # Setup OCIM1.1 or toy model (comment/uncomment to use the one you need for now)
-
 include("build_6BoxModel_circulation.jl")
 Circulation = SixBoxModel
 # include("OCIM1.jl")

@@ -45,8 +45,8 @@ for m in list_methods
         function $m_∇²f̂(λ; preprint=" ")
             ∇p = diagm(0 => ∇λ2p(λ)) # for variable change
             ∇²p = diagm(0 => ∇²λ2p(λ)) # for variable change
-            H = $m_∇²f̂(λ2p(λ), preprint=preprint)
             G = vec($m_∇f̂(λ2p(λ), preprint=preprint))
+            H = $m_∇²f̂(λ2p(λ), preprint=preprint)
             return ∇p * H * ∇p + diagm(0 => G) * ∇²p
         end
     end

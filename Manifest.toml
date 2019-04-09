@@ -53,7 +53,7 @@ version = "0.5.6"
 
 [[Calculus]]
 deps = ["Compat"]
-git-tree-sha1 = "e17b72b086646baf83696f4578d8386e45d0e6e3"
+git-tree-sha1 = "69736a193837a6302d53a3172bb2f939b7e8a677"
 repo-rev = "master"
 repo-url = "https://github.com/briochemc/Calculus.jl.git"
 uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
