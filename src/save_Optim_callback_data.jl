@@ -35,9 +35,9 @@ path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
 for (i, myrun) in enumerate(myruns), m in list_methods
 
     # objective, gradient, and Hessian symbols
-    m_f̂t = Symbol(string(m) * "_f̂t")
-    m_∇f̂t = Symbol(string(m) * "_∇f̂t")
-    m_∇²f̂t = Symbol(string(m) * "_∇²f̂t")
+    m_f̂ = Symbol(string(m) * "_f̂")
+    m_∇f̂ = Symbol(string(m) * "_∇f̂")
+    m_∇²f̂ = Symbol(string(m) * "_∇²f̂")
 
     # Ensure the starting point is the same for everyone
     if m == :F1
@@ -50,7 +50,7 @@ for (i, myrun) in enumerate(myruns), m in list_methods
     println("\n┌────────────────────────")
     println("│ Optimizing using method " * string(m) * ", for " * myrun * "\n│")
     println("│    ", time())
-    eval( :( results = optimize($m_f̂t, $m_∇f̂t, $m_∇²f̂t, $λ₀, NewtonTrustRegion(), $opt)) )
+    eval( :( results = optimize($m_f̂, $m_∇f̂, $m_∇²f̂, $λ₀, NewtonTrustRegion(), $opt)) )
     println("└────────────────────────")
     # Save output
     jld_file = joinpath(path_to_package_root, "data", "Optim_callback_data" * string(m) * myruns2[i] * str_out * ".jld2")
