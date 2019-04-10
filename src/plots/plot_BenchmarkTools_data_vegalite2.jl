@@ -1,88 +1,44 @@
 using JLD2, BenchmarkTools, VegaLite, DataFrames
 
 #@load "data/BenchmarkTools_data.jld2"
-path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
+path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-2]...)
 str_out = "_default"
 jld_file = joinpath(path_to_package_root, "data", "BenchmarkTools_data" * str_out * ".jld2")
-@load jld_file results
+@load jld_file results list_functions
 
+strings = string.(list_functions)
+f̂_list = strings[[occursin("_f̂", s) for s in strings]]
+∇f̂_list = strings[[occursin("_∇f̂", s) for s in strings]]
+∇²f̂_list = strings[[occursin("_∇²f̂", s) for s in strings]]
 
-# Reorder keys to plot in my order
-#     key       fgh       method
-mykeys = [
-    ("f̂!"        , "f"  , "Analytical f" ),
-    ("∇f̂!"       , "∇f" , "Analytical ∇f"), #┐
-    ("OF1_∇f̂!"   , "∇f" , "F-1 ∇f"       ), #│
-    ("F1_∇f̂!"    , "∇f" , "old F-1 ∇f"   ), #│
-    ("HYPER_∇f̂!" , "∇f" , "HYPER ∇f"     ), #├─ gradients
-    ("FD2_∇f̂!"   , "∇f" , "FD2 ∇f"       ), #┘
-    ("OF1_∇²f̂!"  , "∇²f", "F-1 ∇²f"      ), #┐
-    ("F1_∇²f̂!"   , "∇²f", "old F-1 ∇²f"  ), #│
-    ("F0_∇²f̂!"   , "∇²f", "old F-0 ∇²f"  ), #│
-    ("DUAL_∇²f̂!" , "∇²f", "DUAL ∇²f"     ), #│
-    ("CSD_∇²f̂!"  , "∇²f", "CSD ∇²f"      ), #│
-    ("FD1_∇²f̂!"  , "∇²f", "FD1 ∇²f"      ), #├─ Hessians
-    ("HYPER_∇²f̂!", "∇²f", "HYPER ∇²f"    ), #│
-    ("FD2_∇²f̂!"  , "∇²f", "FD2 ∇²f"      )  #┘
-]
-
-#sorting = [
-#    "f"
-#    "∇f"
-#    "Dual"
-#    "F-zero"
-#    "DUAL"
-#    "COMPLEX"
-#    "FINITEDIFF"
-#    "HYPERDUAL"
-#]
-
-function results_to_df(results, mykeys, m_list)
+function results_to_df(results, list)
     df = DataFrame(
         method = Array{String}(undef, 0),
         fgh = Array{String}(undef, 0),
         time = Array{Float64}(undef, 0),
         allocs = Array{Float64}(undef, 0)
     )
-    for (k, f, m) in mykeys 
-        if m ∈ m_list
-            df = push!(
-                df,
-                Dict(
-                    :method => m,
-                    :fgh => f,
-                    :time => myround(results[k].times[] * 1e-9),
-                    :allocs => results[k].allocs[] * 2^-27
-                )
+    for f in list
+        m, fun = split(f, "_")
+        df = push!(
+            df,
+            Dict(
+                :method => m,
+                :fgh => fun,
+                :time => myround(results[f].times[] * 1e-9),
+                :allocs => results[f].allocs[] * 2^-27
             )
-        end
+        )
     end
     return df
 end
 
 myround(x) = x ≥ 100 ? round(x) : round(x*10) / 10
 
-m_list1 = [
-    "Analytical f"
-    "Analytical ∇f"
-    "F-1 ∇f"
-#    "old F-1 ∇f"
-    "HYPER ∇f"
-    "FD2 ∇f"
-    "F-1 ∇²f"
-#    "old F-1 ∇²f"
-#    "old F-0 ∇²f"
-    "DUAL ∇²f"
-    "CSD ∇²f"
-    "FD1 ∇²f"
-]
-m_list2 = [
-    "F-1 ∇²f"
-    "HYPER ∇²f"
-    "FD2 ∇²f"
-]
-df1 = results_to_df(results, mykeys, m_list1)
-df2 = results_to_df(results, mykeys, m_list2)
+
+df1 = results_to_df(results, f̂_list)
+df2 = results_to_df(results, ∇f̂_list)
+df3 = results_to_df(results, ∇²f̂_list)
 
 p1 = df1 |> @vlplot(
     title={text="(a)", anchor="start"},
@@ -132,7 +88,31 @@ p2 = df2 |> @vlplot(
     }
 )
 
-p = [p1; p2]
+p3 = df3 |> @vlplot(
+    title={text="(b)", anchor="start"},
+    encoding={
+        x={:time, title="Computation time (seconds)", scale={domain=[0,2500]}},
+        y={:method, sort=true},
+        color={:fgh, title="", scale={scheme="set2"}, legend={orient="top-right"}},
+        text={:time},
+    },
+    resolve={
+        scale={
+            y ="shared"
+        }
+    }
+) +
+@vlplot(:bar) +
+@vlplot(
+    mark={
+        :text,
+        align=:left,
+        baseline=:middle,
+        dx=5
+    }
+)
+
+p = [p1; p2; p3]
 
 display(p)
 

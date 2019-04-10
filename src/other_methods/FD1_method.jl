@@ -1,7 +1,7 @@
 module FD1
 
 using LinearAlgebra
-using Calculus, DiffEqBase
+using DiffEqBase
 
 mutable struct Solution
     s
@@ -31,8 +31,19 @@ function ∇f̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options..
 end
 
 function ∇²f̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...) 
-    fun = p -> vec(∇f̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...))
-    return Calculus.jacobian(fun, p, :central)
+    s, m, h = sol.s.u, length(p), 1e-4
+    H = zeros(m,m)       # preallocate
+    for j in 1:m
+        hⱼ = h * p[j]
+        p₊ = p + hⱼ * e(j,m)
+        p₋ = p - hⱼ * e(j,m)
+        s₊ = solve(SteadyStateProblem(F, ∇ₓF, s, p₊), alg; options...).u
+        s₋ = solve(SteadyStateProblem(F, ∇ₓF, s, p₋), alg; options...).u
+        H[j,:] .= vec((∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s₊,p₊) - ∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s₋,p₋)) / 2hⱼ)
+    end
+    return H
 end
+
+e(j, m) = [i == j for i in 1:m]      # j-th basis vector
 
 end # module

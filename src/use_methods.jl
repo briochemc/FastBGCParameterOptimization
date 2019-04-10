@@ -17,14 +17,17 @@ end
 
 # Gradient and Hessian
 for ∇ᵏf̂ in list_∇ᵏf̂[2:3]
+    # F1 method
     m_∇ᵏf̂ = Symbol("F1_" * string(∇ᵏf̂))
     @eval  $m_∇ᵏf̂(p::Para; preprint=" ") = F1.$∇ᵏf̂(f, F, ∇ₓf, ∇ₓF, F1buf, p, CTKAlg(), nrm=nrm, preprint=preprint)
-    for m in list_methods[2:4] # DUAL, CSD, and FD1
+    # DUAL, CSD, and FD1 methods
+    for m in list_methods[2:4]
         msol = Symbol(string(m) * "Sol")
         m_∇ᵏf̂ = Symbol(string(m) * "_" * string(∇ᵏf̂))
         @eval $m_∇ᵏf̂(p::Para; preprint=" ") = $m.$∇ᵏf̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, $msol, p, CTKAlg(), nrm=nrm, preprint=preprint)
     end
-    for m in list_methods[5:6] # HYPER and FD2
+    # HYPER and FD2 methods
+    for m in list_methods[5:6]
         msol = Symbol(string(m) * "Sol")
         m_∇ᵏf̂ = Symbol(string(m) * "_" * string(∇ᵏf̂))
         @eval $m_∇ᵏf̂(p::Para; preprint=" ") = $m.$∇ᵏf̂(f, F, ∇ₓF, $msol, p, CTKAlg(), nrm=nrm, preprint=preprint)

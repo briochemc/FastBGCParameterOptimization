@@ -15,8 +15,7 @@ SuiteSparse.UMFPACK.umf_ctrl[8] = 0 # turn iterative refinements off
 # pretty print
 using Printf
 
-# Differentiating sutff
-using Calculus
+# Dual and Hyperdual numbers (and my tools)
 using DualNumbers, HyperDualNumbers
 using DualMatrixTools, HyperDualMatrixTools
 
@@ -27,7 +26,6 @@ using JLD2
 
 # Optimization package
 using Optim
-
 
 # Package to load and grid WOA data
 using WorldOceanAtlasTools

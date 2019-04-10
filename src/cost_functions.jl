@@ -12,27 +12,20 @@ Note: `nrm` **should not** be used with the complex step method or dual numbers.
 """
 function nrm(x)
     DIN, POM = unpackx(x)
-    return sqrt(vnorm²(DIN) + vnorm²(POM))
+    return sqrt(vnorm²(ℜ(DIN)) + vnorm²(ℜ(POM)))
 end
-function nrm(x::Vector{Dual{U}}) where U
-    DIN, POM = unpackx(x)
-    return sqrt(vnorm²(DualNumbers.realpart.(DIN)) + vnorm²(DualNumbers.realpart.(POM)))
-end
-function nrm(x::Vector{Complex{U}}) where U
-    DIN, POM = unpackx(x)
-    return sqrt(vnorm²(real.(DIN)) + vnorm²(real.(POM)))
-end
-function nrm(x::Vector{Hyper{U}}) where U
-    DIN, POM = unpackx(x)
-    return sqrt(vnorm²(HyperDualNumbers.realpart.(DIN)) + vnorm²(HyperDualNumbers.realpart.(POM)))
-end
+ℜ(x::Real) = (x)
+ℜ(x::Complex) = real(x)
+ℜ(x::Dual) = DualNumbers.realpart(x)
+ℜ(x::Hyper) = HyperDualNumbers.realpart(x)
+ℜ(x::Vector) = ℜ.(x)
 
 """
-    f(x)
+    fₓ(x)
 
 Returns the cost of state `x`.
 """
-function f(x) # with respect to x
+function fₓ(x) # with respect to x
     DIN, _ = unpackx(x)
     return vnorm²(DIN - DINobs) / vnorm²(DINobs)
 end
@@ -42,31 +35,27 @@ end
 
 Returns the gradient of cost of `x` (at `x`).
 """
-function ∇ₓf(x)
+function ∇ₓf(x, p)
     DIN, _ = unpackx(x)
     kron([1 0], Dvnorm²(DIN - DINobs) / vnorm²(DINobs))
 end
-∇ₓf(x, p) = ∇ₓf(x) # for generic form
 
-c_noweight(p::Para) = 0.5 * p2λ(p)' * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
-c_noweight(p::Para{Complex{Float64}}) = 0.5 * transpose(p2λ(p)) * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
-Dc_noweight(p::Para) = (∇p2λ(p) .* σ²obs.^-1 .* p2λ(p))'
-Dc_noweight(p::Para{Complex{Float64}}) = transpose(∇p2λ(p) .* σ²obs.^-1 .* p2λ(p))
+fₚ_noweight(p) = 0.5 * transpose(p2λ(p)) * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
+Dfₚ_noweight(p) = transpose(∇p2λ(p) .* σ²obs.^-1 .* p2λ(p))
 
 """
     f(p)
 
 Returns the cost of parameters `p`.
 """
-f(p::Para) = p.ω * c_noweight(p)
+fₚ(p) = p.ω * fₚ_noweight(p)
 
 """
     ∇ₚf(p)
 
 Returns the gradient of cost of parameters `p` (at `p`).
 """
-∇ₚf(p::Para) = p.ω * Dc_noweight(p)
-∇ₚf(x, p) = ∇ₚf(p) # for generic form
+∇ₚf(x, p) = p.ω * Dfₚ_noweight(p) # for generic form
 
 """
     f(x, p)
@@ -75,8 +64,8 @@ Returns the cost of state `x` plus the cost of parameters `p`.
 The costs are added to be used in a Bayesian framework eventually.
 (And also because it is simpler.)
 """
-function f(x, p::Para) # with respect to both x and p
-    return f(x) + f(p)
+function f(x, p) # with respect to both x and p
+    return fₓ(x) + fₚ(p)
 end
 
 
@@ -94,6 +83,12 @@ function print_cost(cval; preprint=" ")
     return nothing
 end
 printRMS(cval) = @printf("RMS = %.2f%%\n", 100 * sqrt(cval / f(0*x₀)))
-printRMS(cval::Dual) = @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(DualNumbers.realpart(cval) / f(0*x₀)), dualpart(cval))
-printRMS(cval::Hyper) = @printf("RMS = %.2f%% (ε₁:%.2g, ε₂:%.2g, ε₁ε₂:%.2g)\n", 100 * sqrt(HyperDualNumbers.realpart(cval) / f(0*x₀)), ε₁part(cval), ε₂part(cval), ε₁ε₂part(cval))
-printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(real(cval) / f(0*x₀)), imag(cval))
+printRMS(cval::Dual) = @printf("RMS = %.2f%% (ε part:%.2g)\n", 100 * sqrt(ℜ(cval) / f(0*x₀)), 𝔇(cval))
+printRMS(cval::Hyper) = @printf("RMS = %.2f%% (ε₁:%.2g, ε₂:%.2g, ε₁ε₂:%.2g)\n", 100 * sqrt(ℌ(cval) / f(0*x₀)), ℌ₁(cval), ℌ₂(cval), ℌ(cval))
+printRMS(cval::Complex) = @printf("RMS = %.2f%% (im part:%.2g)\n", 100 * sqrt(ℜ(cval) / f(0*x₀)), ℑ(cval))
+
+ℑ(x::Complex) = imag(x)
+𝔇(x::Dual) = DualNumbers.dualpart(x)
+ℌ(x::Dual) = HyperDualNumbers.ε₁ε₂part(x)
+ℌ₁(x::Dual) = HyperDualNumbers.ε₁part(x)
+ℌ₂(x::Dual) = HyperDualNumbers.ε₂part(x)
