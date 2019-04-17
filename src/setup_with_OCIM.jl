@@ -1,12 +1,7 @@
 # Load the packages
 include("load_packages.jl")
 
-# Setup OCIM1.1 or toy model (comment/uncomment to use the one you need for now)
-#  include("build_6BoxModel_circulation.jl")
-#  Circulation = SixBoxModel
-include("OCIM1.jl")
-Circulation = OCIM1
-using .Circulation: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
+const wet3d, grd, T_OCIM = TransportMatrixTools.OCIM1.load()
 
 # load biogeochmistry parameters
 include("bgc_parameters.jl")

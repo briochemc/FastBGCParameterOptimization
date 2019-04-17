@@ -6,7 +6,7 @@ include("build_6BoxModel_circulation.jl")
 Circulation = SixBoxModel
 # include("OCIM1.jl")
 # Circulation = OCIM1
-using .Circulation: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
+using .Circulation: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs, vnorm², maskEup, DINobsmean, Dvnorm²
 
 # load biogeochmistry parameters
 include("bgc_parameters.jl")

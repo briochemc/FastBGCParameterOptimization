@@ -1,4 +1,3 @@
-# Cost functions
 """
     nrm(x)
 
@@ -20,21 +19,26 @@ end
 ℜ(x::Hyper) = HyperDualNumbers.realpart(x)
 ℜ(x::Vector) = ℜ.(x)
 
-"""
-    fₓ(x)
-
-Returns the cost of state `x`.
-"""
-function fₓ(x) # with respect to x
-    DIN, _ = unpackx(x)
-    return vnorm²(DIN - DINobs) / vnorm²(DINobs)
+# state mismatches
+δ(x, xobs) = x - xobs
+function mismatch(x, xobs)
+    δx = x - xobs
+    return δx' * V * δx / (xobs'v)
 end
 
-"""
-    ∇ₓf(x)
+# parameter mismatch TODO
+function mismatch(p)
+    λ, λ₀ = p2λ(p), p2λ(p₀)
+    δλ = λ - λ₀
+    Ω = d₀(σobs²(p).^(-1)) # Is that it?
+    return δλ' * Ω * δλ
+end
 
-Returns the gradient of cost of `x` (at `x`).
-"""
+f(PO4, POP, p) = mismatch(PO4, PO4obs) + mismatch(p)
+ω = 1.0, 0.0, 1e-4
+
+
+
 function ∇ₓf(x, p)
     DIN, _ = unpackx(x)
     kron([1 0], Dvnorm²(DIN - DINobs) / vnorm²(DINobs))

@@ -70,7 +70,8 @@ const z = grd["ZT3d"][iwet]
 const ztop = grd["ZW3d"][iwet]
 
 # Vector of observations
-DINobs3d = WOA13_bin_to_grid(grd, "PO4", "annual", "1°", "mean")
+μPO4 = WOA13_bin_to_grid(grd, "PO4", "annual", "1°", "mean")
+σ²PO4 = WOA13_bin_to_grid(grd, "PO4", "annual", "1°", "std")
 const DINobs = DINobs3d[iwet]
 const DINobsmean = vmean(DINobs)
 
