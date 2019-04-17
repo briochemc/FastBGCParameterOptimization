@@ -1,6 +1,6 @@
 
 #=============================================
-    Constants
+Constants
 =============================================#
 
 """
@@ -26,7 +26,7 @@ Currently set at 1 million years.
 const τstop = 1e6 * 365e6 * spd
 
 #=============================================
-    Preallocate buffers for each method
+Preallocate buffers for each method
 =============================================#
 
 # Preallocate special buffer for F-1 method

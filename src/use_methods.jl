@@ -1,7 +1,7 @@
 
 
 #=============================================
-    Assign function name to method
+Assign function name to method
 =============================================#
 
 list_∇ᵏf̂ = [:f̂, :∇f̂, :∇²f̂]
@@ -35,7 +35,7 @@ for ∇ᵏf̂ in list_∇ᵏf̂[2:3]
 end
 
 #=============================================
-    Change of variable from p to λ
+Change of variable from p to λ
 =============================================#
 
 for m in list_methods
@@ -56,7 +56,7 @@ for m in list_methods
 end
 
 #=============================================
-    Objective and derivatives with storage
+Objective and derivatives with storage
 =============================================#
 
 for m in list_methods

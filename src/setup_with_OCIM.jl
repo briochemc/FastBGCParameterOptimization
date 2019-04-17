@@ -5,7 +5,7 @@ const wet3d, grd, T_OCIM = TransportMatrixTools.OCIM1.load()
 
 # load biogeochmistry parameters
 include("bgc_parameters.jl")
-using .Parameters: Para, p₀, λ₀, p2λ, ∇p2λ, ∇²λ2p, ∇λ2p, λ2p, σ²obs, getindex, m, str_out
+using .Parameters: Para, p₀, λ₀, p2λ, ∇p2λ, ∇²λ2p, ∇λ2p, λ2p, logpobs, σ²logpobs, getindex, m
 
 # load biogeochmistry functions
 include("bgc_functions.jl")

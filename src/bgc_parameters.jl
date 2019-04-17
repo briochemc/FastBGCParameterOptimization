@@ -2,7 +2,7 @@
 module Parameters
 
 #=============================================
-    Parameter type
+Parameter type
 =============================================#
 
 # Packages for parameters
@@ -49,7 +49,7 @@ end
 str_out = "_default"
 
 #=============================================
-    Statistics functions
+Statistics functions
 =============================================#
 
 """
@@ -63,7 +63,7 @@ LN(m, s) = LogNormal(μ_LogNormal(m, s), σ_LogNormal(m, s))
 σ_LogNormal(m, s) = sqrt(log(1 + (s / m)^2))
 
 #=============================================
-    Constants
+Constants
 =============================================#
 
 """
@@ -89,7 +89,7 @@ Number of parameters including non-optimizable ones (constant).
 const m_all = length(fieldnames(typeof(Para())))
 
 #=============================================
-    Function overload for the Para type
+Function overload for the Para type
 =============================================#
 
 Base.length(p::Para) = length(fieldnameflatten(p))
@@ -126,6 +126,10 @@ Base.:-(p₁::Para, p₂::Para) = opt_para(p₀, optvec(p₁) - optvec(p₂))
 Base.:*(s::Number, p::Para) = opt_para(p₀, s * optvec(p))
 Base.:*(p::Para, s::Number) = s * p
 
+
+#=============================================
+Default parameters: p₀
+=============================================#
 """
     p₀
 
@@ -133,22 +137,28 @@ The (constant) default values of non-optimized parameters.
 """
 const p₀ = Para()
 
+
+#=============================================
+log function for parameters mismatch
+=============================================#
+Base.log(p::Para) = log.(optvec(p))
+
 """
-    μobs
+    logpobs
 
 The (constant) mean of the log of the observed parameters (the μ of the lognormal prior).
 """
-const μobs = [meanlogx.(metaflatten(p₀, prior))...]
+const logpobs = [meanlogx.(metaflatten(p₀, prior))...]
 
 """
-    σ²obs
+    σ²logpobs
 
 The (constant) variance of the log of the observed parameters (the σ² of the lognormal prior).
 """
-const σ²obs = [varlogx.(metaflatten(p₀, prior))...]
+const σ²logpobs = [varlogx.(metaflatten(p₀, prior))...]
 
 #=============================================
-    Change of variables p <-> λ
+Change of variables p <-> λ
 =============================================#
 
 """
@@ -167,7 +177,7 @@ const λ₀ = p2λ(p₀)
 
 
 #=============================================
-    Functions for printing
+Functions for printing
 =============================================#
 
 using Printf
@@ -213,7 +223,7 @@ function unicodify(U::Unitful.Units)
 end
 
 #=============================================
-    Functions for printing to LaTeX table TODO
+Functions for printing to LaTeX table TODO
 =============================================#
 
 function print_LaTeX_table(p::Para)

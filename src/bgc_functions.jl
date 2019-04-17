@@ -9,8 +9,8 @@ where
     It is constructed from a tuple of functions of (𝒙,𝒑) that the user must supply.
 ===================================#
 
-# Load useful OCIM constants
-const nb, DIV, Iabove, v, z, ztop = constants(wet3d, grd)
+# Set useful constants from the grid information
+const nb, DIV, Iabove, v, z, ztop = TransportMatrixTools.constants(wet3d, grd)
 
 #===================================
 Geological restoring for PO4
@@ -33,7 +33,7 @@ relu(x) = (x .≥ 0) .* x
 # Michaelis-Menten function
 mm(x, μ, k) = μ * x ./ (x .+ k)
 # Depth of the base of the euphotic zone
-const z₀ = 85 # 𝑧₀ = 85m ⟹  2 layers
+const z₀ = 85 # 𝑧₀ = 85m ⟹  2 layers in OCIM
 # Uptake
 function uptake(x, p)
     umax, ku = p.umax, p.ku
@@ -82,17 +82,10 @@ const nt = length(Ts)
 #===================================
 Generate 𝑭 and ∇ₓ𝑭
 ===================================#
-F, ∇ₓF = TransportMatrixTools.multiTracer.build_F_and_∇ₓF(Ts, Gs, nt, nb)
+F, ∇ₓF = TransportMatrixTools.state_function_and_Jacobian(Ts, Gs, nt, nb)
 
 #===================================
-Generate 𝑓 and ∇ₓ𝑓
+Generate volume-weighted norm
 ===================================#
-# hyper parameters
-ωPO4, ωPOP = 1.0, 0.0   # no cost for POP
-ωs = (ωPO4, ωPOP)       # tracers weight
-ωp = 1e-4               # parameter weight
-xobs = (PO4obs, PO4obs)         # observations for tracers
-σ²xobs = (σ²PO4obs, σ²PO4obs)   # variance of observations for tracers
-# TODO pobs = ??
-# TODO σ²p = ??
-# TODO f, ∇ₓf = build_f_and_∇ₓf(ωs, xobs, σ²xobs, v, ωp, pobs, σ²pobs)
+nrm = TransportMatrixTools.volumeweighted_norm(nt, v)
+
