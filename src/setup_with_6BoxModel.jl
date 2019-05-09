@@ -2,21 +2,35 @@
 include("load_packages.jl")
 
 # Setup OCIM1.1 or toy model (comment/uncomment to use the one you need for now)
-include("build_6BoxModel_circulation.jl")
-Circulation = SixBoxModel
-# include("OCIM1.jl")
 # Circulation = OCIM1
-using .Circulation: T, wet3d, grd, spd, nwet, DIV, Iabove, ztop, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²
+Circulation = SixBoxModel
+
+const wet3d, grd, T_Circulation = Circulation.load()
+
+
+const iwet = indices_of_wet_boxes(wet3d)
+const nb = number_of_wet_boxes(wet3d)
+const v = vector_of_volumes(wet3d, grd)
+const z = vector_of_depths(wet3d, grd)
+const ztop = vector_of_top_depths(wet3d, grd)
+
+const DIV = buildDIV(wet3d, iwet, grd)
+const Iabove = buildIabove(wet3d, iwet)
+#=
+spd, DINobs , vnorm², maskEup, DINobsmean, Dvnorm²?
+=#
+
 
 # load biogeochmistry parameters
 include("bgc_parameters.jl")
-using .Parameters: Para, p₀, λ₀, p2λ, ∇p2λ, ∇²λ2p, ∇λ2p, λ2p, σ²obs, getindex, m, str_out
-
 # load biogeochmistry functions
 include("bgc_functions.jl")
-
 # load cost functions
 include("cost_functions.jl")
+#=
+Replace by AIBECS style
+except ∇ₓF, ∇ₓf, ∇ₚF, and ∇ₚf must be analytical for DUAL, CSD, and HYPER methods
+=#
 
 # load methods
 include("load_methods.jl")

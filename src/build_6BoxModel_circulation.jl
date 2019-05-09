@@ -20,7 +20,7 @@ The boxes are grouped as indicated:
 - 4 + 5 + 6 represents the deep box
 =#
 
-using TransportMatrixTools: buildv3d, d₀, buildDIV, buildIabove
+using AIBECS: buildv3d, d₀, buildDIV, buildIabove
 using SparseArrays, SuiteSparse
 using WorldOceanAtlasTools
 
