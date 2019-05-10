@@ -12,23 +12,21 @@ using AIBECS
 using SparseArrays, SuiteSparse, LinearAlgebra
 SuiteSparse.UMFPACK.umf_ctrl[8] = 0 # turn iterative refinements off
 
-# # pretty print
-# using Printf
-# 
-# # Dual and Hyperdual numbers (and my tools)
-# using DualNumbers, HyperDualNumbers
-# using DualMatrixTools, HyperDualMatrixTools
+# Pretty print
+using Printf
+
+# Dual and Hyperdual numbers (and my tools)
+using DualNumbers, HyperDualNumbers
+using DualMatrixTools, HyperDualMatrixTools
 
 # Loading and saving data
 using JLD2
-# using JLD2, MAT
-# Note: I put MAT only where it is called because problems compiling MAT.jl in Julia v1.0+
 
 # Optimization package
 using Optim
 
 # Package to load and grid WOA data
-# using WorldOceanAtlasTools (should be part of AIBECS now)
+using WorldOceanAtlasTools
 
 # Benchmarking
 using BenchmarkTools

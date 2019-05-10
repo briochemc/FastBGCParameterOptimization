@@ -1,6 +1,6 @@
 # F-1 method
-using FormulaOneMethod
-F1 = FormulaOneMethod
+using F1Method
+F1 = F1Method
 
 # Load other methods
 include("other_methods/DUAL_method.jl")

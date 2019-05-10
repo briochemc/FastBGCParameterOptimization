@@ -15,30 +15,30 @@ function update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     end
 end
 
-function f̂(f, F, ∇ₓF, sol, p, alg; options...) # objective
+function objective(f, F, ∇ₓF, sol, p, alg; options...) # objective
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s = sol.s.u
     return f(s,p)
 end
 
-# Analytical Jacobian formula (transpose of Eq.(?))
-∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p) = ∇ₚf(s,p) - (∇ₚF(s,p)' * (∇ₓF(s,p)' \ ∇ₓf(s,p)'))'
+# Analytical Jacobian formula (transpose of Eq.(14))
+gradient(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p) = ∇ₚf(s,p) - (∇ₚF(s,p)' * (∇ₓF(s,p)' \ ∇ₓf(s,p)'))'
 
-function ∇f̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...)
+function gradient(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...)
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s = sol.s.u
-    return ∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p)
+    return gradient(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p)
 end
 
-function ∇²f̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...) # Hessian
+function hessian(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...) # Hessian
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s, m = sol.s.u, length(p)
-    out = zeros(m,m)       # preallocate
+    out = zeros(m,m)         # preallocate
     for j in 1:m
-        pⱼ = p + ε * e(j,m)           # Dual p
+        pⱼ = p + ε * e(j,m)  # Dual p
         prob = SteadyStateProblem(F, ∇ₓF, s, pⱼ) # define problem
         sⱼ = solve(prob, alg; options...).u # update s (inner solver)
-        out[j,:] .= vec(𝔇(∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sⱼ, pⱼ))) # Dual of Eq.(?)
+        out[j,:] .= vec(𝔇(gradient(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sⱼ, pⱼ))) # Dual-step formula
     end
     return out
 end

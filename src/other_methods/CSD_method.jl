@@ -1,7 +1,6 @@
 module CSD
 
-using LinearAlgebra
-using DiffEqBase
+using LinearAlgebra, DiffEqBase
 
 mutable struct Solution
     s
@@ -17,37 +16,37 @@ function update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     end
 end
 
-function f̂(f, F, ∇ₓF, sol, p, alg; options...) # objective
+function objective(f, F, ∇ₓF, sol, p, alg; options...)
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s = sol.s.u
     return f(s,p)
 end
 
-# Analytical Jacobian formula (transpose of Eq.(?))
+# Analytical Jacobian formula (transpose of Eq.(14))
 t = transpose # required instead of `'` to avoid complex adjoint
-∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p) = ∇ₚf(s,p) - t(t(∇ₚF(s,p)) * (t(∇ₓF(s,p)) \ t(∇ₓf(s,p))))
+gradient(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p) = ∇ₚf(s,p) - t(t(∇ₚF(s,p)) * (t(∇ₓF(s,p)) \ t(∇ₓf(s,p))))
 
-function ∇f̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...)
+function gradient(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...)
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s = sol.s.u
-    return ∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p)
+    return gradient(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, s, p)
 end
 
-function ∇²f̂(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...) # Hessian
+function hessian(f, F, ∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sol, p, alg; options...) # Hessian
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s, m = sol.s.u, length(p)
-    out = zeros(m,m)       # preallocate
+    out = zeros(m,m)                             # preallocate
     for j in 1:m
-        pⱼ = p + im * h * e(j,m)           # complex p
+        pⱼ = p + im * h * e(j,m)                 # complex p
         prob = SteadyStateProblem(F, ∇ₓF, s, pⱼ) # define problem
-        sⱼ = solve(prob, alg; options...).u # update s (inner solver)
-        out[j,:] .= vec(ℑ(∇f̂(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sⱼ, pⱼ))) / h # CSD formula
+        sⱼ = solve(prob, alg; options...).u      # update s (inner solver)
+        out[j,:] .= vec(ℑ(gradient(∇ₓf, ∇ₓF, ∇ₚf, ∇ₚF, sⱼ, pⱼ))) / h # CSD formula
     end
     return out
 end
 
 # Helper functions
 e(j, m) = [i == j for i in 1:m]      # j-th basis vector
-ℑ(x) = imag.(x)      # imaginary part
+ℑ(x) = imag.(x)                      # imaginary part
 
 end # module

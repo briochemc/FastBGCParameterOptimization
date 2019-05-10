@@ -14,13 +14,13 @@ function update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     end
 end
 
-function f̂(f, F, ∇ₓF, sol, p, alg; options...) # objective
+function objective(f, F, ∇ₓF, sol, p, alg; options...) # objective
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s = sol.s.u
     return f(s,p)
 end
 
-function ∇f̂(f, F, ∇ₓF, sol, p, alg; options...)
+function gradient(f, F, ∇ₓF, sol, p, alg; options...)
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s, m, h = sol.s.u, length(p), 1e-4
     G = zeros(1,m)       # preallocate
@@ -35,7 +35,7 @@ function ∇f̂(f, F, ∇ₓF, sol, p, alg; options...)
     return G
 end
 
-function ∇²f̂(f, F, ∇ₓF, sol, p, alg; options...) # Hessian
+function hessian(f, F, ∇ₓF, sol, p, alg; options...) # Hessian
     update_Solution!(F, ∇ₓF, sol, p, alg; options...)
     s, m, h = sol.s.u, length(p), 1e-2
     H = zeros(m,m)       # preallocate

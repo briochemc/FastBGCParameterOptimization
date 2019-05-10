@@ -3,7 +3,7 @@
 
 # List of functions to be benchmarked
 list_∇ᵏf̂ = [:f̂, :∇f̂, :∇²f̂]
-list_methods = [:F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
+list_methods = [:AF1, :F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
 
 function print_time_and_q(λ)
     println("   ", time(), f̂!(λ))
@@ -40,8 +40,9 @@ for (i, myrun) in enumerate(myruns), m in list_methods
     m_∇²f̂ = Symbol(string(m) * "_∇²f̂")
 
     # Ensure the starting point is the same for everyone
-    if m == :F1
-        F1buf = F1.initialize_buffer(x₀, p₀)
+    if m == :F1 || m == :AF1
+        m_mem = Symbol(string(m, "_mem"))
+        @eval $m_mem = F1.initialize_mem(x₀, p₀)
     else
         mSol = Symbol(string(m) * "Sol")
         @eval $mSol = $m.Solution(copy(x₀))

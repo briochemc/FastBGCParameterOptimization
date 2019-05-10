@@ -13,10 +13,14 @@ WOA = WorldOceanAtlasTools
 const μx = (μDIPobs, missing)
 const σ²x = (σ²DIPobs, missing)
 # generate mismatch functions
-f, ∇ₓf = mismatch_function_and_Jacobian(ωs, μx, σ²x, v, ωp, mean_pobs, variance_pobs)
+f = generate_objective(ωs, μx, σ²x, v, ωp, mean_pobs, variance_pobs)
+∇ₓf = generate_∇ₓobjective(ωs, μx, σ²x, v, ωp, mean_pobs, variance_pobs)
+∇ₚf = generate_∇ₚobjective(ωs, μx, σ²x, v, ωp, mean_pobs, variance_pobs)
+
 
 
 # Cost functions
+# TODO code inside AIBECS?
 """
     nrm(x)
 
@@ -38,55 +42,7 @@ end
 ℜ(x::Hyper) = HyperDualNumbers.realpart(x)
 ℜ(x::Vector) = ℜ.(x)
 
-"""
-    fₓ(x)
-
-Returns the cost of state `x`.
-"""
-function fₓ(x) # with respect to x
-    DIN, _ = unpackx(x)
-    return vnorm²(DIN - DINobs) / vnorm²(DINobs)
-end
-
-"""
-    ∇ₓf(x)
-
-Returns the gradient of cost of `x` (at `x`).
-"""
-function ∇ₓf(x, p)
-    DIN, _ = unpackx(x)
-    kron([1 0], Dvnorm²(DIN - DINobs) / vnorm²(DINobs))
-end
-
-fₚ_noweight(p) = 0.5 * transpose(p2λ(p)) * Matrix(Diagonal(σ²obs.^-1)) * p2λ(p)
-Dfₚ_noweight(p) = transpose(∇p2λ(p) .* σ²obs.^-1 .* p2λ(p))
-
-"""
-    f(p)
-
-Returns the cost of parameters `p`.
-"""
-fₚ(p) = p.ω * fₚ_noweight(p)
-
-"""
-    ∇ₚf(p)
-
-Returns the gradient of cost of parameters `p` (at `p`).
-"""
-∇ₚf(x, p) = p.ω * Dfₚ_noweight(p) # for generic form
-
-"""
-    f(x, p)
-
-Returns the cost of state `x` plus the cost of parameters `p`.
-The costs are added to be used in a Bayesian framework eventually.
-(And also because it is simpler.)
-"""
-function f(x, p) # with respect to both x and p
-    return fₓ(x) + fₚ(p)
-end
-
-
+vnorm²(x) = AIBECS.weighted_norm²(x, v)
 """
     print_cost(cval; preprint)
 
