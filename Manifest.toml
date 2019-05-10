@@ -501,6 +501,6 @@ version = "0.5.8"
 
 [[WorldOceanAtlasTools]]
 deps = ["DataDeps", "Match", "Memoize", "NCDatasets", "StatsBase", "Unitful"]
-path = "/Users/benoitpasquier/.julia/dev/WorldOceanAtlasTools"
+git-tree-sha1 = "ba8b67aa1d960b1d891a8b2fa424ff6cba7e21d3"
 uuid = "04f20302-f1b9-11e8-29d9-7d841cb0a64a"
-version = "0.2.2"
+version = "0.2.1"
