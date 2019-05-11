@@ -26,8 +26,9 @@ const τstop = ustrip(upreferred(1u"Myr"))
 
 # Preallocate special buffer for F-1 method
 println("  Initializing...")
-F1_mem = F1.initialize_mem(x₀, p₀)
 AF1_mem = F1.initialize_mem(x₀, p₀)
+println("    AF1 buffer")
+F1_mem = F1.initialize_mem(x₀, p₀)
 println("    F1 buffer")
 
 # TODO refactor all the methods out of here
