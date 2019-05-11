@@ -5,7 +5,7 @@ using BenchmarkTools, Random, JLD2
 
 # List of functions to be benchmarked
 list_∇ᵏf̂ = [:f̂, :∇f̂, :∇²f̂]
-list_methods = [:F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
+list_methods = [:AF1, :F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
 list_functions = [Symbol(string(m) * "_" * string(∇ᵏf̂)) for m in list_methods for ∇ᵏf̂ in list_∇ᵏf̂]
 
 # Create a benchmark suite

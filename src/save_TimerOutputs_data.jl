@@ -7,7 +7,7 @@ const to = TimerOutput()
 
 # Time all the functions
 list_∇ᵏf̂ = [:f̂, :∇f̂, :∇²f̂]
-list_methods = [:F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
+list_methods = [:AF1, :F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
 for m in list_methods, ∇ᵏf̂ in list_∇ᵏf̂
     label = string(m) * "_" * string(∇ᵏf̂)
     m_∇ᵏf̂ = Symbol(label)
@@ -51,8 +51,9 @@ for (i, myrun) in enumerate(myruns), m in list_methods
     println("\n------------------------\n\n")
 
     # Ensure the starting point is the same for everyone
-    if m == :F1
-        F1buf = F1.initialize_buffer(x₀, p₀)
+    if m == :F1 || m == :AF1
+        m_mem = Symbol(string(m, "_mem"))
+        @eval $m_mem = F1.initialize_mem(x₀, p₀)
     else
         mSol = Symbol(string(m) * "Sol")
         @eval $mSol = $m.Solution(copy(x₀))
