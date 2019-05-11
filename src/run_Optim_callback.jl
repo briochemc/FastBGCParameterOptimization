@@ -2,7 +2,7 @@
 include("load_packages.jl")
 
 # Define the transport matrix for the circulation
-Circulation = OCIM # from AIBECS
+Circulation = OCIM1 # from AIBECS
 
 include("setup.jl")
 
