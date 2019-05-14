@@ -22,7 +22,6 @@ end
 for (∇ᵏf̂, f_g_h) in zip(list_∇ᵏf̂[2:3], objective_gradient_hessian[2:3])
     # AIBECS + F1 method
     m_∇ᵏf̂ = Symbol("AF1_" * string(∇ᵏf̂))
-    m_f_g_h = Symbol("AF1_" * string(f_g_h))
     @eval $m_∇ᵏf̂(p::Para; preprint=" ") = F1.$f_g_h(f, F, ∇ₓf, A_∇ₓF, AF1_mem, p, CTKAlg(), nrm=nrm, preprint=preprint)
     # F1 method
     m_∇ᵏf̂ = Symbol("F1_" * string(∇ᵏf̂))

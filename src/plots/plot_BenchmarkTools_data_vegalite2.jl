@@ -1,17 +1,15 @@
-using JLD2, BenchmarkTools, VegaLite, DataFrames, Statistics
+using JLD2, BenchmarkTools, VegaLite, DataFrames, StatsBase
 
 #@load "data/BenchmarkTools_data.jld2"
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-2]...)
-str_out = "_default"
+str_out = ""
 jld_file = joinpath(path_to_package_root, "data", "BenchmarkTools_data" * str_out * ".jld2")
 @load jld_file results list_functions
 
-list_∇ᵏf̂ = [:f̂, :∇f̂, :∇²f̂]
-list_∇ᵏf = [:f, :∇f, :∇²f]
-list_methods = [:F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
-list_m = ["F-1", "DUAL", "CSD", "FD1", "HYPER", "FD2"]
+list_methods = [:AF1, :F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
+list_m = ["AF-1", "F-1", "DUAL", "CSD", "FD1", "HYPER", "FD2"]
 
-strings = string.(list_functions)
+strings = string.(list_functions)[4:end] # Remove AF1 for fairness in the paper
 f̂_list = strings[[occursin("_f̂", s) for s in strings]]
 ∇f̂_list = strings[[occursin("_∇f̂", s) for s in strings]]
 ∇²f̂_list = strings[[occursin("_∇²f̂", s) for s in strings]]
@@ -55,13 +53,13 @@ function mymean(x::Array{String})
         return "Analytical f"
     end
 end
-push!(df1, colwise(mymean, df1))
+push!(df1, [mymean(col) for col = eachcol(df1)])
 filter!(row -> row[:method] == "Analytical f", df1)
 
 df2 = results_to_df(results, ∇f̂_list)
 df2a = filter(row -> row[:method] ∈ ["DUAL ∇f", "CSD ∇f", "FD1 ∇f"], df2)
 df2b = filter(row -> row[:method] ∉ ["DUAL ∇f", "CSD ∇f", "FD1 ∇f"], df2)
-push!(df2a, colwise(mymean, df2a))
+push!(df2a, [mymean(col) for col = eachcol(df2a)])
 filter!(row -> row[:method] == "Analytical ∇f", df2a)
 df2 = vcat(df2a, df2b)
 
