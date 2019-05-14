@@ -10,7 +10,7 @@ list_methods = [:AF1, :F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
 Para = AIBECS.Parameters
 
 # Objective
-AF1_f̂(p::Para; preprint=" ") = F1.objective(f, F, A_∇ₓF, AF1_mem, p, CTKAlg(), nrm=nrm, preprint=preprint)
+AF1_f̂(p::Para; preprint=" ") = F1.objective(f, A_F, A_∇ₓF, AF1_mem, p, CTKAlg(), nrm=nrm, preprint=preprint)
 F1_f̂(p::Para; preprint=" ") = F1.objective(f, F, ∇ₓF, F1_mem, p, CTKAlg(), nrm=nrm, preprint=preprint)
 for m in list_methods[3:end] # All methods except F1
     m_f̂ = Symbol(string(m) * "_f̂")
@@ -22,7 +22,7 @@ end
 for (∇ᵏf̂, f_g_h) in zip(list_∇ᵏf̂[2:3], objective_gradient_hessian[2:3])
     # AIBECS + F1 method
     m_∇ᵏf̂ = Symbol("AF1_" * string(∇ᵏf̂))
-    @eval $m_∇ᵏf̂(p::Para; preprint=" ") = F1.$f_g_h(f, F, ∇ₓf, A_∇ₓF, AF1_mem, p, CTKAlg(), nrm=nrm, preprint=preprint)
+    @eval $m_∇ᵏf̂(p::Para; preprint=" ") = F1.$f_g_h(f, A_F, ∇ₓf, A_∇ₓF, AF1_mem, p, CTKAlg(), nrm=nrm, preprint=preprint)
     # F1 method
     m_∇ᵏf̂ = Symbol("F1_" * string(∇ᵏf̂))
     @eval $m_∇ᵏf̂(p::Para; preprint=" ") = F1.$f_g_h(f, F, ∇ₓf, ∇ₓF, F1_mem, p, CTKAlg(), nrm=nrm, preprint=preprint)
