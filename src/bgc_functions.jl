@@ -32,8 +32,8 @@ function remineralization(POP, p)
     return κ * POP
 end
 # Add them up into sms functions (Sources Minus Sinks)
-sms_DIP(DIP, POP, p) = geores(DIP, p) .- uptake(DIP, p) .+ remineralization(POP, p)
-sms_POP(DIP, POP, p) = uptake(DIP, p) .- remineralization(POP, p)
+sms_DIP(DIP, POP, p) = geores(DIP, p) - uptake(DIP, p) + remineralization(POP, p)
+sms_POP(DIP, POP, p) = uptake(DIP, p) - remineralization(POP, p)
 sms_all = (sms_DIP, sms_POP) # bundles all the source-sink functions in a tuple
 
 #===========================================
@@ -113,8 +113,7 @@ function ∇ₓF(x, p)
     uJac = uptakeJac(DIP, p)
     rJac = remineralizationJac(POP, p)
     foo = [ -T_DIP(p) - uJac + georesJac(p)    rJac            ;
-           uJac                               -rJac - T_POP(p) ]
-    dropzeros!(foo)
+                        uJac                  -rJac - T_POP(p) ]
     return foo
 end
 
