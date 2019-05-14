@@ -15,9 +15,9 @@ T_all = (T_DIP, T_POP)
 Sources minus sinks
 ===========================================#
 # Geological Restoring
-function geores(DIP, p)
-    τg, DIPgeo = p.τg, p.DIPgeo
-    return (DIPgeo .- DIP) / τg
+function geores(x, p)
+    τg, xgeo = p.τg, p.xgeo
+    return (xgeo .- x) / τg
 end
 # Uptake of phosphate (DIP)
 relu(x) = (x .≥ 0) .* x
@@ -33,7 +33,7 @@ function remineralization(POP, p)
 end
 # Add them up into sms functions (Sources Minus Sinks)
 sms_DIP(DIP, POP, p) = geores(DIP, p) - uptake(DIP, p) + remineralization(POP, p)
-sms_POP(DIP, POP, p) = uptake(DIP, p) - remineralization(POP, p)
+sms_POP(DIP, POP, p) = geores(POP, p) + uptake(DIP, p) - remineralization(POP, p)
 sms_all = (sms_DIP, sms_POP) # bundles all the source-sink functions in a tuple
 
 #===========================================
@@ -51,7 +51,7 @@ function georesJac(p)
     τg = p.τg
     return -I / τg
 end
-function ∂geores_∂DIPgeo(DIP, p)
+function ∂geores_∂xgeo(x, p)
     τg = p.τg
     return 1 / τg
 end
@@ -105,15 +105,15 @@ function F(x, p)
     u = uptake(DIP, p)
     r = remineralization(POP, p)
     return [ -T_DIP(p) * DIP - u + r + geores(DIP, p) ;
-             -T_POP(p) * POP + u - r                  ]
+             -T_POP(p) * POP + u - r + geores(POP, p) ]
 end
 
 function ∇ₓF(x, p)
     DIP, POP = unpackx(x)
     uJac = uptakeJac(DIP, p)
     rJac = remineralizationJac(POP, p)
-    foo = [ -T_DIP(p) - uJac + georesJac(p)    rJac            ;
-                        uJac                  -rJac - T_POP(p) ]
+    foo = [ -T_DIP(p) - uJac + georesJac(p)              rJac                ;
+                        uJac                 -T_POP(p) - rJac + georesJac(p) ]
     return foo
 end
 
@@ -150,8 +150,9 @@ function ∇ₚF(x, p, s)
     elseif s == :κ
         ∇ₚF[iDIP] .= ∂remineralization_∂κ(POP, p)
         ∇ₚF[iPOP] .= -∇ₚF[iDIP]
-    elseif s == :DIPgeo
-        ∇ₚF[iDIP] .= ∂geores_∂DIPgeo(DIP, p)
+    elseif s == :xgeo
+        ∇ₚF[iDIP] .= ∂geores_∂xgeo(DIP, p)
+        ∇ₚF[iPOP] .= ∂geores_∂xgeo(POP, p)
     else
         error("There is no $s parameter")
     end
