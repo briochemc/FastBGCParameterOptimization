@@ -4,7 +4,7 @@ using AIBECS
 =======#
 # Hyper parameters
 ωs = [1.0, 0.0]
-ωp = 1e-10
+ωp = 1e-7
 # PO₄ mean and variance of observations fom WOA18
 using WorldOceanAtlasTools
 WOA = WorldOceanAtlasTools
