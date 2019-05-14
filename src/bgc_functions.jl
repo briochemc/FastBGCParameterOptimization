@@ -17,7 +17,7 @@ Sources minus sinks
 # Geological Restoring
 function geores(DIP, p)
     τg, DIPgeo = p.τg, p.DIPgeo
-    return (DIPgeo .- DIP) ./ τg
+    return (DIPgeo .- DIP) / τg
 end
 # Uptake of phosphate (DIP)
 relu(x) = (x .≥ 0) .* x

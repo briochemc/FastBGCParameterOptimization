@@ -4,7 +4,7 @@ add_parameter!(t, :DIPgeo, 2.3u"mmol/m^3",
     optimizable = true,
     description = "Mean DIP concentration",
     LaTeX = "\\xNUT^\\obs")
-add_parameter!(t, :τg, 1.0u"Myr",
+add_parameter!(t, :τg, 1.0u"kyr",
     description = "Geological restoring timescale",
     LaTeX = "\\tau_\\mathrm{geo}")
 add_parameter!(t, :Umax, 1e-3u"mmol/m^3/d",
