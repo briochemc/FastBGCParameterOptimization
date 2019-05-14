@@ -20,7 +20,8 @@ function geores(x, p)
     return (xgeo .- x) / τg
 end
 # Uptake of phosphate (DIP)
-relu(x) = (x .≥ 0) .* x
+# relu(x) = (x .≥ 0) .* x
+relu(x) = log.(1 .+ exp.(x))
 function uptake(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
     DIP⁺ = relu(DIP)
@@ -57,7 +58,8 @@ function ∂geores_∂xgeo(x, p)
 end
 
 # Uptake
-drelu(x) = (x .≥ 0)
+#drelu(x) = (x .≥ 0)
+drelu(x) = 1 ./ (1 .+ exp.(-x))
 function uptakeJac(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
     DIP⁺, dDIP⁺ = relu(DIP), drelu(DIP)
