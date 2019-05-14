@@ -10,7 +10,7 @@ Constant state used to start with.
 """
 const nt = 2
 const n = nt * nb
-const x₀ = ones(n)
+const x₀ = p₀.xgeo * ones(n)
 
 """
     τstop
