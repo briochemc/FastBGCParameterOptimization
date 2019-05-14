@@ -29,7 +29,7 @@ end
 # Remineralization of particulate organic phosphorus (POP)
 function remineralization(POP, p)
     κ = p.κ
-    return κ * POP
+    return κ * relu(POP)
 end
 # Add them up into sms functions (Sources Minus Sinks)
 sms_DIP(DIP, POP, p) = geores(DIP, p) - uptake(DIP, p) + remineralization(POP, p)
@@ -77,11 +77,11 @@ end
 # Remineralization
 function remineralizationJac(POP, p)
     κ = p.κ
-    return κ * I
+    return κ * sparse(Diagonal(drelu(POP)))
 end
 function ∂remineralization_∂κ(POP, p)
     κ = p.κ
-    return POP
+    return relu(POP)
 end
 
 # Indices for DIP and POP (needed for Rate of change F(x,p))
