@@ -29,11 +29,11 @@ end
 # Remineralization of particulate organic phosphorus (POP)
 function remineralization(POP, p)
     κ = p.κ
-    return κ * relu(POP)
+    return κ * POP
 end
 # Add them up into sms functions (Sources Minus Sinks)
-sms_DIP(DIP, POP, p) = geores(DIP, p) - uptake(DIP, p) + remineralization(POP, p)
-sms_POP(DIP, POP, p) = geores(POP, p) + uptake(DIP, p) - remineralization(POP, p)
+sms_DIP(DIP, POP, p) = -uptake(DIP, p) + remineralization(POP, p) + geores(DIP, p)
+sms_POP(DIP, POP, p) = +uptake(DIP, p) - remineralization(POP, p) + geores(POP, p)
 sms_all = (sms_DIP, sms_POP) # bundles all the source-sink functions in a tuple
 
 #===========================================
@@ -61,7 +61,7 @@ drelu(x) = (x .≥ 0)
 function uptakeJac(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
     DIP⁺, dDIP⁺ = relu(DIP), drelu(DIP)
-    return sparse(Diagonal(Umax * ku ./ (DIP⁺ .+ ku).^2 .* dDIP⁺ .* (z .≤ z₀)))
+    return sparse(Diagonal(Umax * ku * dDIP⁺ ./ (DIP⁺ .+ ku).^2 .* (z .≤ z₀)))
 end
 function ∂uptake_∂Umax(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
@@ -77,11 +77,11 @@ end
 # Remineralization
 function remineralizationJac(POP, p)
     κ = p.κ
-    return κ * sparse(Diagonal(drelu(POP)))
+    return κ * sparse(Diagonal(POP))
 end
 function ∂remineralization_∂κ(POP, p)
     κ = p.κ
-    return relu(POP)
+    return POP
 end
 
 # Indices for DIP and POP (needed for Rate of change F(x,p))
