@@ -1,7 +1,6 @@
 # Build the parameters type and p₀
 t = empty_parameter_table()    # initialize table of parameters
-add_parameter!(t, :xgeo, 2.3u"mmol/m^3",
-    optimizable = true,
+add_parameter!(t, :xgeo, 2.17u"mmol/m^3",
     description = "Geological mean P concentration",
     LaTeX = "\\state^\\mathrm{geo}")
 add_parameter!(t, :τg, 1.0u"kyr",
