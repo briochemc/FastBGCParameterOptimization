@@ -3,15 +3,15 @@
 using AIBECS
 =======#
 # Hyper parameters
-ωs = [1.0, 0.0]
+ωs = [1.0, 0.0, 0.0]
 ωp = 1e-6
 # PO₄ mean and variance of observations fom WOA18
 using WorldOceanAtlasTools
 WOA = WorldOceanAtlasTools
 μDIPobs3D, σ²DIPobs3D = WOA.fit_to_grid(grd, 2018, "phosphate", "annual", "1°", "an")
 μDIPobs, σ²DIPobs = μDIPobs3D[iwet], σ²DIPobs3D[iwet]
-const μx = (μDIPobs, missing)
-const σ²x = (σ²DIPobs, missing)
+const μx = (μDIPobs, missing, missing)
+const σ²x = (σ²DIPobs, missing, missing)
 # generate mismatch functions
 f = generate_objective(ωs, μx, σ²x, v, ωp, mean_pobs, variance_pobs)
 ∇ₓf = generate_∇ₓobjective(ωs, μx, σ²x, v, ωp, mean_pobs, variance_pobs)
@@ -33,8 +33,8 @@ This is OK because we normalize everything later.
 Note: `nrm` **should not** be used with the complex step method or dual numbers.
 """
 function nrm(x)
-    DIN, POM = unpackx(x)
-    return sqrt(vnorm²(ℜ(DIN)) + vnorm²(ℜ(POM)))
+    DIN, DOP, POP = unpackx(x)
+    return sqrt(vnorm²(ℜ(DIP)) + vnorm²(ℜ(DOP))) + vnorm²(ℜ(POP)))
 end
 ℜ(x::Real) = (x)
 ℜ(x::Complex) = real(x)

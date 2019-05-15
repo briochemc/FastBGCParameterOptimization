@@ -86,22 +86,31 @@ function ∂uptake_∂ku(DIP, p)
 end
 
 # Remineralization
-function remineralizationJac(POP, p)
-    κ = p.κ
-    return κ * sparse(Diagonal(POP))
+function remineralizationJac(DOP, p)
+    κDOP = p.κDOP
+    return κDOP * I
 end
-function ∂remineralization_∂κ(POP, p)
-    κ = p.κ
+function ∂remineralization_∂κDOP(DOP, p)
+    return DOP
+end
+# Dissolution
+function dissolution(POP, p)
+    κPOP = p.κPOP
+    return κPOP * I
+end
+function ∂dissolution_∂κPOP(POP, p)
     return POP
 end
 
-# Indices for DIP and POP (needed for Rate of change F(x,p))
+# Indices for DIP, DOP, and POP (needed for Rate of change F(x,p))
 const iDIP = 1:nb
-const iPOP = iDIP .+ nb
+const iDOP = iDIP .+ nb
+const iPOP = iDOP .+ nb
 function unpackx(x)
     DIP = x[iDIP]
+    DOP = x[iDOP]
     POP = x[iPOP]
-    return DIP, POP
+    return DIP, DOP, POP
 end
 # add method to deal with arrays for numJac
 #function unpackx(x::Array{<:Number,2})
@@ -112,19 +121,25 @@ end
 
 # F and ∇ₓF by hand
 function F(x, p)
-    DIP, POP = unpackx(x)
+    DIP, DOP, POP = unpackx(x)
+    σ = p.σ
     u = uptake(DIP, p)
-    r = remineralization(POP, p)
-    return [ -T_DIP(p) * DIP - u + r + geores(DIP, p) ;
-             -T_POP(p) * POP + u - r + geores(POP, p) ]
+    r = remineralization(DOP, p)
+    d = dissolution(POP, p)
+    return [ -T_DIP(p) * DIP         - u     + r + geores(DIP, p) ;
+             -T_DOP(p) * DOP +    σ  * u + d - r                  ;
+             -T_POP(p) * POP + (1-σ) * u - d                      ]
 end
 
 function ∇ₓF(x, p)
-    DIP, POP = unpackx(x)
+    DIP, DOP, POP = unpackx(x)
+    σ = p.σ
     uJac = uptakeJac(DIP, p)
-    rJac = remineralizationJac(POP, p)
-    foo = [ -T_DIP(p) - uJac + georesJac(p)              rJac                ;
-                        uJac                 -T_POP(p) - rJac + georesJac(p) ]
+    rJac = remineralizationJac(DOP, p)
+    dJac = dissolutionJac(POP, p)
+    foo = [ -T_DIP(p) - uJac + georesJac(p)              rJac                   ;
+                   σ  * uJac                 -T_DOP(p) - rJac              dJac ;
+              (1 - σ) * uJac                                   -T_POP(p) - dJac ]
     return foo
 end
 
@@ -146,24 +161,29 @@ You should fill this function with all the first derivatives of f with respoect 
 Called without the symbol `s`, this function will loop through all the optimizable parameters and create the corresponDIPg Jacobian matrix.
 """
 function ∇ₚF(x, p, s)
-    DIP, POP = unpackx(x)
+    DIP, DOP, POP = unpackx(x)
+    σ = p.σ
     ∇ₚF = zeros(promote_type(eltype(x), eltype(p)), n)
     if s == :Umax
-        ∇ₚF[iPOP] .= ∂uptake_∂Umax(DIP, p)
-        ∇ₚF[iDIP] .= -∇ₚF[iPOP]
+        ∇ₚF[iDIP] .= -∂uptake_∂Umax(DIP, p)
+        ∇ₚF[iDOP] .=   -σ   * ∇ₚF[iDIP]
+        ∇ₚF[iPOP] .= -(1-σ) * ∇ₚF[iDIP]
     elseif s == :ku
-        ∇ₚF[iPOP] .= ∂uptake_∂ku(DIP, p)
-        ∇ₚF[iDIP] .= -∇ₚF[iPOP]
+        ∇ₚF[iDIP] .= -∂uptake_∂ku(DIP, p)
+        ∇ₚF[iDOP] .=   -σ   * ∇ₚF[iDIP]
+        ∇ₚF[iPOP] .= -(1-σ) * ∇ₚF[iDIP]
     elseif s == :w₀
         ∇ₚF[iPOP] .= -S₀ * POP
     elseif s == :w′
         ∇ₚF[iPOP] .= -S′ * POP
-    elseif s == :κ
-        ∇ₚF[iDIP] .= ∂remineralization_∂κ(POP, p)
-        ∇ₚF[iPOP] .= -∇ₚF[iDIP]
+    elseif s == :κDOP
+        ∇ₚF[iDIP] .= ∂remineralization_∂κDOP(DOP, p)
+        ∇ₚF[iDOP] .= -∇ₚF[iDIP]
+    elseif s == :κPOP
+        ∇ₚF[iDOP] .= ∂dissolution_∂κPOP(POP, p)
+        ∇ₚF[iPOP] .= -∇ₚF[iDOP]
     elseif s == :xgeo
         ∇ₚF[iDIP] .= ∂geores_∂xgeo(DIP, p)
-        ∇ₚF[iPOP] .= ∂geores_∂xgeo(POP, p)
     else
         error("There is no $s parameter")
     end
