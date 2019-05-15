@@ -53,6 +53,11 @@ sms_all = (sms_DIP, sms_DOP, sms_POP) # bundles all the source-sink functions in
  # generates the state function (and its Jacobian!)
 
 #===========================================
+AIBECS F and ∇ₓF
+===========================================#
+A_F, A_∇ₓF = state_function_and_Jacobian(T_all, sms_all, nb)
+
+#===========================================
 Analytical derivatives
 Required for CSD, DUAL, and HYPER methods
 ===========================================#
