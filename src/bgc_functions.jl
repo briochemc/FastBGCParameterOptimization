@@ -77,7 +77,7 @@ end
 drelu(x) = (x .≥ 0)
 function uptakeJac(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
-    DIP⁺, dDIP⁺ = soft_relu(DIP. p), dsoft_relu(DIP, p)
+    DIP⁺, dDIP⁺ = soft_relu(DIP, p), dsoft_relu(DIP, p)
     return sparse(Diagonal(Umax * ku * dDIP⁺ ./ (DIP⁺ .+ ku).^2 .* (z .≤ z₀)))
 end
 function ∂uptake_∂Umax(DIP, p)
