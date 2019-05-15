@@ -4,7 +4,7 @@ add_parameter!(t, :xgeo, 2.3u"mmol/m^3",
     optimizable = true,
     description = "Geological mean P concentration",
     LaTeX = "\\state^\\mathrm{geo}")
-add_parameter!(t, :τg, 1.0u"Myr",
+add_parameter!(t, :τg, 1.0u"kyr",
     description = "Geological restoring timescale",
     LaTeX = "\\tau_\\mathrm{geo}")
 add_parameter!(t, :Umax, 1e-3u"mmol/m^3/d",
@@ -22,7 +22,7 @@ add_parameter!(t, :w₀, 1.0u"m/d",
     optimizable = true,
     description = "Sinking velocity at surface",
     LaTeX = "w_0")
-add_parameter!(t, :w′, 1.0u"d^-1",
+add_parameter!(t, :w′, 0.1u"d^-1",
     optimizable = true,
     description = "Vertical gradient of sinking velocity",
     LaTeX = "w'")
