@@ -22,7 +22,7 @@ function geores(x, p)
 end
 # Uptake of phosphate (DIP)
 soft_relu(x, p) = 0.5 * (tanh.(x / p.α) .+ 1) .* x
-dsoft_relu(x, p) = -0.5 * (tanh.(x / p.α).^2 .- 1) .* x / p.α + 0.5tanh(x / p.α) + 0.5
+dsoft_relu(x, p) = -0.5 * (tanh.(x / p.α).^2 .- 1) .* x / p.α + 0.5tanh.(x / p.α) .+ 0.5
 function uptake(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
     DIP⁺ = soft_relu(DIP, p)
@@ -143,9 +143,10 @@ function ∇ₓF(x, p)
     uJac = uptakeJac(DIP, p)
     rJac = remineralizationJac(DOP, p)
     dJac = dissolutionJac(POP, p)
-    foo = [ -T_DIP(p) - uJac + georesJac(p)              rJac                   ;
+    sp0 = sparse([],[],[],nb,nb)
+    foo = [ -T_DIP(p) - uJac + georesJac(p)              rJac          sp0      ;
                    σ  * uJac                 -T_DOP(p) - rJac              dJac ;
-              (1 - σ) * uJac                                   -T_POP(p) - dJac ]
+              (1 - σ) * uJac                       sp0         -T_POP(p) - dJac ]
     return foo
 end
 
