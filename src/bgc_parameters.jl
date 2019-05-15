@@ -7,11 +7,11 @@ add_parameter!(t, :xgeo, 2.3u"mmol/m^3",
 add_parameter!(t, :τg, 1.0u"kyr",
     description = "Geological restoring timescale",
     LaTeX = "\\tau_\\mathrm{geo}")
-add_parameter!(t, :Umax, 1e-3u"mmol/m^3/d",
+add_parameter!(t, :Umax, 1.0u"mol/m^3/d",
     optimizable = true,
     description = "Maximum uptake rate (Michaelis-Menten)",
     LaTeX = "U_\\mathrm{max}")
-add_parameter!(t, :ku, 1e-1u"mmol/m^3",
+add_parameter!(t, :ku, 0.1u"mmol/m^3",
     optimizable = true,
     description = "Half-saturation constant (Michaelis-Menten)",
     LaTeX = "k_\\vec{u}")
