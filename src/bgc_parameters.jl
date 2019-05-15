@@ -1,7 +1,6 @@
 # Build the parameters type and p₀
 t = empty_parameter_table()    # initialize table of parameters
 add_parameter!(t, :xgeo, 2.17u"mmol/m^3",
-    variance_obs = ustrip(upreferred(0.1 * 2.17u"mmol/m^3"))^2,
     optimizable = true,
     description = "Geological mean P concentration",
     LaTeX = "\\state^\\mathrm{geo}")
