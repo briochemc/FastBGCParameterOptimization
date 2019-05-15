@@ -8,10 +8,6 @@ add_parameter!(t, :xgeo, 2.17u"mmol/m^3",
 add_parameter!(t, :τg, 1.0u"Myr",
     description = "Geological restoring timescale",
     LaTeX = "\\tau_\\mathrm{geo}")
-add_parameter!(t, :Umax, 24.0u"μmol/m^3/d",
-    optimizable = true,
-    description = "Maximum uptake rate (Michaelis-Menten)",
-    LaTeX = "U_\\mathrm{max}")
 add_parameter!(t, :ku, 10.0u"μmol/m^3",
     optimizable = true,
     description = "Half-saturation constant (Michaelis-Menten)",
@@ -19,9 +15,6 @@ add_parameter!(t, :ku, 10.0u"μmol/m^3",
 add_parameter!(t, :z₀, 80.0u"m",
     description = "Depth of the euphotic layer base",
     LaTeX = "z_0")
-add_parameter!(t, :α, 1e-7u"mmol/m^3",
-    description = "Smoothing scale",
-    LaTeX = "\\alpha")
 add_parameter!(t, :w₀, 1.0u"m/d",
     optimizable = true,
     description = "Sinking velocity at surface",
@@ -41,5 +34,9 @@ add_parameter!(t, :κPOP, 1/5.25u"d",
 add_parameter!(t, :σ, 0.3u"1",
     description = "Fraction of quick local uptake recycling",
     LaTeX = "\\sigma")
+add_parameter!(t, :τu, 30u"d",
+    optimizable = true,
+    description = "Maximum uptake rate timescale",
+    LaTeX = "\\tau_\\vec{u}")
 initialize_Parameters_type(t)   # Generate the parameter type
 
