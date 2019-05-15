@@ -7,11 +7,11 @@ add_parameter!(t, :xgeo, 2.3u"mmol/m^3",
 add_parameter!(t, :τg, 1.0u"kyr",
     description = "Geological restoring timescale",
     LaTeX = "\\tau_\\mathrm{geo}")
-add_parameter!(t, :Umax, 1.0u"mol/m^3/d",
+add_parameter!(t, :Umax, 24.0u"μmol/m^3/d",
     optimizable = true,
     description = "Maximum uptake rate (Michaelis-Menten)",
     LaTeX = "U_\\mathrm{max}")
-add_parameter!(t, :ku, 0.1u"mmol/m^3",
+add_parameter!(t, :ku, 10.0u"μmol/m^3",
     optimizable = true,
     description = "Half-saturation constant (Michaelis-Menten)",
     LaTeX = "k_\\vec{u}")
@@ -22,11 +22,11 @@ add_parameter!(t, :w₀, 1.0u"m/d",
     optimizable = true,
     description = "Sinking velocity at surface",
     LaTeX = "w_0")
-add_parameter!(t, :w′, 0.1u"d^-1",
+add_parameter!(t, :w′, 0.0352u"d^-1",
     optimizable = true,
     description = "Vertical gradient of sinking velocity",
     LaTeX = "w'")
-add_parameter!(t, :κ, 0.25u"d^-1",
+add_parameter!(t, :κ, 0.0302u"d^-1",
     optimizable = true,
     description = "Remineralization rate constant",
     LaTeX = "\\kappa")
