@@ -4,7 +4,7 @@ add_parameter!(t, :xgeo, 2.3u"mmol/m^3",
     optimizable = true,
     description = "Geological mean P concentration",
     LaTeX = "\\state^\\mathrm{geo}")
-add_parameter!(t, :τg, 1.0u"kyr",
+add_parameter!(t, :τg, 1.0u"Myr",
     description = "Geological restoring timescale",
     LaTeX = "\\tau_\\mathrm{geo}")
 add_parameter!(t, :Umax, 1e-3u"mmol/m^3/d",
