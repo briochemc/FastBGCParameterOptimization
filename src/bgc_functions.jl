@@ -22,6 +22,7 @@ function geores(x, p)
 end
 # Uptake of phosphate (DIP)
 soft_relu(x, p) = 0.5 * (tanh.(x / p.α) .+ 1) .* x
+dsoft_relu(x, p) = -0.5 * (tanh.(x / p.α).^2 .- 1) .* x / p.α + 0.5tanh(x / p.α) + 0.5
 function uptake(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
     DIP⁺ = soft_relu(DIP, p)
@@ -76,17 +77,17 @@ end
 drelu(x) = (x .≥ 0)
 function uptakeJac(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
-    DIP⁺, dDIP⁺ = relu(DIP), drelu(DIP)
+    DIP⁺, dDIP⁺ = soft_relu(DIP), dsoft_relu(DIP)
     return sparse(Diagonal(Umax * ku * dDIP⁺ ./ (DIP⁺ .+ ku).^2 .* (z .≤ z₀)))
 end
 function ∂uptake_∂Umax(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
-    DIP⁺ = relu(DIP)
+    DIP⁺ = soft_relu(DIP)
     return DIP⁺ ./ (DIP⁺ .+ ku) .* (z .≤ z₀)
 end
 function ∂uptake_∂ku(DIP, p)
     Umax, ku, z₀ = p.Umax, p.ku, p.z₀
-    DIP⁺ = relu(DIP)
+    DIP⁺ = soft_relu(DIP)
     return -Umax * DIP⁺ ./ (DIP⁺ .+ ku).^2 .* (z .≤ z₀)
 end
 
@@ -99,7 +100,7 @@ function ∂remineralization_∂κDOP(DOP, p)
     return DOP
 end
 # Dissolution
-function dissolution(POP, p)
+function dissolutionJac(POP, p)
     κPOP = p.κPOP
     return κPOP * I
 end
