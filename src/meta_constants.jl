@@ -8,7 +8,7 @@
 
 Constant state used to start with.
 """
-const nt = 2
+const nt = length(T_all)
 const n = nt * nb
 const x₀ = p₀.xgeo * ones(n)
 
