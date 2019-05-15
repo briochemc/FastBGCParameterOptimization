@@ -33,7 +33,7 @@ function remineralization(POP, p)
 end
 # Add them up into sms functions (Sources Minus Sinks)
 sms_DIP(DIP, POP, p) = -uptake(DIP, p) + remineralization(POP, p) + geores(DIP, p)
-sms_POP(DIP, POP, p) = +uptake(DIP, p) - remineralization(POP, p) + geores(POP, p)
+sms_POP(DIP, POP, p) = +uptake(DIP, p) - remineralization(POP, p)
 sms_all = (sms_DIP, sms_POP) # bundles all the source-sink functions in a tuple
 
 #===========================================
