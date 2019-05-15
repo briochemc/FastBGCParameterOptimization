@@ -34,7 +34,7 @@ Note: `nrm` **should not** be used with the complex step method or dual numbers.
 """
 function nrm(x)
     DIN, DOP, POP = unpackx(x)
-    return sqrt(vnorm²(ℜ(DIP)) + vnorm²(ℜ(DOP))) + vnorm²(ℜ(POP)))
+    return sqrt(vnorm²(ℜ(DIP)) + vnorm²(ℜ(DOP)) + vnorm²(ℜ(POP)))
 end
 ℜ(x::Real) = (x)
 ℜ(x::Complex) = real(x)
