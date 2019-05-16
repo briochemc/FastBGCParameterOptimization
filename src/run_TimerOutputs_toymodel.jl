@@ -1,4 +1,9 @@
+# Load the packages
+include("load_packages.jl")
 
-include("setup_with_6BoxModel.jl")
+# Define the transport matrix for the circulation
+Circulation = SixBoxModel # from AIBECS
+
+include("setup.jl")
 
 include("save_TimerOutputs_data.jl")
