@@ -8,13 +8,20 @@ list_∇ᵏf̂ = [:f̂, :∇f̂, :∇²f̂]
 list_methods = [:AF1, :F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
 list_functions = [Symbol(string(m) * "_" * string(∇ᵏf̂)) for m in list_methods for ∇ᵏf̂ in list_∇ᵏf̂]
 
+using Distributions, LinearAlgebra
+
+μ = AIBECS.LNμ(mean_pobs, variance_pobs)
+σ² = AIBECS.LNσ²(mean_pobs, variance_pobs)
+σ = sqrt.(σ²)
+λ_dist = MvNormal(μ, Diagonal(σ))
+
 # Create a benchmark suite
 suite = BenchmarkGroup()
 myseed = rand(1:10000)
 for fun in list_functions
     suite[string(fun)] = BenchmarkGroup() # Create a BenchmarkGroup for each function
-    suite[string(fun)] = @benchmarkable $fun(λ₀ .+ randn(m)/10) seconds=18000 samples=1 evals=20 setup=(Random.seed!(myseed)) # Add benchmarkable objects in each group
-    @eval $fun(λ₀ .* (1 .+ randn(m)/10)) # Run each function once for precompiling before benchmark
+    suite[string(fun)] = @benchmarkable $fun(rand(λ_dist)) seconds=18000 samples=1 evals=20 setup=(Random.seed!(myseed)) # Add benchmarkable objects in each group
+    @eval $fun(rand(λ_dist)) # Run each function once for precompiling before benchmark
 end
 
 # Run the benchmarks
