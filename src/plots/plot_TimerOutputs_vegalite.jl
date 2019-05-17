@@ -4,16 +4,16 @@ using VegaLite, DataFrames # for stacked bars
 # Load data
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-2]...)
-str_out = "_default"
-jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * "_katana" * ".jld2")
+str_out = ""
+jld_file = joinpath(path_to_package_root, "data", "TimerOutputs_data" * str_out * "" * ".jld2")
 @load jld_file timers
 
 translate_for_legend = Dict("f"=>"objective", "∇f"=>"gradient", "∇²f"=>"Hessian")
 
 list_∇ᵏf̂ = [:f̂, :∇f̂, :∇²f̂]
-list_∇ᵏf = [:f, :∇f, :∇²f]
-list_methods = [:F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
-list_m = ["F-1", "DUAL", "CSD", "FD1", "HYPER", "FD2"]
+list_∇ᵏf = ["objective", "gradient", "Hessian"]
+list_methods = [:AF1, :F1, :DUAL, :CSD, :FD1, :HYPER, :FD2]
+list_m = ["AF-1", "F-1", "DUAL", "CSD", "FD1", "HYPER", "FD2"]
 
 
 
@@ -44,12 +44,13 @@ function timer_to_DataFrame(timers::Dict, I)
     return df
 end
 
-df1 = timer_to_DataFrame(timers, 1:4)
-df2 = timer_to_DataFrame(timers, [1,5,6])
+df1 = timer_to_DataFrame(timers, [2,3,5,4])
+df2 = timer_to_DataFrame(timers, [2,6,7])
 
 orderf = [string(f) for f in list_∇ᵏf]
-order1 = [string(m) for m in list_m[1:4]]
-order2 = [string(m) for m in list_m[[1,5,6]]]
+orderf = list_∇ᵏf
+order1 = [string(m) for m in list_m[[2,3,5,4]]]
+order2 = [string(m) for m in list_m[[2,6,7]]]
 
 ptime1 = df1 |> @vlplot(
     width=300,
