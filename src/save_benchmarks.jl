@@ -13,7 +13,7 @@ using Distributions, LinearAlgebra
 μ = AIBECS.LNμ(mean_pobs, variance_pobs)
 σ² = AIBECS.LNσ²(mean_pobs, variance_pobs)
 σ = sqrt.(σ²)
-λ_dist = MvNormal(μ, Diagonal(σ))
+λ_dist = MvNormal(μ, Diagonal(σ) / 2)
 
 # Create a benchmark suite
 suite = BenchmarkGroup()

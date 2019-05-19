@@ -46,8 +46,8 @@ colh = convert_rgb_to_hex(darker_purple)
 #===========================================
 Plot 
 ===========================================#
-fig = figure("pyplot_barplot", figsize=(7,3))
-subplots_adjust(left  = 0.12)  # the left side of the subplots of the figure
+fig = figure("pyplot_barplot", figsize=(5,3))
+subplots_adjust(left  = 0.16)  # the left side of the subplots of the figure
 subplots_adjust(right = 0.99)
 subplots_adjust(bottom = 0.15)
 subplots_adjust(top = 0.98)
@@ -71,6 +71,7 @@ axis("tight")
 grid("on", axis="x")
 xlabel("Computation time (seconds)")
 ylabel("Method")
+xlim((0, 10600))
 legend((ag, ah), ("gradient","Hessian"), handlelength=1, handleheight=1)
 
 eps_file = joinpath(path_to_package_root, "fig", "TimerOutputs_time.eps")
