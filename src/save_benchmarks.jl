@@ -10,14 +10,14 @@ list_functions = [Symbol(string(m) * "_" * string(∇ᵏf̂)) for m in list_meth
 
 using Distributions, LinearAlgebra
 
-μ = AIBECS.LNμ(mean_pobs, variance_pobs)
-σ² = AIBECS.LNσ²(mean_pobs, variance_pobs)
+μ = AIBECS.LNμ(mean_pobs, variance_pobs/100)
+σ² = AIBECS.LNσ²(mean_pobs, variance_pobs/100)
 σ = sqrt.(σ²)
-λ_dist = MvNormal(μ, Diagonal(σ) / 2)
+λ_dist = MvNormal(μ, Diagonal(σ))
 
 # Create a benchmark suite
 suite = BenchmarkGroup()
-myseed = rand(1:10000)
+myseed = 1
 for fun in list_functions
     suite[string(fun)] = BenchmarkGroup() # Create a BenchmarkGroup for each function
     suite[string(fun)] = @benchmarkable $fun(rand(λ_dist)) seconds=18000 samples=1 evals=20 setup=(Random.seed!(myseed)) # Add benchmarkable objects in each group
