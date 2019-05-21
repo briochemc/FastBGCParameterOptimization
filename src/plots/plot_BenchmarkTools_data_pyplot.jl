@@ -105,7 +105,7 @@ axis("tight")
 grid("on", axis="x")
 xlabel("Computation time (seconds)")
 ylabel("Method")
-xlim((0,3250))
+xlim((0,1100))
 legend((af, ag, ah), ("objective","gradient","Hessian"), handlelength=1, handleheight=1)
 
 eps_file = joinpath(path_to_package_root, "fig", "BenchmarkTools_data.eps")
