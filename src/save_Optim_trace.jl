@@ -16,7 +16,14 @@ println("└──────────────────────�
 
 # Save output
 jld_file = joinpath(path_to_package_root, "data", "Optim_trace.jld2")
-@save jld_file results x₀ p₀ λ₀
+
+λopt = results.minimizer
+popt = λ2p(λopt)
+probopt = SteadyStateProblem(A_F, A_∇ₓF, x₀, popt)
+xopt = solve(probopt, CTKAlg(), nrm=nrm).u
+
+
+@save jld_file results x₀ p₀ λ₀ xopt λopt popt μDIPobs
 
 
 
