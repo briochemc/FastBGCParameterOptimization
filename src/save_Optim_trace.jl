@@ -1,14 +1,7 @@
 # This script is to run the optimization and save the states along the optimization
 
-function print_full_state(x)
-    x.iteration == 0 ? println("│    time                   iteration      f̂(λ)           |∇f̂(λ)|") : nothing
-    @printf "│    %20.16e" time()
-    print(x)
-    return false
-end
-
 # Set the options for the NewtonTrustRegion optimizer
-opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = true, callback=print_full_state)
+opt = Optim.Options(store_trace = true, show_trace = false, extended_trace = true)
 
 using JLD2
 path_to_package_root = joinpath(splitpath(@__DIR__)[1:end-1]...)
