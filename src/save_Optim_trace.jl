@@ -22,8 +22,16 @@ popt = λ2p(λopt)
 probopt = SteadyStateProblem(A_F, A_∇ₓF, x₀, popt)
 xopt = solve(probopt, CTKAlg(), nrm=nrm).u
 
+xs = zeros(length(x₀), length(results.trace))
 
-@save jld_file results x₀ p₀ λ₀ xopt λopt popt μDIPobs
+for (trace_i, i) in enumerate(results.trace)
+    λ = trace_i.metadata["x"]
+    p = λ2p(λ)
+    prob = SteadyStateProblem(A_F, A_∇ₓF, x₀, popt)
+    xs[:,i] .= solve(prob, CTKAlg(), nrm=nrm).u
+end
+
+@save jld_file results x₀ p₀ λ₀ xopt λopt popt μDIPobs xs
 
 
 
