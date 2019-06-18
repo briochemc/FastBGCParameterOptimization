@@ -24,7 +24,7 @@ xopt = solve(probopt, CTKAlg(), nrm=nrm).u
 
 xs = zeros(length(x₀), length(results.trace))
 
-for (trace_i, i) in enumerate(results.trace)
+for (i, trace_i) in enumerate(results.trace)
     λ = trace_i.metadata["x"]
     p = λ2p(λ)
     prob = SteadyStateProblem(A_F, A_∇ₓF, x₀, popt)
