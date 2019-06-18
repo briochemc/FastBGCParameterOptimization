@@ -27,7 +27,7 @@ xs = zeros(length(x₀), length(results.trace))
 for (i, trace_i) in enumerate(results.trace)
     λ = trace_i.metadata["x"]
     p = λ2p(λ)
-    prob = SteadyStateProblem(A_F, A_∇ₓF, x₀, popt)
+    prob = SteadyStateProblem(A_F, A_∇ₓF, x₀, p)
     xs[:,i] .= solve(prob, CTKAlg(), nrm=nrm).u
 end
 
