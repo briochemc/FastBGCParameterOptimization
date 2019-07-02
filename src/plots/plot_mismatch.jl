@@ -19,11 +19,9 @@
 #ENV["MPLBACKEND"]="qt5agg"
 #using PyPlot, PyCall
 #ccrs = pyimport("cartopy.crs")
+
+fig = figure("mismatch", figsize=(12,4))
 clf()
-
-fig = figure("mismatch", figsize=(10,15))
-
-
 
 
 #===================================================
@@ -45,18 +43,29 @@ DIPlevels = 0:0.25:4
 # Make the data cyclic
 lon_cyc = [lon; 360+lon[1]] # making it cyclic for Cartopy
 
-i_depths = [1, 5, 10, 15]
+iz = 10
 #i_depths = [1, 15]
-nrows = length(i_depths) + 1
+nrows = length(i_depths)
 #xplots = [μDIPobs, xs[iDIP,1], xs[iDIP,2], xs[iDIP,3], xopt[iDIP]]
-xplots = [μDIPobs, xs[iDIP,1], xopt[iDIP]]
+xplots = [μDIPobs, xopt[iDIP]]
+depth = Int(round(grd["zt"][iz]))
+titles = ["Observed DIP at $(depth)m", "Simulated DIP (optimal parameters)"]
+
 ncols = length(xplots)
 p = [] # empty array for storing handles of plots
 
-for (irow, iz) in enumerate(i_depths), (icol, x) in enumerate(xplots)
-    ax = subplot2grid((6,6), (irow-1, 2*(icol-1)), colspan=2, projection=ccrs.EqualEarth(central_longitude=central_lon))
+gridspec = PyPlot.matplotlib.gridspec
+
+gs = gridspec.GridSpec(2, 3,
+                       width_ratios=[2.3,2.3,1],
+                       height_ratios=[10,1]
+                       )
+
+for (icol, x) in enumerate(xplots)
+    ax = subplot(gs[icol], projection=ccrs.EqualEarth(central_longitude=central_lon))
     ax.add_feature(cfeature.COASTLINE, edgecolor="#000000") # black coast lines
     ax.add_feature(cfeature.LAND, facecolor="#AAAAAA")      # gray land
+    ax.gridlines()
     # Convert vector to 3D to 2D
     x3D = NaN * wet3d
     x3D[iwet] = x[iDIP] * ustrip(1.0u"mol/m^3" .|> u"mmol/m^3")
@@ -66,19 +75,23 @@ for (irow, iz) in enumerate(i_depths), (icol, x) in enumerate(xplots)
     push!(p, PyPlot.contourf(lon_cyc, lat, map_cyc, levels=DIPlevels, transform=ccrs.PlateCarree(), zorder=-1, extend="both"))
     for c in p[end].collections # Removes white line artifact at filled contour edges in PDF
         c.set_edgecolor("face")
-        c.set_edgewidth(0.1)
+        c.set_linewidth(0.1)
     end
-    title("$irow, $icol")
+    title(titles[icol])
 end
 
 #Colorbar
-fig = gcf()
-fig.subplots_adjust(right=0.85, top=0.85)
-cbar_ax1 = fig.add_axes([0.9, 0.3, 0.025, 0.65])
-cbar1 = fig.colorbar(p[1], cax=cbar_ax1, extend="both")
+cbar_ax1 = subplot(gs[4])
+cbar1 = colorbar(p[1], cax=cbar_ax1, extend="both", orientation="horizontal")
 cbar1.set_label("mmol m⁻³")
 cbar1.solids.set_edgecolor("face")
+cbar1.solids.set_linewidth(0.1)
 
+cbar_ax1bis = subplot(gs[5])
+cbar1bis = colorbar(p[2], cax=cbar_ax1bis, extend="both", orientation="horizontal")
+cbar1bis.set_label("mmol m⁻³")
+cbar1bis.solids.set_edgecolor("face")
+cbar1bis.solids.set_linewidth(0.1)
 
 #===================================================
 joint PDFs
@@ -86,39 +99,46 @@ joint PDFs
 DIPobs = μDIPobs
 using StatsBase, KernelDensity
 weights = Weights(v ./ σ²DIPobs / sum(v ./ σ²DIPobs))
-lims = [-0.1, 5]
+lims = [-0.1, 3.6]
 
 cmap = ColorMap("PuBu")
 
-for (icol, x) in enumerate(xplots)
-    icol == 1 && continue
-    DIPmod = x[iDIP]
-    bandwidth = (0.000005, 0.000005)
-    npoints = (2^11, 2^11)
-    k = kde((DIPobs, DIPmod), weights=weights, bandwidth = bandwidth, npoints = npoints)
-    I = sortperm(vec(k.density))
-    dx = k.x[2]-k.x[1]
-    dy = k.y[2]-k.y[1]
-    q = k.density[I] * dx * dy
-    D = zeros(size(k.density))
-    D[I] .= cumsum(q)
-    levels = 0.1:0.1:0.9
-    ax = subplot2grid((6,6), (4, 2*(icol-1)), colspan=2, rowspan=2)
-    push!(p, contourf(1e3k.x, 1e3k.y, map(x -> x < 0.01 ? NaN : x, permutedims(D, [2, 1])), levels=levels, cmap="cividis", extend="both"))
-    for c in p[end].collections # Removes white line artifact at filled contour edges in PDF
-        c.set_edgecolor("face")
-        c.set_edgewidth(0.1)
-    end
-    xlim(lims)
-    ylim(lims)
-    plot(lims, lims, "r", linewidth=1)
-    title("joint PDF")
+icol = 3
+x = xopt[iDIP]
+DIPmod = x[iDIP]
+bandwidth = (0.00001, 0.00001)
+npoints = (2^10, 2^10)
+k = kde((DIPobs, DIPmod), weights=weights, bandwidth = bandwidth, npoints = npoints)
+I = sortperm(vec(k.density))
+dx = k.x[2]-k.x[1]
+dy = k.y[2]-k.y[1]
+q = k.density[I] * dx * dy
+D = zeros(size(k.density))
+D[I] .= 100cumsum(q)
+levels = 5:5:95
+ax = subplot(gs[3])
+cmap = ColorMap("cividis")
+cmap.set_under([1.0,1.0,1.0])
+push!(p, contourf(1e3k.x, 1e3k.y, map(x -> x < 0.05 ? NaN : x, permutedims(D, [2, 1])), levels=levels, cmap=cmap, extend="both"))
+for c in p[end].collections # Removes white line artifact at filled contour edges in PDF
+    c.set_edgecolor("face")
+    c.set_linewidth(0.1)
 end
+xlim(lims)
+ylim(lims)
+#ax.axis("equal")
+ax.set_aspect("equal", "box")
+plot(lims, lims, "r", linewidth=0.5)
+title("DIP joint PDF")
+xlabel("Observed [mmol m⁻³]")
+ylabel("Simulated [mmol m⁻³]")
+ax.grid()
 
-cbar_ax2 = fig.add_axes([0.9, 0.025, 0.025, 0.2])
-cbar2 = fig.colorbar(p[end], cax=cbar_ax2, extend="both")
-cbar2.set_label("percentile")
+cbar_ax2 = subplot(gs[6])
+cbar2 = colorbar(p[end], cax=cbar_ax2, extend="both", orientation="horizontal")
+cbar2.set_label("Percentile")
 cbar2.solids.set_edgecolor("face")
+cbar2.solids.set_linewidth(0.1)
 
 eps_file = joinpath(path_to_package_root, "fig", "mismatch.eps")
 savefig(eps_file)
