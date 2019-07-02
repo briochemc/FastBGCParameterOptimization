@@ -20,7 +20,7 @@
 #using PyPlot, PyCall
 #ccrs = pyimport("cartopy.crs")
 
-fig = figure("mismatch", figsize=(12,4))
+fig = figure("mismatch", figsize=(2.7*4,4))
 clf()
 
 
@@ -39,59 +39,61 @@ lat = vec(grd["yt"])
 
 # Contour levels
 DIPlevels = 0:0.25:4
+δDIPlevels = -25:2.5:25
 
 # Make the data cyclic
 lon_cyc = [lon; 360+lon[1]] # making it cyclic for Cartopy
 
-iz = 10
-#i_depths = [1, 15]
-nrows = length(i_depths)
-#xplots = [μDIPobs, xs[iDIP,1], xs[iDIP,2], xs[iDIP,3], xopt[iDIP]]
-xplots = [μDIPobs, xopt[iDIP]]
+iz = 12
 depth = Int(round(grd["zt"][iz]))
-titles = ["Observed DIP at $(depth)m", "Simulated DIP (optimal parameters)"]
+xplots = [μDIPobs, xopt[iDIP]]
 
-ncols = length(xplots)
 p = [] # empty array for storing handles of plots
 
 gridspec = PyPlot.matplotlib.gridspec
 
-gs = gridspec.GridSpec(2, 3,
-                       width_ratios=[2.3,2.3,1],
-                       height_ratios=[10,1]
+gs = gridspec.GridSpec(1, 2,
+                       width_ratios=[2,1],
                        )
 
-for (icol, x) in enumerate(xplots)
-    ax = subplot(gs[icol], projection=ccrs.EqualEarth(central_longitude=central_lon))
-    ax.add_feature(cfeature.COASTLINE, edgecolor="#000000") # black coast lines
-    ax.add_feature(cfeature.LAND, facecolor="#AAAAAA")      # gray land
-    ax.gridlines()
-    # Convert vector to 3D to 2D
-    x3D = NaN * wet3d
-    x3D[iwet] = x[iDIP] * ustrip(1.0u"mol/m^3" .|> u"mmol/m^3")
-    # make it cyclic for Cartopy
-    map_2D = x3D[:,:,iz]
-    map_cyc = hcat(map_2D, map_2D[:,1])
-    push!(p, PyPlot.contourf(lon_cyc, lat, map_cyc, levels=DIPlevels, transform=ccrs.PlateCarree(), zorder=-1, extend="both"))
-    for c in p[end].collections # Removes white line artifact at filled contour edges in PDF
-        c.set_edgecolor("face")
-        c.set_linewidth(0.1)
-    end
-    title(titles[icol])
+ax = subplot(gs[1], projection=ccrs.PlateCarree(central_longitude=central_lon))
+ax.add_feature(cfeature.COASTLINE, edgecolor="#000000") # black coast lines
+ax.add_feature(cfeature.LAND, facecolor="#EEEEEE")      # gray land
+#gl = ax.gridlines(draw_labels=false)
+#gl.xlabels_top = false
+#gl.ylabels_right = false
+#mticker = PyPlot.matplotlib.ticker
+#gl.xlocator = mticker.FixedLocator(-180:60:180)
+ax.set_xticks(-180:60:180, crs=ccrs.PlateCarree())
+ax.set_yticks(-80:20:80, crs=ccrs.PlateCarree())
+cticker = pyimport("cartopy.mpl.ticker")
+LongitudeFormatter = cticker.LongitudeFormatter
+LatitudeFormatter = cticker.LatitudeFormatter
+lon_formatter = LongitudeFormatter(
+                                   degree_symbol="",
+                                   dateline_direction_label=true)
+lat_formatter = LatitudeFormatter(
+                                      degree_symbol="")
+ax.xaxis.set_major_formatter(lon_formatter)
+ax.yaxis.set_major_formatter(lat_formatter)
+# Convert vector to 3D to 2D
+x3D = NaN * wet3d
+x3D[iwet] = 100(xopt[iDIP] - μDIPobs) ./ μDIPobs
+# make it cyclic for Cartopy
+map_2D = x3D[:,:,iz]
+map_cyc = hcat(map_2D, map_2D[:,1])
+push!(p, PyPlot.contourf(lon_cyc, lat, map_cyc, cmap="PiYG_r", levels=δDIPlevels, transform=ccrs.PlateCarree(), zorder=-1, extend="both"))
+for c in p[end].collections # Removes white line artifact at filled contour edges in PDF
+    c.set_edgecolor("face")
+    c.set_linewidth(0.1)
 end
+title("(a) DIP mismatch at $(depth)m depth")
 
 #Colorbar
-cbar_ax1 = subplot(gs[4])
-cbar1 = colorbar(p[1], cax=cbar_ax1, extend="both", orientation="horizontal")
-cbar1.set_label("mmol m⁻³")
+cbar1 = colorbar(p[1], ax=ax, extend="both", orientation="vertical", ticks=δDIPlevels[1:2:end], shrink=0.8)
+cbar1.set_label("δDIP / DIP [%]")
 cbar1.solids.set_edgecolor("face")
 cbar1.solids.set_linewidth(0.1)
-
-cbar_ax1bis = subplot(gs[5])
-cbar1bis = colorbar(p[2], cax=cbar_ax1bis, extend="both", orientation="horizontal")
-cbar1bis.set_label("mmol m⁻³")
-cbar1bis.solids.set_edgecolor("face")
-cbar1bis.solids.set_linewidth(0.1)
 
 #===================================================
 joint PDFs
@@ -106,7 +108,7 @@ cmap = ColorMap("PuBu")
 icol = 3
 x = xopt[iDIP]
 DIPmod = x[iDIP]
-bandwidth = (0.00001, 0.00001)
+bandwidth = (0.000005, 0.000005)
 npoints = (2^10, 2^10)
 k = kde((DIPobs, DIPmod), weights=weights, bandwidth = bandwidth, npoints = npoints)
 I = sortperm(vec(k.density))
@@ -116,26 +118,27 @@ q = k.density[I] * dx * dy
 D = zeros(size(k.density))
 D[I] .= 100cumsum(q)
 levels = 5:5:95
-ax = subplot(gs[3])
-cmap = ColorMap("cividis")
-cmap.set_under([1.0,1.0,1.0])
-push!(p, contourf(1e3k.x, 1e3k.y, map(x -> x < 0.05 ? NaN : x, permutedims(D, [2, 1])), levels=levels, cmap=cmap, extend="both"))
+ax = subplot(gs[2])
+cmap = ColorMap("magma_r")
+#cmap.set_under([1.0,1.0,1.0]) # White color for values below minimum
+push!(p, contourf(1e3k.x, 1e3k.y, map(x -> x ≤ 0.1 ? NaN : x, permutedims(D, [2, 1])), levels=levels, cmap=cmap, extend="both"))
 for c in p[end].collections # Removes white line artifact at filled contour edges in PDF
     c.set_edgecolor("face")
     c.set_linewidth(0.1)
 end
 xlim(lims)
 ylim(lims)
+xticks(0:1:3)
+yticks(0:1:3)
 #ax.axis("equal")
 ax.set_aspect("equal", "box")
-plot(lims, lims, "r", linewidth=0.5)
-title("DIP joint PDF")
-xlabel("Observed [mmol m⁻³]")
-ylabel("Simulated [mmol m⁻³]")
-ax.grid()
+plot(lims, lims, "k:", linewidth=0.5)
+title("(b) DIP joint PDF")
+xlabel("Observed DIP [mmol m⁻³]")
+ylabel("Simulated DIP [mmol m⁻³]")
+#ax.grid(linestyle=":")
 
-cbar_ax2 = subplot(gs[6])
-cbar2 = colorbar(p[end], cax=cbar_ax2, extend="both", orientation="horizontal")
+cbar2 = colorbar(p[end], ax=ax, extend="both", orientation="vertical", ticks=levels[1:2:end], shrink=0.8)
 cbar2.set_label("Percentile")
 cbar2.solids.set_edgecolor("face")
 cbar2.solids.set_linewidth(0.1)
@@ -147,5 +150,5 @@ savefig(png_file)
 svg_file = joinpath(path_to_package_root, "fig", "mismatch.svg")
 savefig(svg_file)
 pdf_file = joinpath(path_to_package_root, "fig", "mismatch.pdf")
-savefig(pdf_file)
+savefig(pdf_file, bbox_inches="tight")
 
